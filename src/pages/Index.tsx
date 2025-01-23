@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { AuthButton } from "@/components/AuthButton";
 import { toast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, User, Settings } from "lucide-react";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -13,6 +13,7 @@ const Index = () => {
   const [user, setUser] = useState<any>(null);
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     const fetchRecipes = async () => {
@@ -114,6 +115,29 @@ const Index = () => {
     }
   };
 
+  useEffect(() => {
+    const checkAdminStatus = async () => {
+      if (!user) return;
+      
+      try {
+        const { data, error } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", user.id)
+          .eq("role", "admin")
+          .single();
+
+        if (!error && data) {
+          setIsAdmin(true);
+        }
+      } catch (error) {
+        console.error("Error checking admin status:", error);
+      }
+    };
+
+    checkAdminStatus();
+  }, [user]);
+
   return (
     <div className="min-h-screen bg-background px-4 py-8">
       <div className="container mx-auto">
@@ -128,10 +152,22 @@ const Index = () => {
           </div>
           <div className="flex items-center gap-4">
             {user && (
-              <Button onClick={() => navigate("/create-recipe")}>
-                <Plus className="mr-2 h-4 w-4" />
-                New Recipe
-              </Button>
+              <>
+                <Button onClick={() => navigate("/create-recipe")}>
+                  <Plus className="mr-2 h-4 w-4" />
+                  New Recipe
+                </Button>
+                <Button variant="outline" onClick={() => navigate("/profile")}>
+                  <User className="mr-2 h-4 w-4" />
+                  Profile
+                </Button>
+                {isAdmin && (
+                  <Button variant="outline" onClick={() => navigate("/admin")}>
+                    <Settings className="mr-2 h-4 w-4" />
+                    Admin
+                  </Button>
+                )}
+              </>
             )}
             <AuthButton user={user} />
           </div>
