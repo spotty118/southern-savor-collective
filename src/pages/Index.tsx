@@ -27,7 +27,7 @@ const Index = () => {
           .select(`
             *,
             author:profiles(username),
-            recipe_categories!inner (
+            recipe_categories:recipe_categories(
               category:categories(name)
             )
           `)
