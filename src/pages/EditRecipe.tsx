@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/select";
 import { Home, Plus, Minus } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { Json } from "@/integrations/supabase/types";
 
 const EditRecipe = () => {
   const navigate = useNavigate();
@@ -44,12 +45,12 @@ const EditRecipe = () => {
           setDifficulty(recipe.difficulty || "");
           setImageUrl(recipe.image_url || "");
           
-          // Ensure ingredients and instructions are arrays
+          // Convert Json[] to string[] and ensure arrays
           const recipeIngredients = Array.isArray(recipe.ingredients) 
-            ? recipe.ingredients 
+            ? recipe.ingredients.map(item => String(item))
             : [""];
-          const recipeInstructions = Array.isArray(recipe.instructions) 
-            ? recipe.instructions 
+          const recipeInstructions = Array.isArray(recipe.instructions)
+            ? recipe.instructions.map(item => String(item))
             : [""];
             
           setIngredients(recipeIngredients);
