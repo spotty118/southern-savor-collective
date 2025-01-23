@@ -20,7 +20,7 @@ interface Ingredient {
   item: string;
   amount: number;
   unit: string;
-  [key: string]: string | number; // Add index signature to match Json type
+  [key: string]: string | number;
 }
 
 const EditRecipe = () => {
@@ -77,7 +77,6 @@ const EditRecipe = () => {
           setCookTime(recipe.cook_time?.toString() || "");
           setDifficulty(recipe.difficulty || "");
           setImageUrl(recipe.image_url || "");
-          // Type assertion to handle the Json to Ingredient[] conversion
           setIngredients((recipe.ingredients as Ingredient[]) || [{ item: "", amount: 0, unit: "" }]);
           setInstructions((recipe.instructions as string[]) || [""]);
           
@@ -140,6 +139,26 @@ const EditRecipe = () => {
     setInstructions(newInstructions);
   };
 
+  const handleDescriptionEnhancement = (enhancedContent: string) => {
+    setDescription(enhancedContent);
+  };
+
+  const handleInstructionsEnhancement = (enhancedContent: string) => {
+    try {
+      const enhancedInstructions = JSON.parse(enhancedContent);
+      if (Array.isArray(enhancedInstructions)) {
+        setInstructions(enhancedInstructions);
+      }
+    } catch (error) {
+      console.error('Error parsing enhanced instructions:', error);
+      toast({
+        title: "Error",
+        description: "Failed to parse enhanced instructions",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -158,7 +177,6 @@ const EditRecipe = () => {
         return;
       }
 
-      // Update recipe with type assertion for ingredients
       const { error: recipeError } = await supabase
         .from("recipes")
         .update({
@@ -175,7 +193,6 @@ const EditRecipe = () => {
 
       if (recipeError) throw recipeError;
 
-      // Delete existing category associations
       const { error: deleteError } = await supabase
         .from("recipe_categories")
         .delete()
@@ -183,7 +200,6 @@ const EditRecipe = () => {
 
       if (deleteError) throw deleteError;
 
-      // Insert new category associations
       if (selectedCategories.length > 0) {
         const { error: categoryError } = await supabase
           .from("recipe_categories")
