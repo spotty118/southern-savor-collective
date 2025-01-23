@@ -1,4 +1,4 @@
-import { Heart, Edit } from "lucide-react";
+import { Heart, Edit, Star, MessageSquare } from "lucide-react";
 import { Button } from "./ui/button";
 import { cn } from "@/lib/utils";
 
@@ -11,6 +11,8 @@ interface RecipeCardProps {
   difficulty: string;
   isLoved?: boolean;
   canEdit?: boolean;
+  rating?: number;
+  commentsCount?: number;
   onLoveClick?: () => void;
   onEditClick?: () => void;
   onClick?: () => void;
@@ -25,6 +27,8 @@ export const RecipeCard = ({
   difficulty,
   isLoved = false,
   canEdit = false,
+  rating = 0,
+  commentsCount = 0,
   onLoveClick,
   onEditClick,
   onClick,
@@ -80,11 +84,21 @@ export const RecipeCard = ({
           {title}
         </h3>
         <p className="mb-4 text-sm text-gray-600 line-clamp-2">{description}</p>
-        <div className="flex items-center justify-between text-sm text-gray-500">
+        <div className="flex items-center justify-between text-sm text-gray-500 mb-2">
           <span className="italic">By {author}</span>
           <div className="flex gap-4">
             <span>{cookTime}</span>
             <span className="text-[#FEC6A1] font-medium">{difficulty}</span>
+          </div>
+        </div>
+        <div className="flex items-center justify-between text-sm border-t pt-2">
+          <div className="flex items-center gap-1">
+            <Star className={cn("h-4 w-4", rating > 0 ? "fill-yellow-400 text-yellow-400" : "text-gray-300")} />
+            <span className="text-gray-600">{rating > 0 ? rating.toFixed(1) : "No ratings"}</span>
+          </div>
+          <div className="flex items-center gap-1 text-gray-500">
+            <MessageSquare className="h-4 w-4" />
+            <span>{commentsCount}</span>
           </div>
         </div>
       </div>

@@ -16,7 +16,7 @@ const Index = () => {
   const [isEditor, setIsEditor] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState("All Y'all");
   
-  const { recipes, loading } = useRecipes();
+  const { recipes, loading } = useRecipes(selectedFilter);
   const { favorites, handleLoveClick } = useFavorites(user);
 
   useEffect(() => {
