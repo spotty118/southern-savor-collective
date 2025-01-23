@@ -28,6 +28,8 @@ export const RecipeGrid = ({
   onRecipeClick,
   onEditClick 
 }: RecipeGridProps) => {
+  console.log("Rendering RecipeGrid with recipes:", recipes);
+  
   return (
     <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
       {recipes.map((recipe) => (
@@ -35,7 +37,7 @@ export const RecipeGrid = ({
           key={recipe.id}
           title={recipe.title}
           description={recipe.description || ""}
-          image={recipe.image_url || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c"}
+          image={recipe.image_url || "/placeholder.svg"}
           author={recipe.author?.username || "Anonymous"}
           cookTime={recipe.cook_time?.toString() || "N/A"}
           difficulty={difficultyMapping[recipe.difficulty || "Easy"] || recipe.difficulty || "Easy as Pie"}
@@ -43,7 +45,7 @@ export const RecipeGrid = ({
           canEdit={isAdmin || isEditor || recipe.author_id === currentUserId}
           onLoveClick={() => onLoveClick(recipe.id)}
           onClick={() => onRecipeClick(recipe.id)}
-          onEditClick={() => onEditClick?.(recipe.id)}
+          onEditClick={onEditClick ? () => onEditClick(recipe.id) : undefined}
         />
       ))}
     </div>

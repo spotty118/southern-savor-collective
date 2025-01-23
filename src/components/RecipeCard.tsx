@@ -44,8 +44,12 @@ export const RecipeCard = ({
       <div className="relative overflow-hidden">
         <img 
           src={image} 
-          alt={title} 
-          className="transition-transform duration-300 group-hover:scale-105" 
+          alt={title}
+          className="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105"
+          onError={(e) => {
+            const img = e.target as HTMLImageElement;
+            img.src = "/placeholder.svg";
+          }}
         />
         <div className="absolute right-2 top-2 flex gap-2">
           {canEdit && (
@@ -75,7 +79,7 @@ export const RecipeCard = ({
         </div>
         <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
       </div>
-      <div className="recipe-card-content">
+      <div className="recipe-card-content p-4">
         <h3 className="mb-2 text-xl font-semibold font-display text-accent group-hover:text-[#FEC6A1] transition-colors duration-300 heading-underline">
           {title}
         </h3>
