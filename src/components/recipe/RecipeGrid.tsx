@@ -2,11 +2,7 @@ import { RecipeCard } from "@/components/RecipeCard";
 import { Tables } from "@/integrations/supabase/types";
 
 interface RecipeGridProps {
-  recipes: (Tables<"recipes"> & { 
-    author: { username: string | null };
-    _count?: { comments: number };
-    average_rating?: number;
-  })[];
+  recipes: (Tables<"recipes"> & { author: { username: string | null } })[];
   favorites: Set<string>;
   currentUserId?: string;
   isAdmin?: boolean;
@@ -45,8 +41,6 @@ export const RecipeGrid = ({
           difficulty={difficultyMapping[recipe.difficulty || "Easy"] || recipe.difficulty || "Easy as Pie"}
           isLoved={favorites.has(recipe.id)}
           canEdit={isAdmin || isEditor || recipe.author_id === currentUserId}
-          rating={recipe.average_rating || 0}
-          commentsCount={recipe._count?.comments || 0}
           onLoveClick={() => onLoveClick(recipe.id)}
           onClick={() => onRecipeClick(recipe.id)}
           onEditClick={() => onEditClick?.(recipe.id)}
