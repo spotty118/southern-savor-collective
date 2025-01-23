@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/select";
 import { Home, Plus, Minus } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { Json } from "@/integrations/supabase/types";
 
 interface Ingredient {
   item: string;
@@ -135,6 +136,9 @@ const EditRecipe = () => {
         return;
       }
 
+      // Convert ingredients to Json type before sending to Supabase
+      const ingredientsJson = ingredients.filter(ing => ing.item.trim() !== "") as Json;
+
       const { error } = await supabase
         .from("recipes")
         .update({
@@ -143,7 +147,7 @@ const EditRecipe = () => {
           cook_time: cookTime,
           difficulty,
           image_url: imageUrl,
-          ingredients: ingredients.filter(ing => ing.item.trim() !== ""),
+          ingredients: ingredientsJson,
           instructions: instructions.filter(Boolean),
           updated_at: new Date().toISOString(),
         })
