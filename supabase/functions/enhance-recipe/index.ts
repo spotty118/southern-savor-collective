@@ -41,6 +41,7 @@ Please provide an enhanced description that makes the recipe more inviting and a
           { role: 'system', content: 'You are a helpful Southern cooking expert who enhances recipe content with warmth and authenticity.' },
           { role: 'user', content: prompt }
         ],
+        max_tokens: 500
       }),
     });
 
