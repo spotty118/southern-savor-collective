@@ -4,8 +4,11 @@ import { Tables } from "@/integrations/supabase/types";
 interface RecipeGridProps {
   recipes: (Tables<"recipes"> & { author: { username: string | null } })[];
   favorites: Set<string>;
+  currentUserId?: string;
+  isAdmin?: boolean;
   onLoveClick: (recipeId: string) => void;
   onRecipeClick: (recipeId: string) => void;
+  onEditClick?: (recipeId: string) => void;
 }
 
 const difficultyMapping: { [key: string]: string } = {
@@ -14,7 +17,15 @@ const difficultyMapping: { [key: string]: string } = {
   "Hard": "Down-Home Challenge"
 };
 
-export const RecipeGrid = ({ recipes, favorites, onLoveClick, onRecipeClick }: RecipeGridProps) => {
+export const RecipeGrid = ({ 
+  recipes, 
+  favorites, 
+  currentUserId,
+  isAdmin,
+  onLoveClick, 
+  onRecipeClick,
+  onEditClick 
+}: RecipeGridProps) => {
   return (
     <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
       {recipes.map((recipe) => (
@@ -27,8 +38,10 @@ export const RecipeGrid = ({ recipes, favorites, onLoveClick, onRecipeClick }: R
           cookTime={recipe.cook_time?.toString() || "N/A"}
           difficulty={difficultyMapping[recipe.difficulty || "Easy"] || recipe.difficulty || "Easy as Pie"}
           isLoved={favorites.has(recipe.id)}
+          canEdit={isAdmin || recipe.author_id === currentUserId}
           onLoveClick={() => onLoveClick(recipe.id)}
           onClick={() => onRecipeClick(recipe.id)}
+          onEditClick={() => onEditClick?.(recipe.id)}
         />
       ))}
     </div>

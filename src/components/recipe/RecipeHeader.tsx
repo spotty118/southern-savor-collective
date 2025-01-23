@@ -1,4 +1,4 @@
-import { CookingPot, CakeSlice, Plus, User, Settings, Filter } from "lucide-react";
+import { CookingPot, CakeSlice } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AuthButton } from "@/components/AuthButton";
 import { useNavigate } from "react-router-dom";
@@ -30,7 +30,7 @@ export const RecipeHeader = ({ user, isAdmin, selectedFilter, onFilterChange }: 
         <div className="flex items-center justify-between py-4 px-6">
           <div className="flex items-center gap-2">
             <CookingPot className="h-6 w-6 text-[#FEC6A1]" />
-            <h2 className="text-xl font-display text-accent">Southern Comfort</h2>
+            <h2 className="text-xl font-display text-accent">Y'all Eat</h2>
           </div>
           <div className="flex items-center gap-4">
             {user && (
@@ -70,7 +70,7 @@ export const RecipeHeader = ({ user, isAdmin, selectedFilter, onFilterChange }: 
           <div className="flex items-center justify-center gap-2 mb-4">
             <CookingPot className="h-8 w-8 text-[#FEC6A1]" />
             <h1 className="text-4xl font-bold text-accent font-display md:text-5xl lg:text-6xl">
-              Southern Comfort Recipes
+              Y'all Eat
             </h1>
             <CakeSlice className="h-8 w-8 text-[#FEC6A1]" />
           </div>

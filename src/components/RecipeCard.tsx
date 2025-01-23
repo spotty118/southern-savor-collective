@@ -1,4 +1,4 @@
-import { Heart } from "lucide-react";
+import { Heart, Edit } from "lucide-react";
 import { Button } from "./ui/button";
 import { cn } from "@/lib/utils";
 
@@ -10,7 +10,9 @@ interface RecipeCardProps {
   cookTime: string;
   difficulty: string;
   isLoved?: boolean;
+  canEdit?: boolean;
   onLoveClick?: () => void;
+  onEditClick?: () => void;
   onClick?: () => void;
 }
 
@@ -22,11 +24,12 @@ export const RecipeCard = ({
   cookTime,
   difficulty,
   isLoved = false,
+  canEdit = false,
   onLoveClick,
+  onEditClick,
   onClick,
 }: RecipeCardProps) => {
   const handleClick = (e: React.MouseEvent) => {
-    // Prevent clicking the card when clicking the love button
     if ((e.target as HTMLElement).closest('button')) {
       return;
     }
@@ -44,17 +47,32 @@ export const RecipeCard = ({
           alt={title} 
           className="transition-transform duration-300 group-hover:scale-105" 
         />
-        <Button
-          variant="ghost"
-          size="icon"
-          className="absolute right-2 top-2 bg-white/90 hover:bg-white z-10"
-          onClick={(e) => {
-            e.stopPropagation();
-            onLoveClick?.();
-          }}
-        >
-          <Heart className={cn("h-5 w-5", isLoved ? "fill-red-500 text-red-500" : "text-gray-500")} />
-        </Button>
+        <div className="absolute right-2 top-2 flex gap-2">
+          {canEdit && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="bg-white/90 hover:bg-white z-10"
+              onClick={(e) => {
+                e.stopPropagation();
+                onEditClick?.();
+              }}
+            >
+              <Edit className="h-5 w-5 text-gray-500" />
+            </Button>
+          )}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="bg-white/90 hover:bg-white z-10"
+            onClick={(e) => {
+              e.stopPropagation();
+              onLoveClick?.();
+            }}
+          >
+            <Heart className={cn("h-5 w-5", isLoved ? "fill-red-500 text-red-500" : "text-gray-500")} />
+          </Button>
+        </div>
         <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
       </div>
       <div className="recipe-card-content">
