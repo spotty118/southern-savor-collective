@@ -10,12 +10,19 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 interface UserProfile {
   id: string;
   username: string | null;
   full_name: string | null;
   created_at: string;
+  email: string;
 }
 
 interface UserManagementProps {

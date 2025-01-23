@@ -4,6 +4,12 @@ import { Button } from "@/components/ui/button";
 import { Share2, BookX } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 interface Recipe {
   id: string;
