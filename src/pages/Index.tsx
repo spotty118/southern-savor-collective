@@ -26,7 +26,10 @@ const Index = () => {
           .from("recipes")
           .select(`
             *,
-            author:profiles(username)
+            author:profiles(username),
+            recipe_categories!inner (
+              category:categories(name)
+            )
           `)
           .order("created_at", { ascending: false });
 
@@ -167,6 +170,16 @@ const Index = () => {
 
   const handleFilterChange = (filter: string) => {
     setSelectedFilter(filter);
+    if (filter === "All Y'all") {
+      setFilteredRecipes(recipes);
+    } else {
+      const filtered = recipes.filter(recipe => 
+        recipe.recipe_categories?.some(
+          rc => rc.category?.name === filter
+        )
+      );
+      setFilteredRecipes(filtered);
+    }
   };
 
   return (
