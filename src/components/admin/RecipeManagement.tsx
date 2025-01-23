@@ -14,7 +14,10 @@ import {
 interface Recipe {
   id: string;
   title: string;
-  author: { username: string | null };
+  author: { 
+    id: string;
+    username: string | null;
+  };
   created_at: string;
 }
 

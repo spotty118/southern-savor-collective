@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { UserCog, Mail, Edit2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
@@ -30,6 +31,7 @@ interface UserManagementProps {
 }
 
 export const UserManagement = ({ users }: UserManagementProps) => {
+  const navigate = useNavigate();
   const [resetPasswordDialog, setResetPasswordDialog] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
 

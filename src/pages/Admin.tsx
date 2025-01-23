@@ -19,6 +19,7 @@ const Admin = () => {
   const [users, setUsers] = useState([]);
   const [recipes, setRecipes] = useState([]);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<string>("");
 
   useEffect(() => {
     const checkAdminAndLoadData = async () => {
@@ -29,6 +30,8 @@ const Admin = () => {
           navigate("/auth");
           return;
         }
+
+        setCurrentUserId(session.user.id);
 
         // Check if user is admin
         const { data: roleData, error: roleError } = await supabase
@@ -110,7 +113,7 @@ const Admin = () => {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+        <h1 className="text-3xl font-bold">Y'all Eat Admin Dashboard</h1>
         <Button 
           variant="ghost" 
           onClick={() => navigate("/")}
@@ -137,6 +140,8 @@ const Admin = () => {
           <RecipeManagement 
             recipes={recipes}
             onDeleteRecipe={handleDeleteRecipe}
+            currentUserId={currentUserId}
+            isAdmin={isAdmin}
           />
         </TabsContent>
       </Tabs>
