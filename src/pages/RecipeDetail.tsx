@@ -1,4 +1,17 @@
-// [Previous imports and type definitions remain the same until the ingredient validation function]
+import * as React from "react"
+import { useParams, useNavigate } from "react-router-dom"
+import { useState, useEffect } from "react"
+import { Home, Heart, Wand2 } from "lucide-react"
+import { supabase } from "@/lib/supabase"
+import { Button } from "@/components/ui/button"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { toast } from "@/hooks/use-toast"
 
 const isIngredient = (item: unknown): item is Ingredient => {
   if (!item || typeof item !== 'object') return false;
@@ -95,10 +108,6 @@ const RecipeDetail = () => {
         if (error instanceof Error) {
           toast({
             title: "Error",
-            description: error.message,
-            variant: "destructive",
-          });
-        }
             description: error.message,
             variant: "destructive",
           });
