@@ -4,29 +4,39 @@ import { RecipeCard } from "@/components/RecipeCard";
 import { supabase } from "@/integrations/supabase/client";
 import { AuthButton } from "@/components/AuthButton";
 import { toast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
 
 const Index = () => {
   const navigate = useNavigate();
   const [recipes, setRecipes] = useState<any[]>([]);
   const [user, setUser] = useState<any>(null);
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchRecipes = async () => {
-      const { data, error } = await supabase
-        .from("recipes")
-        .select(`
-          *,
-          author:profiles(username)
-        `)
-        .order("created_at", { ascending: false });
+      try {
+        const { data, error } = await supabase
+          .from("recipes")
+          .select(`
+            *,
+            author:profiles(username)
+          `)
+          .order("created_at", { ascending: false });
 
-      if (error) {
+        if (error) throw error;
+        setRecipes(data || []);
+      } catch (error: any) {
         console.error("Error fetching recipes:", error);
-        return;
+        toast({
+          title: "Error",
+          description: "Failed to load recipes",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
       }
-
-      setRecipes(data || []);
     };
 
     fetchRecipes();
@@ -36,17 +46,17 @@ const Index = () => {
     const fetchFavorites = async () => {
       if (!user) return;
 
-      const { data, error } = await supabase
-        .from("favorites")
-        .select("recipe_id")
-        .eq("user_id", user.id);
+      try {
+        const { data, error } = await supabase
+          .from("favorites")
+          .select("recipe_id")
+          .eq("user_id", user.id);
 
-      if (error) {
+        if (error) throw error;
+        setFavorites(new Set(data.map((fav) => fav.recipe_id)));
+      } catch (error: any) {
         console.error("Error fetching favorites:", error);
-        return;
       }
-
-      setFavorites(new Set(data.map((fav) => fav.recipe_id)));
     };
 
     fetchFavorites();
@@ -116,24 +126,45 @@ const Index = () => {
               Discover authentic Southern recipes passed down through generations
             </p>
           </div>
-          <AuthButton user={user} />
+          <div className="flex items-center gap-4">
+            {user && (
+              <Button onClick={() => navigate("/create-recipe")}>
+                <Plus className="mr-2 h-4 w-4" />
+                New Recipe
+              </Button>
+            )}
+            <AuthButton user={user} />
+          </div>
         </header>
 
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {recipes.map((recipe) => (
-            <RecipeCard
-              key={recipe.id}
-              title={recipe.title}
-              description={recipe.description || ""}
-              image={recipe.image_url || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c"}
-              author={recipe.author?.username || "Anonymous"}
-              cookTime={recipe.cook_time || "N/A"}
-              difficulty={recipe.difficulty || "Easy"}
-              isLoved={favorites.has(recipe.id)}
-              onLoveClick={() => handleLoveClick(recipe.id)}
-            />
-          ))}
-        </div>
+        {loading ? (
+          <div className="text-center">Loading recipes...</div>
+        ) : recipes.length === 0 ? (
+          <div className="text-center">
+            <p className="text-lg text-gray-600">No recipes found</p>
+            {user && (
+              <Button onClick={() => navigate("/create-recipe")} className="mt-4">
+                Create Your First Recipe
+              </Button>
+            )}
+          </div>
+        ) : (
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {recipes.map((recipe) => (
+              <RecipeCard
+                key={recipe.id}
+                title={recipe.title}
+                description={recipe.description || ""}
+                image={recipe.image_url || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c"}
+                author={recipe.author?.username || "Anonymous"}
+                cookTime={recipe.cook_time || "N/A"}
+                difficulty={recipe.difficulty || "Easy"}
+                isLoved={favorites.has(recipe.id)}
+                onLoveClick={() => handleLoveClick(recipe.id)}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

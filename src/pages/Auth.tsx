@@ -1,22 +1,22 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 
 const Auth = () => {
   const navigate = useNavigate();
-  const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-
+    setLoading(true);
+    
     try {
       if (isSignUp) {
         const { error } = await supabase.auth.signUp({
@@ -43,63 +43,55 @@ const Auth = () => {
         variant: "destructive",
       });
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4">
-      <div className="w-full max-w-md space-y-8">
-        <div className="text-center">
-          <h1 className="text-4xl font-bold">{isSignUp ? "Sign Up" : "Login"}</h1>
-          <p className="mt-2 text-gray-600">
+    <div className="container mx-auto flex min-h-screen items-center justify-center px-4">
+      <Card className="w-full max-w-md">
+        <CardHeader>
+          <CardTitle>{isSignUp ? "Create Account" : "Welcome Back"}</CardTitle>
+          <CardDescription>
             {isSignUp
-              ? "Create an account to share your recipes"
-              : "Welcome back! Please login to your account"}
-          </p>
-        </div>
-
-        <form onSubmit={handleSubmit} className="mt-8 space-y-6">
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="email">Email</Label>
+              ? "Sign up to start sharing your recipes"
+              : "Sign in to access your account"}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
               <Input
-                id="email"
                 type="email"
+                placeholder="Email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
               />
             </div>
-            <div>
-              <Label htmlFor="password">Password</Label>
+            <div className="space-y-2">
               <Input
-                id="password"
                 type="password"
+                placeholder="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
               />
             </div>
-          </div>
-
-          <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? "Loading..." : isSignUp ? "Sign Up" : "Login"}
-          </Button>
-
-          <div className="text-center">
-            <button
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? "Loading..." : isSignUp ? "Sign Up" : "Sign In"}
+            </Button>
+            <Button
               type="button"
+              variant="ghost"
+              className="w-full"
               onClick={() => setIsSignUp(!isSignUp)}
-              className="text-sm text-gray-600 hover:text-gray-900"
             >
-              {isSignUp
-                ? "Already have an account? Login"
-                : "Don't have an account? Sign Up"}
-            </button>
-          </div>
-        </form>
-      </div>
+              {isSignUp ? "Already have an account? Sign In" : "Need an account? Sign Up"}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   );
 };
