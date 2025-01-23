@@ -1,4 +1,4 @@
-import { CookingPot, CakeSlice } from "lucide-react";
+import { CookingPot, CakeSlice, PlusCircle, UserRound, Settings2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AuthButton } from "@/components/AuthButton";
 import { useNavigate } from "react-router-dom";
@@ -39,7 +39,7 @@ export const RecipeHeader = ({ user, isAdmin, selectedFilter, onFilterChange }: 
                   onClick={() => navigate("/create-recipe")}
                   className="bg-[#FEC6A1] text-accent hover:bg-[#FDE1D3] transform transition-transform duration-200 hover:scale-105"
                 >
-                  <Plus className="mr-2 h-4 w-4" />
+                  <PlusCircle className="mr-2 h-4 w-4" />
                   Share Your Recipe
                 </Button>
                 <Button 
@@ -47,7 +47,7 @@ export const RecipeHeader = ({ user, isAdmin, selectedFilter, onFilterChange }: 
                   onClick={() => navigate("/profile")}
                   className="border-[#FEC6A1] text-accent hover:bg-[#FDE1D3]"
                 >
-                  <User className="mr-2 h-4 w-4" />
+                  <UserRound className="mr-2 h-4 w-4" />
                   Profile
                 </Button>
                 {isAdmin && (
@@ -56,7 +56,7 @@ export const RecipeHeader = ({ user, isAdmin, selectedFilter, onFilterChange }: 
                     onClick={() => navigate("/admin")}
                     className="border-[#FEC6A1] text-accent hover:bg-[#FDE1D3]"
                   >
-                    <Settings className="mr-2 h-4 w-4" />
+                    <Settings2 className="mr-2 h-4 w-4" />
                     Admin
                   </Button>
                 )}
