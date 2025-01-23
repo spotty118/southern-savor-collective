@@ -63,14 +63,14 @@ const Admin = () => {
         setUsers(userData);
         setStats(prev => ({ ...prev, totalUsers: userData.length }));
 
-        // Fetch recipes
+        // Fetch recipes with author information
         const { data: recipeData, error: recipeError } = await supabase
           .from("recipes")
           .select(`
             id,
             title,
             created_at,
-            author:profiles(username)
+            author:profiles (id, username)
           `)
           .order("created_at", { ascending: false });
 
