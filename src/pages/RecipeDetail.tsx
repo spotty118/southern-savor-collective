@@ -1,18 +1,18 @@
-import * as React from "react"
-import { useParams, useNavigate } from "react-router-dom"
-import { useState, useEffect } from "react"
-import { Home, Heart, Wand2 } from "lucide-react"
-import { supabase } from "@/integrations/supabase/client"
-import { Button } from "@/components/ui/button"
+import * as React from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Home, Heart, Wand2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
-import { toast } from "@/hooks/use-toast"
-import type { Database } from "@/integrations/supabase/types"
+} from "@/components/ui/dialog";
+import { toast } from "@/hooks/use-toast";
+import type { Database } from "@/integrations/supabase/types";
 
 type RecipeRow = Database['public']['Tables']['recipes']['Row']
 type AISuggestionRow = Database['public']['Tables']['recipe_ai_suggestions']['Row']
@@ -23,6 +23,7 @@ interface Ingredient {
   amount: number;
 }
 
+// Type guard to validate ingredient shape
 const isIngredient = (item: unknown): item is Ingredient => {
   if (!item || typeof item !== 'object') return false;
   
@@ -79,7 +80,13 @@ const RecipeDetail = () => {
 
         // Validate and convert ingredients array
         const ingredients = Array.isArray(data.ingredients)
-          ? data.ingredients.filter(isIngredient)
+          ? data.ingredients.filter((item): item is Ingredient => {
+              if (!isIngredient(item)) {
+                console.warn('Invalid ingredient found:', item);
+                return false;
+              }
+              return true;
+            })
           : [];
 
         // Validate instructions array
