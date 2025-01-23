@@ -77,7 +77,7 @@ const RecipeDetail = () => {
           throw error;
         }
 
-        // Validate ingredients array
+        // Validate and convert ingredients array
         const ingredients = Array.isArray(data.ingredients)
           ? data.ingredients.filter(isIngredient)
           : [];
