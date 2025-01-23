@@ -34,7 +34,15 @@ const Index = () => {
           .order("created_at", { ascending: false });
 
         if (error) throw error;
-        setRecipes(data || []);
+        
+        // Ensure data is properly formatted
+        const formattedData = data?.map(recipe => ({
+          ...recipe,
+          ingredients: Array.isArray(recipe.ingredients) ? recipe.ingredients : [],
+          instructions: Array.isArray(recipe.instructions) ? recipe.instructions : []
+        })) || [];
+        
+        setRecipes(formattedData);
       } catch (error: any) {
         console.error("Error fetching recipes:", error);
         toast({
@@ -60,8 +68,12 @@ const Index = () => {
           .select("recipe_id")
           .eq("user_id", user.id);
 
-        if (error) throw error;
-        setFavorites(new Set(data.map((fav) => fav.recipe_id)));
+        if (error) {
+          console.error("Error fetching favorites:", error);
+          return;
+        }
+        
+        setFavorites(new Set(data?.map((fav) => fav.recipe_id) || []));
       } catch (error: any) {
         console.error("Error fetching favorites:", error);
       }
@@ -99,21 +111,28 @@ const Index = () => {
 
     try {
       if (isFavorited) {
-        await supabase
+        const { error } = await supabase
           .from("favorites")
           .delete()
           .eq("user_id", user.id)
           .eq("recipe_id", recipeId);
+          
+        if (error) throw error;
         newFavorites.delete(recipeId);
       } else {
-        await supabase.from("favorites").insert({
-          user_id: user.id,
-          recipe_id: recipeId,
-        });
+        const { error } = await supabase
+          .from("favorites")
+          .insert({
+            user_id: user.id,
+            recipe_id: recipeId,
+          });
+          
+        if (error) throw error;
         newFavorites.add(recipeId);
       }
       setFavorites(newFavorites);
     } catch (error: any) {
+      console.error("Error handling favorite:", error);
       toast({
         title: "Error",
         description: error.message,
