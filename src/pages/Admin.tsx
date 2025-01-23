@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
-import { Loader2, Users, BookOpen } from "lucide-react";
+import { Loader2, Users, BookOpen, Home } from "lucide-react";
 
 const Admin = () => {
   const navigate = useNavigate();
@@ -83,6 +84,14 @@ const Admin = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      <Button 
+        variant="ghost" 
+        onClick={() => navigate("/")}
+        className="mb-6"
+      >
+        <Home className="mr-2 h-4 w-4" />
+        Back to Home
+      </Button>
       <h1 className="mb-8 text-3xl font-bold">Admin Dashboard</h1>
       <div className="grid gap-6 md:grid-cols-2">
         <Card>

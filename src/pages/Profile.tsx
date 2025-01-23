@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
-import { Loader2 } from "lucide-react";
+import { Loader2, Home } from "lucide-react";
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -95,6 +95,14 @@ const Profile = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      <Button 
+        variant="ghost" 
+        onClick={() => navigate("/")}
+        className="mb-6"
+      >
+        <Home className="mr-2 h-4 w-4" />
+        Back to Home
+      </Button>
       <Card className="mx-auto max-w-2xl">
         <CardHeader>
           <CardTitle>Profile Settings</CardTitle>
