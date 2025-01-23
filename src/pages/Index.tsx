@@ -8,10 +8,19 @@ import { RecipeGrid } from "@/components/recipe/RecipeGrid";
 import { RecipeHeader } from "@/components/recipe/RecipeHeader";
 import { Tables } from "@/integrations/supabase/types";
 
+interface RecipeWithExtras extends Tables<"recipes"> {
+  author: { username: string | null };
+  recipe_categories?: {
+    category: {
+      name: string | null;
+    } | null;
+  }[] | null;
+}
+
 const Index = () => {
   const navigate = useNavigate();
-  const [recipes, setRecipes] = useState<(Tables<"recipes"> & { author: { username: string | null } })[]>([]);
-  const [filteredRecipes, setFilteredRecipes] = useState<(Tables<"recipes"> & { author: { username: string | null } })[]>([]);
+  const [recipes, setRecipes] = useState<RecipeWithExtras[]>([]);
+  const [filteredRecipes, setFilteredRecipes] = useState<RecipeWithExtras[]>([]);
   const [user, setUser] = useState<any>(null);
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);

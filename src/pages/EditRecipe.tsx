@@ -136,8 +136,9 @@ const EditRecipe = () => {
         return;
       }
 
-      // Convert ingredients to Json type before sending to Supabase
-      const ingredientsJson = ingredients.filter(ing => ing.item.trim() !== "") as Json;
+      // Convert ingredients to Json type by explicitly casting it
+      const ingredientsJson = ingredients.filter(ing => ing.item.trim() !== "") as unknown as Json;
+      const instructionsJson = instructions.filter(Boolean) as unknown as Json;
 
       const { error } = await supabase
         .from("recipes")
@@ -148,7 +149,7 @@ const EditRecipe = () => {
           difficulty,
           image_url: imageUrl,
           ingredients: ingredientsJson,
-          instructions: instructions.filter(Boolean),
+          instructions: instructionsJson,
           updated_at: new Date().toISOString(),
         })
         .eq("id", id);
