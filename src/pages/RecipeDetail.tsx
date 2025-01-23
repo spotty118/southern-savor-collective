@@ -24,14 +24,11 @@ interface Ingredient {
 }
 
 // Type guard to validate ingredient shape
-const isIngredient = (json: unknown): json is Ingredient => {
-  if (!json || typeof json !== 'object') return false;
+const isIngredient = (value: unknown): value is Ingredient => {
+  if (!value || typeof value !== 'object') return false;
   
-  const candidate = json as Record<string, unknown>;
+  const candidate = value as Record<string, unknown>;
   return (
-    'item' in candidate &&
-    'unit' in candidate &&
-    'amount' in candidate &&
     typeof candidate.item === 'string' &&
     typeof candidate.unit === 'string' &&
     typeof candidate.amount === 'number'
@@ -78,26 +75,25 @@ const RecipeDetail = () => {
           throw error;
         }
 
-        // Validate and convert ingredients array
-        const ingredients = Array.isArray(data.ingredients)
-          ? data.ingredients.filter((item): item is Ingredient => {
-              if (!isIngredient(item)) {
-                console.warn('Invalid ingredient found:', item);
-                return false;
-              }
-              return true;
-            })
-          : [];
+        // Parse and validate ingredients
+        const rawIngredients = data.ingredients as unknown[];
+        const validatedIngredients = rawIngredients.filter((item): item is Ingredient => {
+          if (!isIngredient(item)) {
+            console.warn('Invalid ingredient found:', item);
+            return false;
+          }
+          return true;
+        });
 
         // Validate instructions array
         const instructions = Array.isArray(data.instructions)
           ? data.instructions.filter((item): item is string => typeof item === 'string')
           : [];
 
-        // Type assert and format the data
+        // Format the data
         const formattedData: RecipeData = {
           ...data,
-          ingredients,
+          ingredients: validatedIngredients,
           instructions,
           author: data.author as { username: string | null }
         };
