@@ -15,16 +15,39 @@ import { Home, Plus, Minus } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { Tables } from "@/integrations/supabase/types";
 
+interface Ingredient {
+  item: string;
+  amount: string;
+  unit: string;
+  [key: string]: string; // Index signature for Json compatibility
+}
+
 const CreateRecipe = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [cookTime, setCookTime] = useState("");
-  const [difficulty, setDifficulty] = useState("");
+  const [title, setTitle] = useState("Classic Baked Macaroni and Cheese");
+  const [description, setDescription] = useState("A comforting Southern classic with perfectly cooked macaroni in a rich, creamy cheese sauce, baked until golden and bubbly.");
+  const [cookTime, setCookTime] = useState("35 minutes");
+  const [difficulty, setDifficulty] = useState("Medium");
   const [imageUrl, setImageUrl] = useState("");
-  const [ingredients, setIngredients] = useState([""]);
-  const [instructions, setInstructions] = useState([""]);
+  const [ingredients, setIngredients] = useState<Ingredient[]>([
+    { item: "elbow macaroni", amount: "8", unit: "oz" },
+    { item: "milk", amount: "2", unit: "cups" },
+    { item: "butter", amount: "2", unit: "Tbsp" },
+    { item: "all-purpose flour", amount: "2", unit: "Tbsp" },
+    { item: "salt", amount: "1/2", unit: "tsp" },
+    { item: "black pepper", amount: "1/4", unit: "tsp" },
+    { item: "extra sharp Cheddar cheese", amount: "10", unit: "oz" },
+    { item: "ground red pepper", amount: "1/4", unit: "tsp" },
+  ]);
+  const [instructions, setInstructions] = useState([
+    "Preheat oven to 400°F. Prepare pasta according to package directions. Grease a 2-qt. baking dish with cooking spray.",
+    "Microwave milk at HIGH for 1 1/2 minutes. Melt butter in a large skillet or Dutch oven over medium-low heat; whisk in flour until smooth. Cook, whisking constantly, 1 minute.",
+    "Gradually whisk in warm milk, and cook, whisking constantly, 5 minutes or until thickened.",
+    "Whisk in salt, black pepper, 1 cup shredded cheese, and, if desired, red pepper until smooth.",
+    "Stir in hot cooked pasta. Spoon pasta mixture into prepared dish; top with remaining cheese.",
+    "Bake at 400°F for 20 minutes or until golden and bubbly."
+  ]);
   const [categories, setCategories] = useState<Tables<"categories">[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 
@@ -52,7 +75,7 @@ const CreateRecipe = () => {
   }, []);
 
   const handleAddIngredient = () => {
-    setIngredients([...ingredients, ""]);
+    setIngredients([...ingredients, { item: "", amount: "", unit: "" }]);
   };
 
   const handleRemoveIngredient = (index: number) => {
@@ -60,9 +83,9 @@ const CreateRecipe = () => {
     setIngredients(newIngredients);
   };
 
-  const handleIngredientChange = (index: number, value: string) => {
+  const handleIngredientChange = (index: number, field: keyof Ingredient, value: string) => {
     const newIngredients = [...ingredients];
-    newIngredients[index] = value;
+    newIngredients[index][field] = value;
     setIngredients(newIngredients);
   };
 
@@ -108,8 +131,8 @@ const CreateRecipe = () => {
           cook_time: cookTime,
           difficulty,
           image_url: imageUrl,
-          ingredients: ingredients.filter(Boolean),
-          instructions: instructions.filter(Boolean),
+          ingredients: ingredients as unknown as Json,
+          instructions: instructions as unknown as Json,
           author_id: user.id,
         })
         .select()
@@ -250,21 +273,34 @@ const CreateRecipe = () => {
           <div className="space-y-4">
             <label className="text-sm font-medium">Ingredients</label>
             {ingredients.map((ingredient, index) => (
-              <div key={index} className="flex gap-2">
+              <div key={index} className="grid grid-cols-4 gap-2">
                 <Input
-                  value={ingredient}
-                  onChange={(e) => handleIngredientChange(index, e.target.value)}
-                  placeholder={`Ingredient ${index + 1}`}
+                  className="col-span-2"
+                  value={ingredient.item}
+                  onChange={(e) => handleIngredientChange(index, "item", e.target.value)}
+                  placeholder="Ingredient name"
                 />
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="icon"
-                  onClick={() => handleRemoveIngredient(index)}
-                  disabled={ingredients.length === 1}
-                >
-                  <Minus className="h-4 w-4" />
-                </Button>
+                <Input
+                  value={ingredient.amount}
+                  onChange={(e) => handleIngredientChange(index, "amount", e.target.value)}
+                  placeholder="Amount"
+                />
+                <div className="flex gap-2">
+                  <Input
+                    value={ingredient.unit}
+                    onChange={(e) => handleIngredientChange(index, "unit", e.target.value)}
+                    placeholder="Unit"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    onClick={() => handleRemoveIngredient(index)}
+                    disabled={ingredients.length === 1}
+                  >
+                    <Minus className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             ))}
             <Button
