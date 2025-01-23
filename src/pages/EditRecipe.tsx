@@ -13,7 +13,12 @@ import {
 } from "@/components/ui/select";
 import { Home, Plus, Minus } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-import { Json } from "@/integrations/supabase/types";
+
+interface Ingredient {
+  item: string;
+  amount: number;
+  unit: string;
+}
 
 const EditRecipe = () => {
   const navigate = useNavigate();
@@ -24,7 +29,7 @@ const EditRecipe = () => {
   const [cookTime, setCookTime] = useState("");
   const [difficulty, setDifficulty] = useState("");
   const [imageUrl, setImageUrl] = useState("");
-  const [ingredients, setIngredients] = useState<string[]>([""]);
+  const [ingredients, setIngredients] = useState<Ingredient[]>([{ item: "", amount: 0, unit: "" }]);
   const [instructions, setInstructions] = useState<string[]>([""]);
 
   useEffect(() => {
@@ -45,12 +50,18 @@ const EditRecipe = () => {
           setDifficulty(recipe.difficulty || "");
           setImageUrl(recipe.image_url || "");
           
-          // Convert Json[] to string[] and ensure arrays
+          // Handle ingredients array
           const recipeIngredients = Array.isArray(recipe.ingredients) 
-            ? recipe.ingredients.map(item => String(item))
-            : [""];
+            ? recipe.ingredients.map((ing: any) => ({
+                item: ing.item || "",
+                amount: ing.amount || 0,
+                unit: ing.unit || ""
+              }))
+            : [{ item: "", amount: 0, unit: "" }];
+          
+          // Handle instructions array
           const recipeInstructions = Array.isArray(recipe.instructions)
-            ? recipe.instructions.map(item => String(item))
+            ? recipe.instructions.map(String)
             : [""];
             
           setIngredients(recipeIngredients);
@@ -73,7 +84,7 @@ const EditRecipe = () => {
   }, [id, navigate]);
 
   const handleAddIngredient = () => {
-    setIngredients([...ingredients, ""]);
+    setIngredients([...ingredients, { item: "", amount: 0, unit: "" }]);
   };
 
   const handleRemoveIngredient = (index: number) => {
@@ -81,9 +92,13 @@ const EditRecipe = () => {
     setIngredients(newIngredients);
   };
 
-  const handleIngredientChange = (index: number, value: string) => {
+  const handleIngredientChange = (index: number, field: keyof Ingredient, value: string | number) => {
     const newIngredients = [...ingredients];
-    newIngredients[index] = value;
+    if (field === 'amount') {
+      newIngredients[index][field] = Number(value) || 0;
+    } else {
+      newIngredients[index][field as 'item' | 'unit'] = value as string;
+    }
     setIngredients(newIngredients);
   };
 
@@ -128,7 +143,7 @@ const EditRecipe = () => {
           cook_time: cookTime,
           difficulty,
           image_url: imageUrl,
-          ingredients: ingredients.filter(Boolean),
+          ingredients: ingredients.filter(ing => ing.item.trim() !== ""),
           instructions: instructions.filter(Boolean),
           updated_at: new Date().toISOString(),
         })
@@ -225,20 +240,35 @@ const EditRecipe = () => {
           <div className="space-y-4">
             <label className="text-sm font-medium">Ingredients</label>
             {ingredients.map((ingredient, index) => (
-              <div key={index} className="flex gap-2">
-                <Input
-                  value={ingredient}
-                  onChange={(e) => handleIngredientChange(index, e.target.value)}
-                  placeholder={`Ingredient ${index + 1}`}
-                />
+              <div key={index} className="flex flex-col gap-2">
+                <div className="grid grid-cols-3 gap-2">
+                  <Input
+                    value={ingredient.amount}
+                    type="number"
+                    onChange={(e) => handleIngredientChange(index, 'amount', e.target.value)}
+                    placeholder="Amount"
+                  />
+                  <Input
+                    value={ingredient.unit}
+                    onChange={(e) => handleIngredientChange(index, 'unit', e.target.value)}
+                    placeholder="Unit (e.g., cups)"
+                  />
+                  <Input
+                    value={ingredient.item}
+                    onChange={(e) => handleIngredientChange(index, 'item', e.target.value)}
+                    placeholder="Ingredient name"
+                  />
+                </div>
                 <Button
                   type="button"
                   variant="outline"
-                  size="icon"
+                  size="sm"
                   onClick={() => handleRemoveIngredient(index)}
                   disabled={ingredients.length === 1}
+                  className="self-end"
                 >
                   <Minus className="h-4 w-4" />
+                  Remove
                 </Button>
               </div>
             ))}
