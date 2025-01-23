@@ -189,6 +189,8 @@ const RecipeDetail = () => {
     }
   };
 
+  const isRecipeOwner = user && recipe && user.id === recipe.author_id;
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-[#FDE1D3] to-[#FDFCFB] p-8">
@@ -247,7 +249,7 @@ const RecipeDetail = () => {
                 }`}
               />
             </Button>
-            {user && (
+            {isRecipeOwner && (
               <Button
                 variant="ghost"
                 size="icon"
@@ -298,7 +300,7 @@ const RecipeDetail = () => {
                   <h2 className="text-2xl font-display text-accent-foreground">
                     Instructions
                   </h2>
-                  {user && (
+                  {isRecipeOwner && (
                     <Button
                       variant="ghost"
                       onClick={() => enhanceRecipe("instructions")}
