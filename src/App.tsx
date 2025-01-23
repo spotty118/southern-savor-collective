@@ -8,6 +8,7 @@ import Auth from "./pages/Auth";
 import Profile from "./pages/Profile";
 import Admin from "./pages/Admin";
 import CreateRecipe from "./pages/CreateRecipe";
+import RecipeDetail from "./pages/RecipeDetail";
 
 const queryClient = new QueryClient();
 
@@ -23,6 +24,7 @@ const App = () => (
           <Route path="/profile" element={<Profile />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="/create-recipe" element={<CreateRecipe />} />
+          <Route path="/recipe/:id" element={<RecipeDetail />} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>

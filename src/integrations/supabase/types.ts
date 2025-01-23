@@ -72,6 +72,54 @@ export type Database = {
         }
         Relationships: []
       }
+      recipe_ai_suggestions: {
+        Row: {
+          content_type: string
+          created_at: string
+          enhanced_content: string
+          id: string
+          is_applied: boolean | null
+          original_content: string
+          recipe_id: string
+          user_id: string
+        }
+        Insert: {
+          content_type: string
+          created_at?: string
+          enhanced_content: string
+          id?: string
+          is_applied?: boolean | null
+          original_content: string
+          recipe_id: string
+          user_id: string
+        }
+        Update: {
+          content_type?: string
+          created_at?: string
+          enhanced_content?: string
+          id?: string
+          is_applied?: boolean | null
+          original_content?: string
+          recipe_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recipe_ai_suggestions_recipe_id_fkey"
+            columns: ["recipe_id"]
+            isOneToOne: false
+            referencedRelation: "recipes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "recipe_ai_suggestions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       recipes: {
         Row: {
           author_id: string | null
