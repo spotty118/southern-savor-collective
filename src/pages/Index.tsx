@@ -11,10 +11,12 @@ import { Tables } from "@/integrations/supabase/types";
 const Index = () => {
   const navigate = useNavigate();
   const [recipes, setRecipes] = useState<(Tables<"recipes"> & { author: { username: string | null } })[]>([]);
+  const [filteredRecipes, setFilteredRecipes] = useState<(Tables<"recipes"> & { author: { username: string | null } })[]>([]);
   const [user, setUser] = useState<any>(null);
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [selectedFilter, setSelectedFilter] = useState("All Y'all");
 
   useEffect(() => {
     const fetchRecipes = async () => {
@@ -29,7 +31,6 @@ const Index = () => {
 
         if (error) throw error;
         
-        // Ensure data is properly formatted
         const formattedData = data?.map(recipe => ({
           ...recipe,
           ingredients: Array.isArray(recipe.ingredients) ? recipe.ingredients : [],
@@ -37,6 +38,7 @@ const Index = () => {
         })) || [];
         
         setRecipes(formattedData);
+        setFilteredRecipes(formattedData);
       } catch (error: any) {
         console.error("Error fetching recipes:", error);
         toast({
@@ -51,6 +53,38 @@ const Index = () => {
 
     fetchRecipes();
   }, []);
+
+  useEffect(() => {
+    const filterRecipes = () => {
+      if (selectedFilter === "All Y'all") {
+        setFilteredRecipes(recipes);
+        return;
+      }
+
+      const filtered = recipes.filter(recipe => {
+        // You would need to add a category field to your recipes table
+        // For now, this is a placeholder filter
+        const categoryMapping: { [key: string]: string[] } = {
+          "Comfort Food": ["casserole", "mac", "chicken", "meatloaf"],
+          "BBQ & Grilling": ["bbq", "grill", "smoke", "barbecue"],
+          "Soul Food": ["collard", "grits", "okra", "cornbread"],
+          "Country Breakfast": ["biscuit", "gravy", "eggs", "hash"],
+          "Sweet Tea & Drinks": ["tea", "lemonade", "punch", "cocktail"],
+          "Pies & Desserts": ["pie", "cobbler", "pudding", "cake"]
+        };
+
+        const keywords = categoryMapping[selectedFilter] || [];
+        return keywords.some(keyword => 
+          recipe.title.toLowerCase().includes(keyword) || 
+          recipe.description?.toLowerCase().includes(keyword)
+        );
+      });
+
+      setFilteredRecipes(filtered);
+    };
+
+    filterRecipes();
+  }, [selectedFilter, recipes]);
 
   useEffect(() => {
     const fetchFavorites = async () => {
@@ -162,11 +196,20 @@ const Index = () => {
     navigate(`/recipe/${recipeId}`);
   };
 
-  return (
-    <div className="min-h-screen bg-gradient-to-b from-[#FDE1D3] to-[#FDFCFB] px-4 py-8">
-      <div className="container mx-auto">
-        <RecipeHeader user={user} isAdmin={isAdmin} />
+  const handleFilterChange = (filter: string) => {
+    setSelectedFilter(filter);
+  };
 
+  return (
+    <div className="min-h-screen bg-[#FDFCFB]">
+      <RecipeHeader 
+        user={user} 
+        isAdmin={isAdmin} 
+        selectedFilter={selectedFilter}
+        onFilterChange={handleFilterChange}
+      />
+
+      <div className="container mx-auto px-4 py-8">
         {loading ? (
           <div className="text-center py-12">
             <div className="animate-pulse flex flex-col items-center gap-4">
@@ -174,10 +217,14 @@ const Index = () => {
               <p className="text-accent">Loading our family recipes...</p>
             </div>
           </div>
-        ) : recipes.length === 0 ? (
+        ) : filteredRecipes.length === 0 ? (
           <div className="text-center py-12 bg-white/50 rounded-lg shadow-sm backdrop-blur-sm">
-            <p className="text-lg text-gray-700 mb-4">No recipes found in the cookbook yet</p>
-            {user && (
+            <p className="text-lg text-gray-700 mb-4">
+              {selectedFilter === "All Y'all" 
+                ? "No recipes found in the cookbook yet"
+                : `No ${selectedFilter.toLowerCase()} recipes found`}
+            </p>
+            {user && selectedFilter === "All Y'all" && (
               <Button 
                 onClick={() => navigate("/create-recipe")} 
                 className="bg-[#FEC6A1] text-accent hover:bg-[#FDE1D3] transform transition-transform duration-200 hover:scale-105"
@@ -188,7 +235,7 @@ const Index = () => {
           </div>
         ) : (
           <RecipeGrid 
-            recipes={recipes}
+            recipes={filteredRecipes}
             favorites={favorites}
             onLoveClick={handleLoveClick}
             onRecipeClick={handleRecipeClick}
