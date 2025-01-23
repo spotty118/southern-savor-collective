@@ -13,12 +13,13 @@ import {
 } from "@/components/ui/select";
 import { Home, Plus, Minus } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-import { Tables } from "@/integrations/supabase/types";
+import { Tables, Json } from "@/integrations/supabase/types";
 
 interface Ingredient {
   item: string;
   amount: number;
   unit: string;
+  [key: string]: string | number; // Add index signature to match Json type
 }
 
 const EditRecipe = () => {
@@ -61,7 +62,6 @@ const EditRecipe = () => {
   useEffect(() => {
     const fetchRecipe = async () => {
       try {
-        // Fetch recipe details
         const { data: recipe, error } = await supabase
           .from("recipes")
           .select("*")
@@ -76,10 +76,10 @@ const EditRecipe = () => {
           setCookTime(recipe.cook_time?.toString() || "");
           setDifficulty(recipe.difficulty || "");
           setImageUrl(recipe.image_url || "");
-          setIngredients(recipe.ingredients as Ingredient[] || [{ item: "", amount: 0, unit: "" }]);
-          setInstructions(recipe.instructions as string[] || [""]);
+          // Type assertion to handle the Json to Ingredient[] conversion
+          setIngredients((recipe.ingredients as Ingredient[]) || [{ item: "", amount: 0, unit: "" }]);
+          setInstructions((recipe.instructions as string[]) || [""]);
           
-          // Fetch recipe categories
           const { data: categoryData, error: categoryError } = await supabase
             .from("recipe_categories")
             .select("category_id")
@@ -157,7 +157,7 @@ const EditRecipe = () => {
         return;
       }
 
-      // Update recipe
+      // Update recipe with type assertion for ingredients
       const { error: recipeError } = await supabase
         .from("recipes")
         .update({
@@ -166,8 +166,8 @@ const EditRecipe = () => {
           cook_time: cookTime,
           difficulty,
           image_url: imageUrl,
-          ingredients,
-          instructions: instructions.filter(Boolean),
+          ingredients: ingredients as Json,
+          instructions: instructions.filter(Boolean) as Json,
           updated_at: new Date().toISOString(),
         })
         .eq("id", id);
