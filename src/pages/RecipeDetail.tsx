@@ -12,6 +12,12 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 
+interface Ingredient {
+  item: string;
+  unit: string;
+  amount: number;
+}
+
 const RecipeDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -35,22 +41,38 @@ const RecipeDetail = () => {
           .eq("id", id)
           .single();
 
-        if (error) throw error;
-        setRecipe(data);
+        if (error) {
+          console.error("Error fetching recipe:", error);
+          throw error;
+        }
+
+        // Ensure ingredients and instructions are arrays
+        const formattedData = {
+          ...data,
+          ingredients: Array.isArray(data.ingredients) ? data.ingredients : [],
+          instructions: Array.isArray(data.instructions) ? data.instructions : []
+        };
+
+        setRecipe(formattedData);
 
         // Check if recipe is loved by current user
         if (user) {
-          const { data: favoriteData } = await supabase
+          const { data: favoriteData, error: favoriteError } = await supabase
             .from("favorites")
             .select("*")
             .eq("recipe_id", id)
             .eq("user_id", user.id)
-            .single();
+            .maybeSingle();
+
+          if (favoriteError) {
+            console.error("Error fetching favorite status:", favoriteError);
+            return;
+          }
 
           setIsLoved(!!favoriteData);
         }
       } catch (error: any) {
-        console.error("Error fetching recipe:", error);
+        console.error("Error in fetchRecipe:", error);
         toast({
           title: "Error",
           description: "Failed to load recipe",
@@ -90,19 +112,26 @@ const RecipeDetail = () => {
 
     try {
       if (isLoved) {
-        await supabase
+        const { error } = await supabase
           .from("favorites")
           .delete()
           .eq("user_id", user.id)
           .eq("recipe_id", id);
+
+        if (error) throw error;
       } else {
-        await supabase.from("favorites").insert({
-          user_id: user.id,
-          recipe_id: id,
-        });
+        const { error } = await supabase
+          .from("favorites")
+          .insert({
+            user_id: user.id,
+            recipe_id: id,
+          });
+
+        if (error) throw error;
       }
       setIsLoved(!isLoved);
     } catch (error: any) {
+      console.error("Error handling favorite:", error);
       toast({
         title: "Error",
         description: error.message,
@@ -184,10 +213,7 @@ const RecipeDetail = () => {
           <h1 className="text-2xl font-display text-accent-foreground">
             Recipe not found
           </h1>
-          <Button
-            onClick={() => navigate("/")}
-            className="mt-4"
-          >
+          <Button onClick={() => navigate("/")} className="mt-4">
             <Home className="mr-2 h-4 w-4" />
             Back to Home
           </Button>
@@ -215,14 +241,18 @@ const RecipeDetail = () => {
               className="bg-white/90 hover:bg-white"
               onClick={handleLoveClick}
             >
-              <Heart className={`h-5 w-5 ${isLoved ? "fill-red-500 text-red-500" : "text-gray-500"}`} />
+              <Heart
+                className={`h-5 w-5 ${
+                  isLoved ? "fill-red-500 text-red-500" : "text-gray-500"
+                }`}
+              />
             </Button>
             {user && (
               <Button
                 variant="ghost"
                 size="icon"
                 className="bg-white/90 hover:bg-white"
-                onClick={() => enhanceRecipe('description')}
+                onClick={() => enhanceRecipe("description")}
                 disabled={enhancing}
               >
                 <Wand2 className="h-5 w-5 text-[#FEC6A1]" />
@@ -233,7 +263,10 @@ const RecipeDetail = () => {
 
         <div className="bg-white/80 backdrop-blur-sm rounded-lg shadow-lg overflow-hidden">
           <img
-            src={recipe.image_url || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c"}
+            src={
+              recipe.image_url ||
+              "https://images.unsplash.com/photo-1546069901-ba9599a7e63c"
+            }
             alt={recipe.title}
             className="w-full h-96 object-cover"
           />
@@ -246,14 +279,16 @@ const RecipeDetail = () => {
             </p>
             <div className="prose prose-lg max-w-none">
               <p className="text-gray-700 mb-8">{recipe.description}</p>
-              
+
               <div className="mb-8">
                 <h2 className="text-2xl font-display text-accent-foreground mb-4">
                   Ingredients
                 </h2>
                 <ul className="list-disc pl-6 space-y-2">
-                  {recipe.ingredients.map((ingredient: string, index: number) => (
-                    <li key={index} className="text-gray-700">{ingredient}</li>
+                  {recipe.ingredients.map((ingredient: Ingredient, index: number) => (
+                    <li key={index} className="text-gray-700">
+                      {`${ingredient.amount} ${ingredient.unit} ${ingredient.item}`}
+                    </li>
                   ))}
                 </ul>
               </div>
@@ -266,7 +301,7 @@ const RecipeDetail = () => {
                   {user && (
                     <Button
                       variant="ghost"
-                      onClick={() => enhanceRecipe('instructions')}
+                      onClick={() => enhanceRecipe("instructions")}
                       disabled={enhancing}
                       className="flex items-center gap-2"
                     >
@@ -277,7 +312,9 @@ const RecipeDetail = () => {
                 </div>
                 <ol className="list-decimal pl-6 space-y-4">
                   {recipe.instructions.map((instruction: string, index: number) => (
-                    <li key={index} className="text-gray-700">{instruction}</li>
+                    <li key={index} className="text-gray-700">
+                      {instruction}
+                    </li>
                   ))}
                 </ol>
               </div>
@@ -297,7 +334,8 @@ const RecipeDetail = () => {
             <DialogHeader>
               <DialogTitle>AI Enhanced Version</DialogTitle>
               <DialogDescription>
-                Here's an AI-enhanced version of your recipe content. Would you like to apply these changes?
+                Here's an AI-enhanced version of your recipe content. Would you
+                like to apply these changes?
               </DialogDescription>
             </DialogHeader>
             <div className="mt-4 space-y-4">
@@ -312,21 +350,26 @@ const RecipeDetail = () => {
                 <Button
                   onClick={async () => {
                     try {
-                      const updates = aiSuggestion.content_type === 'instructions'
-                        ? { instructions: aiSuggestion.enhanced_content.split('\n').filter(Boolean) }
-                        : { description: aiSuggestion.enhanced_content };
+                      const updates =
+                        aiSuggestion.content_type === "instructions"
+                          ? {
+                              instructions: aiSuggestion.enhanced_content
+                                .split("\n")
+                                .filter(Boolean),
+                            }
+                          : { description: aiSuggestion.enhanced_content };
 
                       const { error } = await supabase
-                        .from('recipes')
+                        .from("recipes")
                         .update(updates)
-                        .eq('id', recipe.id);
+                        .eq("id", recipe.id);
 
                       if (error) throw error;
 
                       await supabase
-                        .from('recipe_ai_suggestions')
+                        .from("recipe_ai_suggestions")
                         .update({ is_applied: true })
-                        .eq('id', aiSuggestion.id);
+                        .eq("id", aiSuggestion.id);
 
                       setRecipe({ ...recipe, ...updates });
                       setShowAiDialog(false);
