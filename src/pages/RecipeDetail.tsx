@@ -2,7 +2,7 @@ import * as React from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { useState, useEffect } from "react"
 import { Home, Heart, Wand2 } from "lucide-react"
-import { supabase } from "@/lib/supabase"
+import { supabase } from "@/integrations/supabase/client"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -12,6 +12,16 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { toast } from "@/hooks/use-toast"
+import type { Database } from "@/integrations/supabase/types"
+
+type RecipeRow = Database['public']['Tables']['recipes']['Row']
+type AISuggestionRow = Database['public']['Tables']['recipe_ai_suggestions']['Row']
+
+interface Ingredient {
+  item: string;
+  unit: string;
+  amount: number;
+}
 
 const isIngredient = (item: unknown): item is Ingredient => {
   if (!item || typeof item !== 'object') return false;
