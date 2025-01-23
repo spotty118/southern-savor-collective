@@ -10,11 +10,7 @@ import { Tables } from "@/integrations/supabase/types";
 
 interface RecipeWithExtras extends Tables<"recipes"> {
   author: { username: string | null };
-  recipe_categories: {
-    category: {
-      name: string;
-    };
-  }[] | null;
+  categories: Tables<"categories">[];
 }
 
 interface Category extends Tables<"categories"> {}
@@ -57,27 +53,39 @@ const Index = () => {
   useEffect(() => {
     const fetchRecipes = async () => {
       try {
-        const { data, error } = await supabase
+        const { data: recipesData, error: recipesError } = await supabase
           .from("recipes")
           .select(`
             *,
-            author:profiles(username),
-            recipe_categories!inner(
-              category:categories(name)
-            )
+            author:profiles(username)
           `)
           .order("created_at", { ascending: false });
 
-        if (error) throw error;
-        
-        const formattedData = data?.map(recipe => ({
-          ...recipe,
-          ingredients: Array.isArray(recipe.ingredients) ? recipe.ingredients : [],
-          instructions: Array.isArray(recipe.instructions) ? recipe.instructions : []
-        })) || [];
-        
-        setRecipes(formattedData);
-        setFilteredRecipes(formattedData);
+        if (recipesError) throw recipesError;
+
+        // Fetch categories for each recipe
+        const recipesWithCategories = await Promise.all(
+          recipesData.map(async (recipe) => {
+            const { data: categoryData, error: categoryError } = await supabase
+              .from("recipe_categories")
+              .select(`
+                categories (
+                  *
+                )
+              `)
+              .eq("recipe_id", recipe.id);
+
+            if (categoryError) throw categoryError;
+
+            return {
+              ...recipe,
+              categories: categoryData?.map((c) => c.categories) || [],
+            };
+          })
+        );
+
+        setRecipes(recipesWithCategories);
+        setFilteredRecipes(recipesWithCategories);
       } catch (error: any) {
         console.error("Error fetching recipes:", error);
         toast({
@@ -176,45 +184,20 @@ const Index = () => {
     }
   };
 
-  useEffect(() => {
-    const checkUserRoles = async () => {
-      if (!user) return;
-      
-      try {
-        const { data, error } = await supabase
-          .from("user_roles")
-          .select("role")
-          .eq("user_id", user.id);
-
-        if (!error && data) {
-          const roles = data.map(r => r.role);
-          setIsAdmin(roles.includes('admin'));
-          setIsEditor(roles.includes('editor'));
-        }
-      } catch (error) {
-        console.error("Error checking user roles:", error);
-      }
-    };
-
-    checkUserRoles();
-  }, [user]);
-
-  const handleRecipeClick = (recipeId: string) => {
-    navigate(`/recipe/${recipeId}`);
-  };
-
   const handleFilterChange = (filter: string) => {
     setSelectedFilter(filter);
     if (filter === "All Y'all") {
       setFilteredRecipes(recipes);
     } else {
-      const filtered = recipes.filter(recipe => 
-        recipe.recipe_categories?.some(
-          rc => rc.category.name === filter
-        )
+      const filtered = recipes.filter((recipe) =>
+        recipe.categories.some((category) => category.name === filter)
       );
       setFilteredRecipes(filtered);
     }
+  };
+
+  const handleRecipeClick = (recipeId: string) => {
+    navigate(`/recipe/${recipeId}`);
   };
 
   return (
