@@ -10,23 +10,49 @@ import { Tables } from "@/integrations/supabase/types";
 
 interface RecipeWithExtras extends Tables<"recipes"> {
   author: { username: string | null };
-  recipe_categories?: {
+  recipe_categories: {
     category: {
-      name: string | null;
-    } | null;
+      name: string;
+    };
   }[] | null;
 }
+
+interface Category extends Tables<"categories"> {}
 
 const Index = () => {
   const navigate = useNavigate();
   const [recipes, setRecipes] = useState<RecipeWithExtras[]>([]);
   const [filteredRecipes, setFilteredRecipes] = useState<RecipeWithExtras[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [user, setUser] = useState<any>(null);
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isEditor, setIsEditor] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState("All Y'all");
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("categories")
+          .select("*")
+          .order("name");
+
+        if (error) throw error;
+        setCategories(data || []);
+      } catch (error: any) {
+        console.error("Error fetching categories:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load categories",
+          variant: "destructive",
+        });
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   useEffect(() => {
     const fetchRecipes = async () => {
@@ -36,7 +62,7 @@ const Index = () => {
           .select(`
             *,
             author:profiles(username),
-            recipe_categories:recipe_categories(
+            recipe_categories!inner(
               category:categories(name)
             )
           `)
@@ -184,7 +210,7 @@ const Index = () => {
     } else {
       const filtered = recipes.filter(recipe => 
         recipe.recipe_categories?.some(
-          rc => rc.category?.name === filter
+          rc => rc.category.name === filter
         )
       );
       setFilteredRecipes(filtered);
@@ -198,6 +224,7 @@ const Index = () => {
         isAdmin={isAdmin} 
         selectedFilter={selectedFilter}
         onFilterChange={handleFilterChange}
+        categories={categories}
       />
 
       <div className="container mx-auto px-4 py-8">

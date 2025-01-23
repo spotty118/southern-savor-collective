@@ -3,26 +3,24 @@ import { Button } from "@/components/ui/button";
 import { AuthButton } from "@/components/AuthButton";
 import { useNavigate } from "react-router-dom";
 import { Separator } from "@/components/ui/separator";
+import { Tables } from "@/integrations/supabase/types";
 
 interface RecipeHeaderProps {
   user: any;
   isAdmin: boolean;
   selectedFilter: string;
+  categories: Tables<"categories">[];
   onFilterChange: (filter: string) => void;
 }
 
-export const RecipeHeader = ({ user, isAdmin, selectedFilter, onFilterChange }: RecipeHeaderProps) => {
+export const RecipeHeader = ({ 
+  user, 
+  isAdmin, 
+  selectedFilter, 
+  categories,
+  onFilterChange 
+}: RecipeHeaderProps) => {
   const navigate = useNavigate();
-  
-  const filters = [
-    "All Y'all",
-    "Comfort Food",
-    "BBQ & Grilling",
-    "Soul Food",
-    "Country Breakfast",
-    "Sweet Tea & Drinks",
-    "Pies & Desserts"
-  ];
   
   return (
     <div className="mb-12 bg-gradient-to-b from-[#FDE1D3] to-transparent pb-6">
@@ -85,20 +83,20 @@ export const RecipeHeader = ({ user, isAdmin, selectedFilter, onFilterChange }: 
         <Separator className="my-8 bg-[#FEC6A1]/20" />
 
         <div className="flex items-center justify-center gap-4 flex-wrap px-4">
-          {filters.map((filter) => (
+          {categories.map((category) => (
             <Button
-              key={filter}
-              variant={selectedFilter === filter ? "default" : "outline"}
-              onClick={() => onFilterChange(filter)}
+              key={category.id}
+              variant={selectedFilter === category.name ? "default" : "outline"}
+              onClick={() => onFilterChange(category.name)}
               className={`
                 rounded-full px-6 transition-all duration-200
-                ${selectedFilter === filter 
+                ${selectedFilter === category.name 
                   ? 'bg-[#FEC6A1] text-accent hover:bg-[#FDE1D3]' 
                   : 'border-[#FEC6A1] text-accent hover:bg-[#FDE1D3]'
                 }
               `}
             >
-              {filter}
+              {category.name}
             </Button>
           ))}
         </div>
