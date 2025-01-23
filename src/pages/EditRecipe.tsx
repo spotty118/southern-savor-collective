@@ -23,8 +23,8 @@ const EditRecipe = () => {
   const [cookTime, setCookTime] = useState("");
   const [difficulty, setDifficulty] = useState("");
   const [imageUrl, setImageUrl] = useState("");
-  const [ingredients, setIngredients] = useState([""]);
-  const [instructions, setInstructions] = useState([""]);
+  const [ingredients, setIngredients] = useState<string[]>([""]);
+  const [instructions, setInstructions] = useState<string[]>([""]);
 
   useEffect(() => {
     const fetchRecipe = async () => {
@@ -38,13 +38,22 @@ const EditRecipe = () => {
         if (error) throw error;
 
         if (recipe) {
-          setTitle(recipe.title);
+          setTitle(recipe.title || "");
           setDescription(recipe.description || "");
-          setCookTime(recipe.cook_time || "");
+          setCookTime(recipe.cook_time?.toString() || "");
           setDifficulty(recipe.difficulty || "");
           setImageUrl(recipe.image_url || "");
-          setIngredients(recipe.ingredients || [""]);
-          setInstructions(recipe.instructions || [""]);
+          
+          // Ensure ingredients and instructions are arrays
+          const recipeIngredients = Array.isArray(recipe.ingredients) 
+            ? recipe.ingredients 
+            : [""];
+          const recipeInstructions = Array.isArray(recipe.instructions) 
+            ? recipe.instructions 
+            : [""];
+            
+          setIngredients(recipeIngredients);
+          setInstructions(recipeInstructions);
         }
       } catch (error: any) {
         console.error("Error fetching recipe:", error);
