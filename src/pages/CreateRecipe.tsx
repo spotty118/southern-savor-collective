@@ -14,6 +14,7 @@ import {
 import { Home, Plus, Minus } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { Tables, Json } from "@/integrations/supabase/types";
+import { AIEnhanceButton } from "@/components/recipe/AIEnhanceButton";
 
 interface Ingredient {
   item: string;
@@ -102,6 +103,26 @@ const CreateRecipe = () => {
     const newInstructions = [...instructions];
     newInstructions[index] = value;
     setInstructions(newInstructions);
+  };
+
+  const handleDescriptionEnhancement = (enhancedContent: string) => {
+    setDescription(enhancedContent);
+  };
+
+  const handleInstructionsEnhancement = (enhancedContent: string) => {
+    try {
+      const enhancedInstructions = JSON.parse(enhancedContent);
+      if (Array.isArray(enhancedInstructions)) {
+        setInstructions(enhancedInstructions);
+      }
+    } catch (error) {
+      console.error('Error parsing enhanced instructions:', error);
+      toast({
+        title: "Error",
+        description: "Failed to parse enhanced instructions",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -201,11 +222,19 @@ const CreateRecipe = () => {
 
           <div className="space-y-2">
             <label className="text-sm font-medium">Description</label>
-            <Textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Share the story behind your recipe"
-            />
+            <div className="space-y-2">
+              <Textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Share the story behind your recipe"
+              />
+              <AIEnhanceButton
+                content={description}
+                type="description"
+                onEnhanced={handleDescriptionEnhancement}
+                disabled={!description}
+              />
+            </div>
           </div>
 
           <div className="space-y-2">
@@ -334,15 +363,23 @@ const CreateRecipe = () => {
                 </Button>
               </div>
             ))}
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleAddInstruction}
-              className="w-full"
-            >
-              <Plus className="mr-2 h-4 w-4" />
-              Add Step
-            </Button>
+            <div className="flex justify-between items-center">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleAddInstruction}
+                className="w-full"
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                Add Step
+              </Button>
+              <AIEnhanceButton
+                content={JSON.stringify(instructions)}
+                type="instructions"
+                onEnhanced={handleInstructionsEnhancement}
+                disabled={instructions.length === 0 || instructions.every(i => !i)}
+              />
+            </div>
           </div>
 
           <Button
