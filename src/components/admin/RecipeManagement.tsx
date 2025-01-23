@@ -47,6 +47,7 @@ export const RecipeManagement = ({ recipes, onDeleteRecipe, currentUserId, isAdm
         description: "Recipe deleted successfully",
       });
     } catch (error: any) {
+      console.error("Error deleting recipe:", error);
       toast({
         title: "Error",
         description: "Failed to delete recipe",
