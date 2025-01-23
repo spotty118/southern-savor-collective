@@ -24,7 +24,7 @@ interface Ingredient {
 }
 
 // Type guard to validate ingredient shape
-const isIngredient = (json: Json): json is Ingredient => {
+const isIngredient = (json: unknown): json is Ingredient => {
   if (!json || typeof json !== 'object') return false;
   
   const candidate = json as Record<string, unknown>;
