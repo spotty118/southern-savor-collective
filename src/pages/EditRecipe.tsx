@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/select";
 import { Home, Plus, Minus } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-import { Json } from "@/integrations/supabase/types";
+import { Tables } from "@/integrations/supabase/types";
 
 interface Ingredient {
   item: string;
@@ -32,10 +32,36 @@ const EditRecipe = () => {
   const [imageUrl, setImageUrl] = useState("");
   const [ingredients, setIngredients] = useState<Ingredient[]>([{ item: "", amount: 0, unit: "" }]);
   const [instructions, setInstructions] = useState<string[]>([""]);
+  const [categories, setCategories] = useState<Tables<"categories">[]>([]);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("categories")
+          .select("*")
+          .order("name");
+
+        if (error) throw error;
+        setCategories(data || []);
+      } catch (error: any) {
+        console.error("Error fetching categories:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load categories",
+          variant: "destructive",
+        });
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   useEffect(() => {
     const fetchRecipe = async () => {
       try {
+        // Fetch recipe details
         const { data: recipe, error } = await supabase
           .from("recipes")
           .select("*")
@@ -50,23 +76,18 @@ const EditRecipe = () => {
           setCookTime(recipe.cook_time?.toString() || "");
           setDifficulty(recipe.difficulty || "");
           setImageUrl(recipe.image_url || "");
+          setIngredients(recipe.ingredients as Ingredient[] || [{ item: "", amount: 0, unit: "" }]);
+          setInstructions(recipe.instructions as string[] || [""]);
           
-          // Handle ingredients array
-          const recipeIngredients = Array.isArray(recipe.ingredients) 
-            ? recipe.ingredients.map((ing: any) => ({
-                item: ing.item || "",
-                amount: ing.amount || 0,
-                unit: ing.unit || ""
-              }))
-            : [{ item: "", amount: 0, unit: "" }];
+          // Fetch recipe categories
+          const { data: categoryData, error: categoryError } = await supabase
+            .from("recipe_categories")
+            .select("category_id")
+            .eq("recipe_id", id);
+
+          if (categoryError) throw categoryError;
           
-          // Handle instructions array
-          const recipeInstructions = Array.isArray(recipe.instructions)
-            ? recipe.instructions.map(String)
-            : [""];
-            
-          setIngredients(recipeIngredients);
-          setInstructions(recipeInstructions);
+          setSelectedCategories(categoryData?.map(c => c.category_id) || []);
         }
       } catch (error: any) {
         console.error("Error fetching recipe:", error);
@@ -136,11 +157,8 @@ const EditRecipe = () => {
         return;
       }
 
-      // Convert ingredients to Json type by explicitly casting it
-      const ingredientsJson = ingredients.filter(ing => ing.item.trim() !== "") as unknown as Json;
-      const instructionsJson = instructions.filter(Boolean) as unknown as Json;
-
-      const { error } = await supabase
+      // Update recipe
+      const { error: recipeError } = await supabase
         .from("recipes")
         .update({
           title,
@@ -148,13 +166,35 @@ const EditRecipe = () => {
           cook_time: cookTime,
           difficulty,
           image_url: imageUrl,
-          ingredients: ingredientsJson,
-          instructions: instructionsJson,
+          ingredients,
+          instructions: instructions.filter(Boolean),
           updated_at: new Date().toISOString(),
         })
         .eq("id", id);
 
-      if (error) throw error;
+      if (recipeError) throw recipeError;
+
+      // Delete existing category associations
+      const { error: deleteError } = await supabase
+        .from("recipe_categories")
+        .delete()
+        .eq("recipe_id", id);
+
+      if (deleteError) throw deleteError;
+
+      // Insert new category associations
+      if (selectedCategories.length > 0) {
+        const { error: categoryError } = await supabase
+          .from("recipe_categories")
+          .insert(
+            selectedCategories.map(categoryId => ({
+              recipe_id: id,
+              category_id: categoryId
+            }))
+          );
+
+        if (categoryError) throw categoryError;
+      }
 
       toast({
         title: "Success!",
@@ -240,6 +280,35 @@ const EditRecipe = () => {
               onChange={(e) => setImageUrl(e.target.value)}
               placeholder="Enter image URL"
             />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Categories</label>
+            <div className="flex flex-wrap gap-2">
+              {categories.map((category) => (
+                <Button
+                  key={category.id}
+                  type="button"
+                  variant={selectedCategories.includes(category.id) ? "default" : "outline"}
+                  onClick={() => {
+                    setSelectedCategories(prev =>
+                      prev.includes(category.id)
+                        ? prev.filter(id => id !== category.id)
+                        : [...prev, category.id]
+                    );
+                  }}
+                  className={`
+                    rounded-full px-4 py-2 text-sm
+                    ${selectedCategories.includes(category.id)
+                      ? 'bg-[#FEC6A1] text-accent hover:bg-[#FDE1D3]'
+                      : 'border-[#FEC6A1] text-accent hover:bg-[#FDE1D3]'
+                    }
+                  `}
+                >
+                  {category.name}
+                </Button>
+              ))}
+            </div>
           </div>
 
           <div className="space-y-4">

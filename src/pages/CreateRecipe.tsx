@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/select";
 import { Home, Plus, Minus } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { Tables } from "@/integrations/supabase/types";
 
 const CreateRecipe = () => {
   const navigate = useNavigate();
@@ -24,6 +25,31 @@ const CreateRecipe = () => {
   const [imageUrl, setImageUrl] = useState("");
   const [ingredients, setIngredients] = useState([""]);
   const [instructions, setInstructions] = useState([""]);
+  const [categories, setCategories] = useState<Tables<"categories">[]>([]);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("categories")
+          .select("*")
+          .order("name");
+
+        if (error) throw error;
+        setCategories(data || []);
+      } catch (error: any) {
+        console.error("Error fetching categories:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load categories",
+          variant: "destructive",
+        });
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   const handleAddIngredient = () => {
     setIngredients([...ingredients, ""]);
@@ -73,18 +99,37 @@ const CreateRecipe = () => {
         return;
       }
 
-      const { error } = await supabase.from("recipes").insert({
-        title,
-        description,
-        cook_time: cookTime,
-        difficulty,
-        image_url: imageUrl,
-        ingredients: ingredients.filter(Boolean),
-        instructions: instructions.filter(Boolean),
-        author_id: user.id,
-      });
+      // Insert recipe
+      const { data: recipe, error: recipeError } = await supabase
+        .from("recipes")
+        .insert({
+          title,
+          description,
+          cook_time: cookTime,
+          difficulty,
+          image_url: imageUrl,
+          ingredients: ingredients.filter(Boolean),
+          instructions: instructions.filter(Boolean),
+          author_id: user.id,
+        })
+        .select()
+        .single();
 
-      if (error) throw error;
+      if (recipeError) throw recipeError;
+
+      // Insert recipe categories
+      if (selectedCategories.length > 0 && recipe) {
+        const { error: categoryError } = await supabase
+          .from("recipe_categories")
+          .insert(
+            selectedCategories.map(categoryId => ({
+              recipe_id: recipe.id,
+              category_id: categoryId
+            }))
+          );
+
+        if (categoryError) throw categoryError;
+      }
 
       toast({
         title: "Success!",
@@ -92,6 +137,7 @@ const CreateRecipe = () => {
       });
       navigate("/");
     } catch (error: any) {
+      console.error("Error creating recipe:", error);
       toast({
         title: "Error",
         description: error.message,
@@ -170,6 +216,35 @@ const CreateRecipe = () => {
               onChange={(e) => setImageUrl(e.target.value)}
               placeholder="Enter image URL"
             />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Categories</label>
+            <div className="flex flex-wrap gap-2">
+              {categories.map((category) => (
+                <Button
+                  key={category.id}
+                  type="button"
+                  variant={selectedCategories.includes(category.id) ? "default" : "outline"}
+                  onClick={() => {
+                    setSelectedCategories(prev =>
+                      prev.includes(category.id)
+                        ? prev.filter(id => id !== category.id)
+                        : [...prev, category.id]
+                    );
+                  }}
+                  className={`
+                    rounded-full px-4 py-2 text-sm
+                    ${selectedCategories.includes(category.id)
+                      ? 'bg-[#FEC6A1] text-accent hover:bg-[#FDE1D3]'
+                      : 'border-[#FEC6A1] text-accent hover:bg-[#FDE1D3]'
+                    }
+                  `}
+                >
+                  {category.name}
+                </Button>
+              ))}
+            </div>
           </div>
 
           <div className="space-y-4">
