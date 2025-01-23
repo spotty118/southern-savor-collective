@@ -38,7 +38,7 @@ export const RecipeCard = ({
 
   return (
     <div 
-      className="recipe-card group bg-white/80 backdrop-blur-sm cursor-pointer transform transition-all duration-300 hover:-translate-y-1"
+      className="recipe-card group vintage-paper cursor-pointer transform transition-all duration-300 hover:-translate-y-1"
       onClick={handleClick}
     >
       <div className="relative overflow-hidden">
@@ -76,15 +76,15 @@ export const RecipeCard = ({
         <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
       </div>
       <div className="recipe-card-content">
-        <h3 className="mb-2 text-xl font-semibold font-display text-accent group-hover:text-[#FEC6A1] transition-colors duration-300">
+        <h3 className="mb-2 text-xl font-semibold font-display text-accent group-hover:text-[#FEC6A1] transition-colors duration-300 heading-underline">
           {title}
         </h3>
         <p className="mb-4 text-sm text-gray-600 line-clamp-2">{description}</p>
         <div className="flex items-center justify-between text-sm text-gray-500">
-          <span className="italic">By {author}</span>
+          <span className="font-script text-lg">By {author}</span>
           <div className="flex gap-4">
-            <span>{cookTime}</span>
-            <span className="text-[#FEC6A1] font-medium">{difficulty}</span>
+            <span className="font-script text-base">{cookTime}</span>
+            <span className="font-script text-base text-[#FEC6A1]">{difficulty}</span>
           </div>
         </div>
       </div>
