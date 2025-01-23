@@ -36,6 +36,7 @@ const Index = () => {
           .order("name");
 
         if (error) throw error;
+        console.log("Fetched categories:", data);
         setCategories(data || []);
       } catch (error: any) {
         console.error("Error fetching categories:", error);
@@ -53,6 +54,7 @@ const Index = () => {
   useEffect(() => {
     const fetchRecipes = async () => {
       try {
+        console.log("Fetching recipes...");
         const { data: recipesData, error: recipesError } = await supabase
           .from("recipes")
           .select(`
@@ -62,6 +64,7 @@ const Index = () => {
           .order("created_at", { ascending: false });
 
         if (recipesError) throw recipesError;
+        console.log("Initial recipes data:", recipesData);
 
         // Fetch categories for each recipe
         const recipesWithCategories = await Promise.all(
@@ -76,6 +79,7 @@ const Index = () => {
               .eq("recipe_id", recipe.id);
 
             if (categoryError) throw categoryError;
+            console.log(`Categories for recipe ${recipe.id}:`, categoryData);
 
             return {
               ...recipe,
@@ -84,6 +88,7 @@ const Index = () => {
           })
         );
 
+        console.log("Final recipes with categories:", recipesWithCategories);
         setRecipes(recipesWithCategories);
         setFilteredRecipes(recipesWithCategories);
       } catch (error: any) {
@@ -138,6 +143,30 @@ const Index = () => {
 
     return () => subscription.unsubscribe();
   }, []);
+
+  // Add back user roles checking
+  useEffect(() => {
+    const checkUserRoles = async () => {
+      if (!user) return;
+      
+      try {
+        const { data, error } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", user.id);
+
+        if (!error && data) {
+          const roles = data.map(r => r.role);
+          setIsAdmin(roles.includes('admin'));
+          setIsEditor(roles.includes('editor'));
+        }
+      } catch (error) {
+        console.error("Error checking user roles:", error);
+      }
+    };
+
+    checkUserRoles();
+  }, [user]);
 
   const handleLoveClick = async (recipeId: string) => {
     if (!user) {
