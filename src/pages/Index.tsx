@@ -1,22 +1,16 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { RecipeCard } from "@/components/RecipeCard";
 import { supabase } from "@/integrations/supabase/client";
-import { AuthButton } from "@/components/AuthButton";
 import { toast } from "@/hooks/use-toast";
+import { CookingPot } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Plus, User, Settings, CakeSlice, CookingPot } from "lucide-react";
-
-// Southern-inspired difficulty mapping
-const difficultyMapping: { [key: string]: string } = {
-  "Easy": "Easy as Pie",
-  "Medium": "Sunday Supper Simple",
-  "Hard": "Down-Home Challenge"
-};
+import { RecipeGrid } from "@/components/recipe/RecipeGrid";
+import { RecipeHeader } from "@/components/recipe/RecipeHeader";
+import { Tables } from "@/integrations/supabase/types";
 
 const Index = () => {
   const navigate = useNavigate();
-  const [recipes, setRecipes] = useState<any[]>([]);
+  const [recipes, setRecipes] = useState<(Tables<"recipes"> & { author: { username: string | null } })[]>([]);
   const [user, setUser] = useState<any>(null);
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
@@ -171,55 +165,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#FDE1D3] to-[#FDFCFB] px-4 py-8">
       <div className="container mx-auto">
-        <header className="mb-12">
-          <div className="text-center max-w-3xl mx-auto">
-            <div className="flex items-center justify-center gap-2 mb-4">
-              <CookingPot className="h-8 w-8 text-[#FEC6A1]" />
-              <h1 className="text-4xl font-bold text-accent font-display md:text-5xl lg:text-6xl">
-                Southern Comfort Recipes
-              </h1>
-              <CakeSlice className="h-8 w-8 text-[#FEC6A1]" />
-            </div>
-            <p className="text-lg text-gray-700 font-light italic">
-              "Where every recipe tells a story and every meal brings folks together"
-            </p>
-            <div className="mt-4 text-sm text-gray-600">
-              From Grandma's kitchen to yours - sharing the flavors of the South
-            </div>
-          </div>
-          <div className="mt-8 flex items-center justify-center gap-4 flex-wrap">
-            {user && (
-              <>
-                <Button 
-                  onClick={() => navigate("/create-recipe")}
-                  className="bg-[#FEC6A1] text-accent hover:bg-[#FDE1D3] transform transition-transform duration-200 hover:scale-105"
-                >
-                  <Plus className="mr-2 h-4 w-4" />
-                  Share Your Recipe
-                </Button>
-                <Button 
-                  variant="outline" 
-                  onClick={() => navigate("/profile")}
-                  className="border-[#FEC6A1] text-accent hover:bg-[#FDE1D3] transform transition-transform duration-200 hover:scale-105"
-                >
-                  <User className="mr-2 h-4 w-4" />
-                  Profile
-                </Button>
-                {isAdmin && (
-                  <Button 
-                    variant="outline" 
-                    onClick={() => navigate("/admin")}
-                    className="border-[#FEC6A1] text-accent hover:bg-[#FDE1D3] transform transition-transform duration-200 hover:scale-105"
-                  >
-                    <Settings className="mr-2 h-4 w-4" />
-                    Admin
-                  </Button>
-                )}
-              </>
-            )}
-            <AuthButton user={user} />
-          </div>
-        </header>
+        <RecipeHeader user={user} isAdmin={isAdmin} />
 
         {loading ? (
           <div className="text-center py-12">
@@ -241,22 +187,12 @@ const Index = () => {
             )}
           </div>
         ) : (
-          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-            {recipes.map((recipe) => (
-              <RecipeCard
-                key={recipe.id}
-                title={recipe.title}
-                description={recipe.description || ""}
-                image={recipe.image_url || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c"}
-                author={recipe.author?.username || "Anonymous"}
-                cookTime={recipe.cook_time || "N/A"}
-                difficulty={difficultyMapping[recipe.difficulty] || recipe.difficulty || "Easy as Pie"}
-                isLoved={favorites.has(recipe.id)}
-                onLoveClick={() => handleLoveClick(recipe.id)}
-                onClick={() => handleRecipeClick(recipe.id)}
-              />
-            ))}
-          </div>
+          <RecipeGrid 
+            recipes={recipes}
+            favorites={favorites}
+            onLoveClick={handleLoveClick}
+            onRecipeClick={handleRecipeClick}
+          />
         )}
       </div>
     </div>
