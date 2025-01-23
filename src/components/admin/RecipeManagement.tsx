@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Share2, BookX } from "lucide-react";
+import { Share2, BookX, Edit2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -21,10 +21,13 @@ interface Recipe {
 interface RecipeManagementProps {
   recipes: Recipe[];
   onDeleteRecipe: (recipeId: string) => void;
+  currentUserId: string;
+  isAdmin: boolean;
 }
 
-export const RecipeManagement = ({ recipes, onDeleteRecipe }: RecipeManagementProps) => {
+export const RecipeManagement = ({ recipes, onDeleteRecipe, currentUserId, isAdmin }: RecipeManagementProps) => {
   const navigate = useNavigate();
+  const [shareableLink, setShareableLink] = useState<string>("");
   
   const handleDeleteRecipe = async (recipeId: string) => {
     try {
@@ -47,6 +50,20 @@ export const RecipeManagement = ({ recipes, onDeleteRecipe }: RecipeManagementPr
         variant: "destructive",
       });
     }
+  };
+
+  const generateShareableLink = (recipeId: string) => {
+    const link = `${window.location.origin}/recipe/${recipeId}`;
+    setShareableLink(link);
+    navigator.clipboard.writeText(link);
+    toast({
+      title: "Link Copied!",
+      description: "Shareable link has been copied to your clipboard",
+    });
+  };
+
+  const canEditRecipe = (authorId: string) => {
+    return isAdmin || currentUserId === authorId;
   };
 
   return (
@@ -92,20 +109,33 @@ export const RecipeManagement = ({ recipes, onDeleteRecipe }: RecipeManagementPr
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => navigate(`/recipe/${recipe.id}`)}
+                        onClick={() => generateShareableLink(recipe.id)}
                       >
                         <Share2 className="h-4 w-4 mr-2" />
-                        View
+                        Share
                       </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleDeleteRecipe(recipe.id)}
-                        className="text-red-600 hover:text-red-700"
-                      >
-                        <BookX className="h-4 w-4 mr-2" />
-                        Delete
-                      </Button>
+                      {canEditRecipe(recipe.author?.id) && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => navigate(`/recipe/${recipe.id}/edit`)}
+                          className="text-blue-600 hover:text-blue-700"
+                        >
+                          <Edit2 className="h-4 w-4 mr-2" />
+                          Edit
+                        </Button>
+                      )}
+                      {(isAdmin || currentUserId === recipe.author?.id) && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleDeleteRecipe(recipe.id)}
+                          className="text-red-600 hover:text-red-700"
+                        >
+                          <BookX className="h-4 w-4 mr-2" />
+                          Delete
+                        </Button>
+                      )}
                     </div>
                   </td>
                 </tr>

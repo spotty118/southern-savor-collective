@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { UserCog } from "lucide-react";
+import { UserCog, Mail, Edit2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -60,6 +60,14 @@ export const UserManagement = ({ users }: UserManagementProps) => {
     }
   };
 
+  const handleSendEmail = async (email: string) => {
+    // This is a placeholder for email functionality
+    toast({
+      title: "Email Feature",
+      description: "Email functionality will be implemented soon!",
+    });
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -93,6 +101,9 @@ export const UserManagement = ({ users }: UserManagementProps) => {
                         <div className="text-sm text-gray-500">
                           {user.username || "No username"}
                         </div>
+                        <div className="text-sm text-gray-500">
+                          {user.email}
+                        </div>
                       </div>
                     </div>
                   </td>
@@ -100,17 +111,35 @@ export const UserManagement = ({ users }: UserManagementProps) => {
                     {new Date(user.created_at).toLocaleDateString()}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        setSelectedUser(user);
-                        setResetPasswordDialog(true);
-                      }}
-                    >
-                      <UserCog className="h-4 w-4 mr-2" />
-                      Reset Password
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setSelectedUser(user);
+                          setResetPasswordDialog(true);
+                        }}
+                      >
+                        <UserCog className="h-4 w-4 mr-2" />
+                        Reset Password
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleSendEmail(user.email)}
+                      >
+                        <Mail className="h-4 w-4 mr-2" />
+                        Email User
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => navigate(`/admin/users/${user.id}/edit`)}
+                      >
+                        <Edit2 className="h-4 w-4 mr-2" />
+                        Edit Profile
+                      </Button>
+                    </div>
                   </td>
                 </tr>
               ))}
