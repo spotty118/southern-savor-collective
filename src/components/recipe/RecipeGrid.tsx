@@ -6,6 +6,7 @@ interface RecipeGridProps {
   favorites: Set<string>;
   currentUserId?: string;
   isAdmin?: boolean;
+  isEditor?: boolean;
   onLoveClick: (recipeId: string) => void;
   onRecipeClick: (recipeId: string) => void;
   onEditClick?: (recipeId: string) => void;
@@ -22,6 +23,7 @@ export const RecipeGrid = ({
   favorites, 
   currentUserId,
   isAdmin,
+  isEditor,
   onLoveClick, 
   onRecipeClick,
   onEditClick 
@@ -38,7 +40,7 @@ export const RecipeGrid = ({
           cookTime={recipe.cook_time?.toString() || "N/A"}
           difficulty={difficultyMapping[recipe.difficulty || "Easy"] || recipe.difficulty || "Easy as Pie"}
           isLoved={favorites.has(recipe.id)}
-          canEdit={isAdmin || recipe.author_id === currentUserId}
+          canEdit={isAdmin || isEditor || recipe.author_id === currentUserId}
           onLoveClick={() => onLoveClick(recipe.id)}
           onClick={() => onRecipeClick(recipe.id)}
           onEditClick={() => onEditClick?.(recipe.id)}

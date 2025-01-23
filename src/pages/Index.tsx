@@ -16,6 +16,7 @@ const Index = () => {
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isEditor, setIsEditor] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState("All Y'all");
 
   useEffect(() => {
@@ -53,38 +54,6 @@ const Index = () => {
 
     fetchRecipes();
   }, []);
-
-  useEffect(() => {
-    const filterRecipes = () => {
-      if (selectedFilter === "All Y'all") {
-        setFilteredRecipes(recipes);
-        return;
-      }
-
-      const filtered = recipes.filter(recipe => {
-        // You would need to add a category field to your recipes table
-        // For now, this is a placeholder filter
-        const categoryMapping: { [key: string]: string[] } = {
-          "Comfort Food": ["casserole", "mac", "chicken", "meatloaf"],
-          "BBQ & Grilling": ["bbq", "grill", "smoke", "barbecue"],
-          "Soul Food": ["collard", "grits", "okra", "cornbread"],
-          "Country Breakfast": ["biscuit", "gravy", "eggs", "hash"],
-          "Sweet Tea & Drinks": ["tea", "lemonade", "punch", "cocktail"],
-          "Pies & Desserts": ["pie", "cobbler", "pudding", "cake"]
-        };
-
-        const keywords = categoryMapping[selectedFilter] || [];
-        return keywords.some(keyword => 
-          recipe.title.toLowerCase().includes(keyword) || 
-          recipe.description?.toLowerCase().includes(keyword)
-        );
-      });
-
-      setFilteredRecipes(filtered);
-    };
-
-    filterRecipes();
-  }, [selectedFilter, recipes]);
 
   useEffect(() => {
     const fetchFavorites = async () => {
@@ -170,26 +139,26 @@ const Index = () => {
   };
 
   useEffect(() => {
-    const checkAdminStatus = async () => {
+    const checkUserRoles = async () => {
       if (!user) return;
       
       try {
         const { data, error } = await supabase
           .from("user_roles")
           .select("role")
-          .eq("user_id", user.id)
-          .eq("role", "admin")
-          .single();
+          .eq("user_id", user.id);
 
         if (!error && data) {
-          setIsAdmin(true);
+          const roles = data.map(r => r.role);
+          setIsAdmin(roles.includes('admin'));
+          setIsEditor(roles.includes('editor'));
         }
       } catch (error) {
-        console.error("Error checking admin status:", error);
+        console.error("Error checking user roles:", error);
       }
     };
 
-    checkAdminStatus();
+    checkUserRoles();
   }, [user]);
 
   const handleRecipeClick = (recipeId: string) => {
@@ -237,8 +206,12 @@ const Index = () => {
           <RecipeGrid 
             recipes={filteredRecipes}
             favorites={favorites}
+            currentUserId={user?.id}
+            isAdmin={isAdmin}
+            isEditor={isEditor}
             onLoveClick={handleLoveClick}
             onRecipeClick={handleRecipeClick}
+            onEditClick={(id) => navigate(`/recipe/${id}/edit`)}
           />
         )}
       </div>
