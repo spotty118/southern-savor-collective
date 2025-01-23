@@ -12,7 +12,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
-import type { Database } from "@/integrations/supabase/types";
+import type { Database, Json } from "@/integrations/supabase/types";
 
 type RecipeRow = Database['public']['Tables']['recipes']['Row']
 type AISuggestionRow = Database['public']['Tables']['recipe_ai_suggestions']['Row']
@@ -24,10 +24,10 @@ interface Ingredient {
 }
 
 // Type guard to validate ingredient shape
-const isIngredient = (item: unknown): item is Ingredient => {
-  if (!item || typeof item !== 'object') return false;
+const isIngredient = (json: Json): json is Ingredient => {
+  if (!json || typeof json !== 'object') return false;
   
-  const candidate = item as Record<string, unknown>;
+  const candidate = json as Record<string, unknown>;
   return (
     'item' in candidate &&
     'unit' in candidate &&
