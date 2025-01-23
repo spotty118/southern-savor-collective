@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { AuthButton } from "@/components/AuthButton";
 import { toast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { Plus, User, Settings } from "lucide-react";
+import { Plus, User, Settings, CakeSlice, CookingPot } from "lucide-react";
 
 // Southern-inspired difficulty mapping
 const difficultyMapping: { [key: string]: string } = {
@@ -145,24 +145,35 @@ const Index = () => {
     checkAdminStatus();
   }, [user]);
 
+  const handleRecipeClick = (recipeId: string) => {
+    navigate(`/recipe/${recipeId}`);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#FDE1D3] to-[#FDFCFB] px-4 py-8">
       <div className="container mx-auto">
         <header className="mb-12">
           <div className="text-center max-w-3xl mx-auto">
-            <h1 className="mb-4 text-4xl font-bold text-accent font-display md:text-5xl lg:text-6xl">
-              Southern Comfort Recipes
-            </h1>
+            <div className="flex items-center justify-center gap-2 mb-4">
+              <CookingPot className="h-8 w-8 text-[#FEC6A1]" />
+              <h1 className="text-4xl font-bold text-accent font-display md:text-5xl lg:text-6xl">
+                Southern Comfort Recipes
+              </h1>
+              <CakeSlice className="h-8 w-8 text-[#FEC6A1]" />
+            </div>
             <p className="text-lg text-gray-700 font-light italic">
               "Where every recipe tells a story and every meal brings folks together"
             </p>
+            <div className="mt-4 text-sm text-gray-600">
+              From Grandma's kitchen to yours - sharing the flavors of the South
+            </div>
           </div>
-          <div className="mt-8 flex items-center justify-center gap-4">
+          <div className="mt-8 flex items-center justify-center gap-4 flex-wrap">
             {user && (
               <>
                 <Button 
                   onClick={() => navigate("/create-recipe")}
-                  className="bg-[#FEC6A1] text-accent hover:bg-[#FDE1D3]"
+                  className="bg-[#FEC6A1] text-accent hover:bg-[#FDE1D3] transform transition-transform duration-200 hover:scale-105"
                 >
                   <Plus className="mr-2 h-4 w-4" />
                   Share Your Recipe
@@ -170,7 +181,7 @@ const Index = () => {
                 <Button 
                   variant="outline" 
                   onClick={() => navigate("/profile")}
-                  className="border-[#FEC6A1] text-accent hover:bg-[#FDE1D3]"
+                  className="border-[#FEC6A1] text-accent hover:bg-[#FDE1D3] transform transition-transform duration-200 hover:scale-105"
                 >
                   <User className="mr-2 h-4 w-4" />
                   Profile
@@ -179,7 +190,7 @@ const Index = () => {
                   <Button 
                     variant="outline" 
                     onClick={() => navigate("/admin")}
-                    className="border-[#FEC6A1] text-accent hover:bg-[#FDE1D3]"
+                    className="border-[#FEC6A1] text-accent hover:bg-[#FDE1D3] transform transition-transform duration-200 hover:scale-105"
                   >
                     <Settings className="mr-2 h-4 w-4" />
                     Admin
@@ -192,14 +203,19 @@ const Index = () => {
         </header>
 
         {loading ? (
-          <div className="text-center text-accent">Loading our family recipes...</div>
+          <div className="text-center py-12">
+            <div className="animate-pulse flex flex-col items-center gap-4">
+              <CookingPot className="h-12 w-12 text-[#FEC6A1]" />
+              <p className="text-accent">Loading our family recipes...</p>
+            </div>
+          </div>
         ) : recipes.length === 0 ? (
-          <div className="text-center">
-            <p className="text-lg text-gray-700">No recipes found in the cookbook yet</p>
+          <div className="text-center py-12 bg-white/50 rounded-lg shadow-sm backdrop-blur-sm">
+            <p className="text-lg text-gray-700 mb-4">No recipes found in the cookbook yet</p>
             {user && (
               <Button 
                 onClick={() => navigate("/create-recipe")} 
-                className="mt-4 bg-[#FEC6A1] text-accent hover:bg-[#FDE1D3]"
+                className="bg-[#FEC6A1] text-accent hover:bg-[#FDE1D3] transform transition-transform duration-200 hover:scale-105"
               >
                 Share Your First Recipe
               </Button>
@@ -218,6 +234,7 @@ const Index = () => {
                 difficulty={difficultyMapping[recipe.difficulty] || recipe.difficulty || "Easy as Pie"}
                 isLoved={favorites.has(recipe.id)}
                 onLoveClick={() => handleLoveClick(recipe.id)}
+                onClick={() => handleRecipeClick(recipe.id)}
               />
             ))}
           </div>
