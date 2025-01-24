@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { PrintRecipe } from "@/components/recipe/PrintRecipe";
+import { RecipeScaling } from "@/components/recipe/RecipeScaling";
 
 interface RecipeDetailContentProps {
   recipe: {
@@ -11,6 +12,7 @@ interface RecipeDetailContentProps {
     ingredients: Array<{ amount: string; unit: string; item: string }>;
     instructions: string[];
     author_id: string;
+    default_servings: number;
   };
   currentUserId: string | null;
   isAdmin: boolean;
@@ -33,6 +35,8 @@ export const RecipeDetailContent = ({
   onEnhanceInstructions,
   enhancing,
 }: RecipeDetailContentProps) => {
+  const [scaledIngredients, setScaledIngredients] = useState(recipe.ingredients);
+  
   const handleDeleteClick = () => {
     if (window.confirm("Are you sure you want to delete this recipe?")) {
       onDelete();
@@ -49,7 +53,7 @@ export const RecipeDetailContent = ({
             description={recipe.description || ""}
             cookTime={recipe.cook_time?.toString() || ""}
             difficulty={recipe.difficulty || ""}
-            ingredients={recipe.ingredients as Array<{ amount: string; unit: string; item: string }>}
+            ingredients={scaledIngredients}
             instructions={recipe.instructions as string[]}
           />
           {(currentUserId === recipe.author_id || isAdmin || isEditor) && (
@@ -69,9 +73,19 @@ export const RecipeDetailContent = ({
         <h2 className="text-xl font-semibold">Description</h2>
         <p>{recipe.description}</p>
         
-        <h2 className="text-xl font-semibold">Ingredients</h2>
+        <div className="flex justify-between items-center">
+          <h2 className="text-xl font-semibold">Ingredients</h2>
+          <RecipeScaling
+            recipeId={recipe.id}
+            defaultServings={recipe.default_servings || 4}
+            ingredients={recipe.ingredients}
+            currentUserId={currentUserId}
+            onIngredientsScale={setScaledIngredients}
+          />
+        </div>
+        
         <ul className="list-disc pl-5">
-          {recipe.ingredients.map((ingredient, index) => (
+          {scaledIngredients.map((ingredient, index) => (
             <li key={index}>
               {ingredient.amount} {ingredient.unit} {ingredient.item}
             </li>

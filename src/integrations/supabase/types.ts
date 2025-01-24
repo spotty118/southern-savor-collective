@@ -255,6 +255,48 @@ export type Database = {
           },
         ]
       }
+      recipe_scaling_preferences: {
+        Row: {
+          created_at: string
+          id: string
+          recipe_id: string
+          servings: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          recipe_id: string
+          servings: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          recipe_id?: string
+          servings?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recipe_scaling_preferences_recipe_id_fkey"
+            columns: ["recipe_id"]
+            isOneToOne: false
+            referencedRelation: "recipes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "recipe_scaling_preferences_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       recipe_versions: {
         Row: {
           cook_time: unknown | null
@@ -320,6 +362,7 @@ export type Database = {
           author_id: string | null
           cook_time: unknown | null
           created_at: string
+          default_servings: number | null
           description: string | null
           difficulty: string | null
           id: string
@@ -333,6 +376,7 @@ export type Database = {
           author_id?: string | null
           cook_time?: unknown | null
           created_at?: string
+          default_servings?: number | null
           description?: string | null
           difficulty?: string | null
           id?: string
@@ -346,6 +390,7 @@ export type Database = {
           author_id?: string | null
           cook_time?: unknown | null
           created_at?: string
+          default_servings?: number | null
           description?: string | null
           difficulty?: string | null
           id?: string

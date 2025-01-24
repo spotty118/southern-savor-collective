@@ -20,6 +20,8 @@ interface RecipeBasicInfoProps {
   setDifficulty: (value: string) => void;
   imageUrl: string;
   setImageUrl: (value: string) => void;
+  defaultServings: number;
+  setDefaultServings: (value: number) => void;
   onDescriptionEnhancement: (enhanced: string[]) => void;
 }
 
@@ -34,6 +36,8 @@ export const RecipeBasicInfo = ({
   setDifficulty,
   imageUrl,
   setImageUrl,
+  defaultServings,
+  setDefaultServings,
   onDescriptionEnhancement,
 }: RecipeBasicInfoProps) => {
   return (
@@ -65,13 +69,26 @@ export const RecipeBasicInfo = ({
         </div>
       </div>
 
-      <div className="space-y-2">
-        <label className="text-sm font-medium">Cooking Time</label>
-        <Input
-          value={cookTime}
-          onChange={(e) => setCookTime(e.target.value)}
-          placeholder="e.g., 1 hour 30 minutes"
-        />
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Cooking Time</label>
+          <Input
+            value={cookTime}
+            onChange={(e) => setCookTime(e.target.value)}
+            placeholder="e.g., 1 hour 30 minutes"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Default Servings</label>
+          <Input
+            type="number"
+            min="1"
+            value={defaultServings}
+            onChange={(e) => setDefaultServings(parseInt(e.target.value) || 4)}
+            placeholder="Number of servings"
+          />
+        </div>
       </div>
 
       <div className="space-y-2">
