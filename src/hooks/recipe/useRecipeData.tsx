@@ -7,6 +7,7 @@ interface Ingredient {
   amount: string;
   unit: string;
   item: string;
+  [key: string]: string;
 }
 
 interface RecipeData {
@@ -56,7 +57,7 @@ export const useRecipeData = (id: string | undefined) => {
                  typeof ing.item === 'string';
         };
 
-        // Parse ingredients from JSON
+        // Parse ingredients from JSON and validate
         const ingredients = Array.isArray(data.ingredients) 
           ? data.ingredients.filter(isIngredient)
           : [];
@@ -67,10 +68,14 @@ export const useRecipeData = (id: string | undefined) => {
           : [];
 
         const formattedData: RecipeData = {
-          ...data,
+          id: data.id,
+          title: data.title,
+          description: data.description,
           ingredients,
           instructions,
           cook_time: data.cook_time?.toString() || '',
+          difficulty: data.difficulty,
+          image_url: data.image_url,
           default_servings: data.default_servings || 4,
           author: data.author as { username: string | null },
           categories: data.categories?.map(cat => cat.categories) || [],
