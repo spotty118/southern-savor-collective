@@ -21,7 +21,10 @@ export const AIEnhanceButton = ({
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const enhanceContent = async () => {
-    if (!content.length) return;
+    if (!content?.length) {
+      console.log('No content to enhance');
+      return;
+    }
     
     setIsEnhancing(true);
     const enhancedContent = [...content];
@@ -34,12 +37,16 @@ export const AIEnhanceButton = ({
         setCurrentIndex(i);
         const item = content[i];
         
-        if (!item.trim()) continue;
+        // Skip empty or invalid items
+        if (!item?.toString()?.trim()) {
+          console.log(`Skipping empty ${type} item ${i + 1}`);
+          continue;
+        }
 
         console.log(`Enhancing ${type} item ${i + 1}/${content.length}`);
         const { data, error } = await supabase.functions.invoke('enhance-recipe', {
           body: { 
-            content: item, 
+            content: item.toString(), 
             type,
             singleInstruction: true
           }
@@ -51,11 +58,11 @@ export const AIEnhanceButton = ({
           throw error;
         }
 
-        if (data?.enhancedContent) {
-          console.log(`Successfully enhanced ${type} item ${i + 1}:`, data.enhancedContent);
-          enhancedContent[i] = data.enhancedContent;
+        if (data?.enhancedContent?.[0]) {
+          console.log(`Successfully enhanced ${type} item ${i + 1}:`, data.enhancedContent[0]);
+          enhancedContent[i] = data.enhancedContent[0];
           // Update content as we go
-          onEnhanced(enhancedContent);
+          onEnhanced([...enhancedContent]);
         } else {
           console.error(`No enhanced content received for ${type} item ${i + 1}`);
           hasError = true;
@@ -83,13 +90,18 @@ export const AIEnhanceButton = ({
     }
   };
 
+  // Ensure content is valid before enabling the button
+  const isContentValid = content?.every(item => 
+    typeof item === 'string' || typeof item?.toString === 'function'
+  );
+
   return (
     <Button
       type="button"
       variant="outline"
       size="sm"
       onClick={enhanceContent}
-      disabled={disabled || isEnhancing}
+      disabled={disabled || isEnhancing || !isContentValid}
       className="gap-2"
     >
       <Wand2 className="h-4 w-4" />
