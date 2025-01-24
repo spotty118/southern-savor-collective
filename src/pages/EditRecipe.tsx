@@ -143,17 +143,16 @@ const EditRecipe = () => {
     setDescription(enhancedContent);
   };
 
-  const handleInstructionsEnhancement = (enhancedContent: string) => {
+  const handleInstructionEnhancement = (index: number, enhancedContent: string) => {
     try {
-      const enhancedInstructions = JSON.parse(enhancedContent);
-      if (Array.isArray(enhancedInstructions)) {
-        setInstructions(enhancedInstructions);
-      }
+      const newInstructions = [...instructions];
+      newInstructions[index] = enhancedContent;
+      setInstructions(newInstructions);
     } catch (error) {
-      console.error('Error parsing enhanced instructions:', error);
+      console.error('Error updating instruction:', error);
       toast({
         title: "Error",
-        description: "Failed to parse enhanced instructions",
+        description: "Failed to update instruction",
         variant: "destructive",
       });
     }
@@ -386,11 +385,20 @@ const EditRecipe = () => {
             <label className="text-sm font-medium">Instructions</label>
             {instructions.map((instruction, index) => (
               <div key={index} className="flex gap-2">
-                <Textarea
-                  value={instruction}
-                  onChange={(e) => handleInstructionChange(index, e.target.value)}
-                  placeholder={`Step ${index + 1}`}
-                />
+                <div className="flex-1 space-y-2">
+                  <Textarea
+                    value={instruction}
+                    onChange={(e) => handleInstructionChange(index, e.target.value)}
+                    placeholder={`Step ${index + 1}`}
+                  />
+                  <AIEnhanceButton
+                    content={instruction}
+                    type="instructions"
+                    onEnhanced={(content) => handleInstructionEnhancement(index, content)}
+                    disabled={!instruction}
+                    index={index}
+                  />
+                </div>
                 <Button
                   type="button"
                   variant="outline"
@@ -402,23 +410,15 @@ const EditRecipe = () => {
                 </Button>
               </div>
             ))}
-            <div className="flex justify-between items-center">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleAddInstruction}
-                className="w-full"
-              >
-                <Plus className="mr-2 h-4 w-4" />
-                Add Step
-              </Button>
-              <AIEnhanceButton
-                content={JSON.stringify(instructions)}
-                type="instructions"
-                onEnhanced={handleInstructionsEnhancement}
-                disabled={instructions.length === 0 || instructions.every(i => !i)}
-              />
-            </div>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleAddInstruction}
+              className="w-full"
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              Add Step
+            </Button>
           </div>
 
           <Button

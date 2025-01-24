@@ -9,13 +9,15 @@ interface AIEnhanceButtonProps {
   type: "instructions" | "description";
   onEnhanced: (enhancedContent: string) => void;
   disabled?: boolean;
+  index?: number;
 }
 
 export const AIEnhanceButton = ({ 
   content, 
   type, 
   onEnhanced,
-  disabled 
+  disabled,
+  index 
 }: AIEnhanceButtonProps) => {
   const [isEnhancing, setIsEnhancing] = useState(false);
 
@@ -23,7 +25,7 @@ export const AIEnhanceButton = ({
     setIsEnhancing(true);
     try {
       const { data, error } = await supabase.functions.invoke('enhance-recipe', {
-        body: { content, type }
+        body: { content, type, singleInstruction: type === "instructions" }
       });
 
       if (error) throw error;
@@ -32,7 +34,7 @@ export const AIEnhanceButton = ({
         onEnhanced(data.enhancedContent);
         toast({
           title: "Success!",
-          description: `Recipe ${type} enhanced with Southern charm`,
+          description: `Recipe ${type === "instructions" ? "step" : type} enhanced with Southern charm`,
         });
       }
     } catch (error) {
