@@ -20,7 +20,7 @@ interface Ingredient {
   item: string;
   amount: string;
   unit: string;
-  [key: string]: string; // Index signature for Json compatibility // Index signature for Json compatibility
+  [key: string]: string; // Index signature for Json compatibility
 }
 
 const CreateRecipe = () => {
@@ -386,10 +386,6 @@ const CreateRecipe = () => {
         </form>
       </div>
     </div>
-  );
-};
-
-export default CreateRecipe;
   );
 };
 
