@@ -16,14 +16,14 @@ serve(async (req) => {
     console.log('Received request:', { type, singleInstruction, content });
 
     let prompt = '';
-    if (type === 'instructions' && singleInstruction) {
-      prompt = `As a Southern cooking expert, enhance this single cooking instruction with Southern charm, keeping it concise but warm. Make it sound like a friendly Southern cook giving directions, but keep the same meaning and steps:
+    if (type === 'instructions') {
+      prompt = `As a Southern cooking expert, enhance these cooking instructions with more detailed steps, cooking tips, and Southern charm. Make it warm and inviting, like a grandmother sharing her secrets:
 
 ${content}
 
 Please provide ONE enhanced instruction that maintains the same meaning but adds Southern warmth. Keep it brief but clear.`;
     } else if (type === 'description') {
-      prompt = `As a Southern food writer, enhance this recipe description with more warmth, charm, and storytelling elements that capture the essence of Southern cooking:
+      prompt = `As a Southern food writer, enhance this recipe description with more warmth, charm, and storytelling elements that capture the essence of Southern cooking. Keep the response concise and focused:
 
 ${content}
 
@@ -35,11 +35,11 @@ Please provide an enhanced description that makes the recipe more inviting and a
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${Deno.env.get('OPENAI_API_KEY')}`,
+        'Authorization': `Bearer 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`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: 'gpt-3.5-turbo',
         messages: [
           { 
             role: 'system', 
@@ -47,8 +47,6 @@ Please provide an enhanced description that makes the recipe more inviting and a
           },
           { role: 'user', content: prompt }
         ],
-        temperature: 0.7,
-        max_tokens: 200
       }),
     });
 
