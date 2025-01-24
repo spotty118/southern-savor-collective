@@ -14,8 +14,19 @@ interface Ingredient {
 }
 
 interface RecipeDetailContentProps {
-  recipe: Tables<"recipes"> & {
-    author: { username: string | null };
+  recipe: {
+    id: string;
+    title: string;
+    description: string | null;
+    ingredients: Ingredient[];
+    instructions: string[];
+    cook_time: unknown;
+    difficulty: string | null;
+    image_url: string | null;
+    default_servings: number | null;
+    author: {
+      username: string | null;
+    };
     categories: Tables<"categories">[];
   };
   currentUserId: string | null;
@@ -41,33 +52,14 @@ export const RecipeDetailContent = ({
 }: RecipeDetailContentProps) => {
   const canModify = isAdmin || isEditor || isRecipeOwner;
 
-  // Type guard to check if value is an Ingredient
-  const isIngredient = (value: unknown): value is Ingredient => {
-    if (!value || typeof value !== 'object') return false;
-    const ing = value as Record<string, unknown>;
-    return typeof ing.amount === 'string' && 
-           typeof ing.unit === 'string' && 
-           typeof ing.item === 'string';
-  };
-
-  // Parse ingredients from JSON
-  const ingredients = Array.isArray(recipe.ingredients) 
-    ? recipe.ingredients.filter(isIngredient)
-    : [];
-
-  // Parse instructions from JSON
-  const instructions = Array.isArray(recipe.instructions)
-    ? recipe.instructions.filter((i): i is string => typeof i === 'string')
-    : [];
-
   // Extract basic recipe info for PrintRecipe component
   const printRecipeProps = {
     title: recipe.title,
     description: recipe.description || "",
     cookTime: recipe.cook_time?.toString() || "",
     difficulty: recipe.difficulty || "",
-    ingredients,
-    instructions
+    ingredients: recipe.ingredients,
+    instructions: recipe.instructions
   };
 
   // Extract basic recipe info for RecipeBasicInfo component
@@ -135,7 +127,7 @@ export const RecipeDetailContent = ({
             <h2 className="text-xl font-semibold text-gray-900">Ingredients</h2>
           </div>
           <ul className="list-disc list-inside space-y-2">
-            {ingredients.map((ingredient, index) => (
+            {recipe.ingredients.map((ingredient, index) => (
               <li key={index} className="text-gray-700">
                 {ingredient.amount} {ingredient.unit} {ingredient.item}
               </li>
@@ -148,7 +140,7 @@ export const RecipeDetailContent = ({
             <h2 className="text-xl font-semibold text-gray-900">Instructions</h2>
             {currentUserId && onEnhanceInstructions && (
               <AIEnhanceButton
-                content={instructions}
+                content={recipe.instructions}
                 type="instructions"
                 onEnhanced={onEnhanceInstructions}
                 disabled={enhancing}
@@ -156,7 +148,7 @@ export const RecipeDetailContent = ({
             )}
           </div>
           <ol className="list-decimal list-inside space-y-4">
-            {instructions.map((instruction, index) => (
+            {recipe.instructions.map((instruction, index) => (
               <li
                 key={index}
                 className="text-gray-700 leading-relaxed pl-2"

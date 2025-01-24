@@ -46,12 +46,14 @@ export const useRecipeData = (id: string | undefined) => {
                  typeof ing.item === 'string';
         };
 
+        // Parse ingredients from JSON
         const ingredients = Array.isArray(data.ingredients) 
           ? data.ingredients.filter(isIngredient)
           : [];
 
+        // Parse instructions from JSON
         const instructions = Array.isArray(data.instructions)
-          ? data.instructions.filter((item): item is string => typeof item === 'string')
+          ? data.instructions.filter((i): i is string => typeof i === 'string')
           : [];
 
         const formattedData: RecipeData = {
