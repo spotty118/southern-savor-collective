@@ -5,6 +5,7 @@ import { Clock, ChevronRight } from "lucide-react";
 import { format } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
+import { Json } from "@/integrations/supabase/types";
 
 interface Version {
   id: string;
@@ -78,12 +79,16 @@ export const RecipeVersionHistory = ({
       const user = await supabase.auth.getUser();
       if (!user.data.user) throw new Error("No user found");
 
+      // Convert arrays to Json type for database storage
+      const ingredients = currentVersion.ingredients as Json;
+      const instructions = currentVersion.instructions as Json;
+
       const { error } = await supabase.from("recipe_versions").insert({
         recipe_id: recipeId,
         title: currentVersion.title,
         description: currentVersion.description,
-        ingredients: currentVersion.ingredients,
-        instructions: currentVersion.instructions,
+        ingredients,
+        instructions,
         cook_time: currentVersion.cook_time,
         difficulty: currentVersion.difficulty,
         image_url: currentVersion.image_url,
