@@ -49,6 +49,13 @@ const RecipeDetail = () => {
         <RecipeDetailContent
           recipe={recipe}
           currentUserId={user?.id || null}
+          isAdmin={isAdmin}
+          isEditor={isEditor}
+          onDelete={handleDelete}
+          onEdit={handleEdit}
+          isRecipeOwner={isRecipeOwner}
+          onEnhanceInstructions={() => enhanceRecipe("instructions")}
+          enhancing={enhancing}
         />
 
         <AIEnhancementDialog

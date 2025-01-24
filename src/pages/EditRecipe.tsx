@@ -32,7 +32,6 @@ const EditRecipe = () => {
   const [instructions, setInstructions] = useState<string[]>([""]);
   const [categories, setCategories] = useState<Tables<"categories">[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [defaultServings, setDefaultServings] = useState(4);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -74,7 +73,6 @@ const EditRecipe = () => {
           setCookTime(recipe.cook_time?.toString() || "");
           setDifficulty(recipe.difficulty || "");
           setImageUrl(recipe.image_url || "");
-          setDefaultServings(recipe.default_servings || 4);
           setIngredients((recipe.ingredients as Ingredient[]) || [
             { item: "", amount: "", unit: "" },
           ]);
@@ -258,8 +256,6 @@ const EditRecipe = () => {
             setDifficulty={setDifficulty}
             imageUrl={imageUrl}
             setImageUrl={setImageUrl}
-            defaultServings={defaultServings}
-            setDefaultServings={setDefaultServings}
             onDescriptionEnhancement={(enhanced) => {
               if (enhanced.length > 0) {
                 setDescription(enhanced[0]);
