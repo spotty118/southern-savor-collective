@@ -48,7 +48,9 @@ export const RecipeScaling = ({
         if (error) throw error;
         if (data) {
           setServings(data.servings);
-          scaleRecipe(data.servings);
+          // Temporarily pass original values without scaling
+          onIngredientsScale(ingredients);
+          onInstructionsScale(instructions);
         }
       } catch (error) {
         console.error("Error fetching scaling preference:", error);
@@ -58,41 +60,13 @@ export const RecipeScaling = ({
     fetchUserPreference();
   }, [currentUserId, recipeId, defaultServings]);
 
-  const scaleRecipe = (newServings: number) => {
-    const scaleFactor = newServings / defaultServings;
-    
-    // Scale ingredients
-    const scaledIngredients = ingredients.map(ing => {
-      const originalAmount = parseFloat(ing.amount);
-      if (isNaN(originalAmount)) return ing;
-
-      const scaledAmount = (originalAmount * scaleFactor).toFixed(2);
-      return {
-        ...ing,
-        amount: scaledAmount.toString()
-      };
-    });
-    onIngredientsScale(scaledIngredients);
-
-    // Instruction scaling temporarily disabled
-    // const commonUnits = /(\d+(\.\d+)?)\s*(cup|cups|tablespoon|tablespoons|tbsp|teaspoon|teaspoons|tsp|ounce|ounces|oz|pound|pounds|lb|lbs|gram|grams|g|kilogram|kilograms|kg|ml|milliliter|milliliters|liter|liters|l)/gi;
-    // const scaledInstructions = instructions.map(instruction => {
-    //   return instruction.replace(commonUnits, (match, number) => {
-    //     const num = parseFloat(number);
-    //     if (isNaN(num)) return match;
-    //     const scaledNum = (num * scaleFactor).toFixed(2);
-    //     return match.replace(number, scaledNum);
-    //   });
-    // });
-    
-    // Just pass the original instructions without scaling
-    onInstructionsScale(instructions);
-  };
-
   const handleServingsChange = async (newServings: number) => {
     if (newServings < 1) return;
     setServings(newServings);
-    scaleRecipe(newServings);
+    
+    // Temporarily disabled scaling - just pass original values
+    onIngredientsScale(ingredients);
+    onInstructionsScale(instructions);
 
     if (!currentUserId) return;
 
