@@ -1,8 +1,10 @@
 import { Heart, Edit } from "lucide-react";
 import { Button } from "./ui/button";
 import { cn } from "@/lib/utils";
+import { RecipeRating } from "./recipe/RecipeRating";
 
 interface RecipeCardProps {
+  id: string;
   title: string;
   description: string;
   image: string;
@@ -11,12 +13,14 @@ interface RecipeCardProps {
   difficulty: string;
   isLoved?: boolean;
   canEdit?: boolean;
+  currentUserId?: string | null;
   onLoveClick?: () => void;
   onEditClick?: () => void;
   onClick?: () => void;
 }
 
 export const RecipeCard = ({
+  id,
   title,
   description,
   image,
@@ -25,6 +29,7 @@ export const RecipeCard = ({
   difficulty,
   isLoved = false,
   canEdit = false,
+  currentUserId,
   onLoveClick,
   onEditClick,
   onClick,
@@ -84,12 +89,19 @@ export const RecipeCard = ({
           {title}
         </h3>
         <p className="mb-4 text-sm text-gray-600 line-clamp-2">{description}</p>
-        <div className="flex items-center justify-between text-sm text-gray-500">
-          <span className="font-script text-lg">By {author}</span>
-          <div className="flex gap-4">
-            <span className="font-script text-base">{cookTime}</span>
-            <span className="font-script text-base text-[#FEC6A1]">{difficulty}</span>
+        <div className="space-y-2">
+          <div className="flex items-center justify-between text-sm text-gray-500">
+            <span className="font-script text-lg">By {author}</span>
+            <div className="flex gap-4">
+              <span className="font-script text-base">{cookTime}</span>
+              <span className="font-script text-base text-[#FEC6A1]">{difficulty}</span>
+            </div>
           </div>
+          <RecipeRating 
+            recipeId={id} 
+            userId={currentUserId} 
+            className="pt-2"
+          />
         </div>
       </div>
     </div>

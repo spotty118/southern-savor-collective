@@ -12,12 +12,6 @@ interface RecipeGridProps {
   onEditClick?: (recipeId: string) => void;
 }
 
-const difficultyMapping: { [key: string]: string } = {
-  "Easy": "Easy as Pie",
-  "Medium": "Sunday Supper Simple",
-  "Hard": "Down-Home Challenge"
-};
-
 export const RecipeGrid = ({ 
   recipes, 
   favorites, 
@@ -35,14 +29,16 @@ export const RecipeGrid = ({
       {recipes.map((recipe) => (
         <RecipeCard
           key={recipe.id}
+          id={recipe.id}
           title={recipe.title}
           description={recipe.description || ""}
           image={recipe.image_url || "/placeholder.svg"}
           author={recipe.author?.username || "Anonymous"}
           cookTime={recipe.cook_time?.toString() || "N/A"}
-          difficulty={difficultyMapping[recipe.difficulty || "Easy"] || recipe.difficulty || "Easy as Pie"}
+          difficulty={recipe.difficulty || "Easy as Pie"}
           isLoved={favorites.has(recipe.id)}
           canEdit={isAdmin || isEditor || recipe.author_id === currentUserId}
+          currentUserId={currentUserId}
           onLoveClick={() => onLoveClick(recipe.id)}
           onClick={() => onRecipeClick(recipe.id)}
           onEditClick={onEditClick ? () => onEditClick(recipe.id) : undefined}
