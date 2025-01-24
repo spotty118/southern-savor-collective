@@ -2,25 +2,19 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Home, Plus, Minus } from "lucide-react";
+import { Home } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { Tables, Json } from "@/integrations/supabase/types";
-import { AIEnhanceButton } from "@/components/recipe/AIEnhanceButton";
+import { RecipeBasicInfo } from "@/components/recipe/RecipeBasicInfo";
+import { RecipeCategories } from "@/components/recipe/RecipeCategories";
+import { IngredientsList } from "@/components/recipe/IngredientsList";
+import { InstructionsList } from "@/components/recipe/InstructionsList";
 
 interface Ingredient {
   item: string;
-  amount: number;
+  amount: string;
   unit: string;
-  [key: string]: string | number;
+  [key: string]: string;
 }
 
 const EditRecipe = () => {
@@ -32,7 +26,9 @@ const EditRecipe = () => {
   const [cookTime, setCookTime] = useState("");
   const [difficulty, setDifficulty] = useState("");
   const [imageUrl, setImageUrl] = useState("");
-  const [ingredients, setIngredients] = useState<Ingredient[]>([{ item: "", amount: 0, unit: "" }]);
+  const [ingredients, setIngredients] = useState<Ingredient[]>([
+    { item: "", amount: "", unit: "" },
+  ]);
   const [instructions, setInstructions] = useState<string[]>([""]);
   const [categories, setCategories] = useState<Tables<"categories">[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
@@ -77,17 +73,19 @@ const EditRecipe = () => {
           setCookTime(recipe.cook_time?.toString() || "");
           setDifficulty(recipe.difficulty || "");
           setImageUrl(recipe.image_url || "");
-          setIngredients((recipe.ingredients as Ingredient[]) || [{ item: "", amount: 0, unit: "" }]);
+          setIngredients((recipe.ingredients as Ingredient[]) || [
+            { item: "", amount: "", unit: "" },
+          ]);
           setInstructions((recipe.instructions as string[]) || [""]);
-          
+
           const { data: categoryData, error: categoryError } = await supabase
             .from("recipe_categories")
             .select("category_id")
             .eq("recipe_id", id);
 
           if (categoryError) throw categoryError;
-          
-          setSelectedCategories(categoryData?.map(c => c.category_id) || []);
+
+          setSelectedCategories(categoryData?.map((c) => c.category_id) || []);
         }
       } catch (error: any) {
         console.error("Error fetching recipe:", error);
@@ -104,50 +102,6 @@ const EditRecipe = () => {
       fetchRecipe();
     }
   }, [id, navigate]);
-
-  const handleAddIngredient = () => {
-    setIngredients([...ingredients, { item: "", amount: 0, unit: "" }]);
-  };
-
-  const handleRemoveIngredient = (index: number) => {
-    const newIngredients = ingredients.filter((_, i) => i !== index);
-    setIngredients(newIngredients);
-  };
-
-  const handleIngredientChange = (index: number, field: keyof Ingredient, value: string | number) => {
-    const newIngredients = [...ingredients];
-    if (field === 'amount') {
-      newIngredients[index][field] = Number(value) || 0;
-    } else {
-      newIngredients[index][field as 'item' | 'unit'] = value as string;
-    }
-    setIngredients(newIngredients);
-  };
-
-  const handleAddInstruction = () => {
-    setInstructions([...instructions, ""]);
-  };
-
-  const handleRemoveInstruction = (index: number) => {
-    const newInstructions = instructions.filter((_, i) => i !== index);
-    setInstructions(newInstructions);
-  };
-
-  const handleInstructionChange = (index: number, value: string) => {
-    const newInstructions = [...instructions];
-    newInstructions[index] = value;
-    setInstructions(newInstructions);
-  };
-
-  const handleDescriptionEnhancement = (enhancedContent: string[]) => {
-    if (enhancedContent.length > 0) {
-      setDescription(enhancedContent[0]);
-    }
-  };
-
-  const handleInstructionsEnhancement = (enhancedInstructions: string[]) => {
-    setInstructions(enhancedInstructions);
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -194,9 +148,9 @@ const EditRecipe = () => {
         const { error: categoryError } = await supabase
           .from("recipe_categories")
           .insert(
-            selectedCategories.map(categoryId => ({
+            selectedCategories.map((categoryId) => ({
               recipe_id: id,
-              category_id: categoryId
+              category_id: categoryId,
             }))
           );
 
@@ -219,6 +173,40 @@ const EditRecipe = () => {
     }
   };
 
+  const handleAddIngredient = () => {
+    setIngredients([...ingredients, { item: "", amount: "", unit: "" }]);
+  };
+
+  const handleRemoveIngredient = (index: number) => {
+    const newIngredients = ingredients.filter((_, i) => i !== index);
+    setIngredients(newIngredients);
+  };
+
+  const handleIngredientChange = (
+    index: number,
+    field: keyof Ingredient,
+    value: string
+  ) => {
+    const newIngredients = [...ingredients];
+    newIngredients[index][field] = value;
+    setIngredients(newIngredients);
+  };
+
+  const handleAddInstruction = () => {
+    setInstructions([...instructions, ""]);
+  };
+
+  const handleRemoveInstruction = (index: number) => {
+    const newInstructions = instructions.filter((_, i) => i !== index);
+    setInstructions(newInstructions);
+  };
+
+  const handleInstructionChange = (index: number, value: string) => {
+    const newInstructions = [...instructions];
+    newInstructions[index] = value;
+    setInstructions(newInstructions);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#FDE1D3] to-[#FDFCFB] px-4 py-8">
       <div className="container mx-auto max-w-2xl">
@@ -237,183 +225,48 @@ const EditRecipe = () => {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Recipe Title</label>
-            <Input
-              required
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Enter your recipe title"
-            />
-          </div>
+          <RecipeBasicInfo
+            title={title}
+            setTitle={setTitle}
+            description={description}
+            setDescription={setDescription}
+            cookTime={cookTime}
+            setCookTime={setCookTime}
+            difficulty={difficulty}
+            setDifficulty={setDifficulty}
+            imageUrl={imageUrl}
+            setImageUrl={setImageUrl}
+            onDescriptionEnhancement={(enhanced) => {
+              if (enhanced.length > 0) {
+                setDescription(enhanced[0]);
+              }
+            }}
+          />
 
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Description</label>
-            <div className="space-y-2">
-              <Textarea
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="Share the story behind your recipe"
-              />
-              <AIEnhanceButton
-                content={[description]}
-                type="description"
-                onEnhanced={handleDescriptionEnhancement}
-                disabled={!description}
-              />
-            </div>
-          </div>
+          <RecipeCategories
+            categories={categories}
+            selectedCategories={selectedCategories}
+            setSelectedCategories={setSelectedCategories}
+          />
 
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Cooking Time</label>
-            <Input
-              value={cookTime}
-              onChange={(e) => setCookTime(e.target.value)}
-              placeholder="e.g., 1 hour 30 minutes"
-            />
-          </div>
+          <IngredientsList
+            ingredients={ingredients}
+            onAddIngredient={handleAddIngredient}
+            onRemoveIngredient={handleRemoveIngredient}
+            onIngredientChange={handleIngredientChange}
+          />
 
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Difficulty</label>
-            <Select value={difficulty} onValueChange={setDifficulty}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select difficulty" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Easy">Easy as Pie</SelectItem>
-                <SelectItem value="Medium">Sunday Supper Simple</SelectItem>
-                <SelectItem value="Hard">Down-Home Challenge</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Image URL</label>
-            <Input
-              type="url"
-              value={imageUrl}
-              onChange={(e) => setImageUrl(e.target.value)}
-              placeholder="Enter image URL"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Categories</label>
-            <div className="flex flex-wrap gap-2">
-              {categories.map((category) => (
-                <Button
-                  key={category.id}
-                  type="button"
-                  variant={selectedCategories.includes(category.id) ? "default" : "outline"}
-                  onClick={() => {
-                    setSelectedCategories(prev =>
-                      prev.includes(category.id)
-                        ? prev.filter(id => id !== category.id)
-                        : [...prev, category.id]
-                    );
-                  }}
-                  className={`
-                    rounded-full px-4 py-2 text-sm
-                    ${selectedCategories.includes(category.id)
-                      ? 'bg-[#FEC6A1] text-accent hover:bg-[#FDE1D3]'
-                      : 'border-[#FEC6A1] text-accent hover:bg-[#FDE1D3]'
-                    }
-                  `}
-                >
-                  {category.name}
-                </Button>
-              ))}
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            <label className="text-sm font-medium">Ingredients</label>
-            {ingredients.map((ingredient, index) => (
-              <div key={index} className="flex flex-col gap-2">
-                <div className="grid grid-cols-3 gap-2">
-                  <Input
-                    value={ingredient.amount}
-                    type="number"
-                    onChange={(e) => handleIngredientChange(index, 'amount', e.target.value)}
-                    placeholder="Amount"
-                  />
-                  <Input
-                    value={ingredient.unit}
-                    onChange={(e) => handleIngredientChange(index, 'unit', e.target.value)}
-                    placeholder="Unit (e.g., cups)"
-                  />
-                  <Input
-                    value={ingredient.item}
-                    onChange={(e) => handleIngredientChange(index, 'item', e.target.value)}
-                    placeholder="Ingredient name"
-                  />
-                </div>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleRemoveIngredient(index)}
-                  disabled={ingredients.length === 1}
-                  className="self-end"
-                >
-                  <Minus className="h-4 w-4" />
-                  Remove
-                </Button>
-              </div>
-            ))}
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleAddIngredient}
-              className="w-full"
-            >
-              <Plus className="mr-2 h-4 w-4" />
-              Add Ingredient
-            </Button>
-          </div>
-
-          <div className="space-y-4">
-            <label className="text-sm font-medium">Instructions</label>
-            <div className="space-y-4">
-              {instructions.map((instruction, index) => (
-                <div key={index} className="flex gap-2">
-                  <div className="flex-1">
-                    <Textarea
-                      value={instruction}
-                      onChange={(e) => handleInstructionChange(index, e.target.value)}
-                      placeholder={`Step ${index + 1}`}
-                    />
-                  </div>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="icon"
-                    onClick={() => handleRemoveInstruction(index)}
-                    disabled={instructions.length === 1}
-                  >
-                    <Minus className="h-4 w-4" />
-                  </Button>
-                </div>
-              ))}
-              <div className="flex justify-between items-center gap-4">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handleAddInstruction}
-                  className="flex-1"
-                >
-                  <Plus className="mr-2 h-4 w-4" />
-                  Add Step
-                </Button>
-                <AIEnhanceButton
-                  content={instructions}
-                  type="instructions"
-                  onEnhanced={handleInstructionsEnhancement}
-                  disabled={instructions.some(i => !i.trim())}
-                />
-              </div>
-            </div>
-          </div>
+          <InstructionsList
+            instructions={instructions}
+            onAddInstruction={handleAddInstruction}
+            onRemoveInstruction={handleRemoveInstruction}
+            onInstructionChange={handleInstructionChange}
+            onInstructionsEnhancement={(enhanced) => {
+              if (enhanced.length > 0) {
+                setInstructions(enhanced);
+              }
+            }}
+          />
 
           <Button
             type="submit"
