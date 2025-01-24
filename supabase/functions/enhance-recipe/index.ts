@@ -55,6 +55,8 @@ Original Step: "${instruction}"
 5. Output One Instruction
    - Present the final version as a single, concise step, preserving the original meaning but focusing only on essential cooking actions.
 
+6. Convert spelled-out numbers in measurements into numeric form
+      
       console.log('Sending prompt to OpenAI:', prompt);
 
       const response = await fetch('https://api.openai.com/v1/chat/completions', {
