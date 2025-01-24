@@ -86,14 +86,23 @@ export const useRecipeDetail = (id: string | undefined) => {
 
         if (error) throw error;
 
+        // Type guard to ensure ingredients is an array
+        const ingredients = Array.isArray(data.ingredients) 
+          ? data.ingredients.map(ingredient => {
+              if (typeof ingredient === 'object' && ingredient !== null) {
+                return {
+                  amount: String(ingredient.amount || ''),
+                  unit: String(ingredient.unit || ''),
+                  item: String(ingredient.item || '')
+                };
+              }
+              return { amount: '', unit: '', item: '' };
+            })
+          : [];
+
         const formattedData: RecipeData = {
           ...data,
-          ingredients: Array.isArray(data.ingredients) 
-            ? data.ingredients.map(ingredient => ({
-                ...ingredient,
-                amount: ingredient.amount.toString()
-              }))
-            : [],
+          ingredients,
           instructions: Array.isArray(data.instructions) 
             ? data.instructions.filter((item): item is string => typeof item === 'string')
             : [],
