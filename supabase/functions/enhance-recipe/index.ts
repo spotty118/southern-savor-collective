@@ -16,7 +16,7 @@ serve(async (req) => {
 
     let prompt = '';
     if (type === 'instructions' && singleInstruction) {
-      prompt = `As a Southern cooking expert, enhance this single cooking instruction with Southern charm, keeping it concise but warm. Make it sound like a friendly Southern cook giving directions:
+      prompt = `As a Southern cooking expert, enhance this single cooking instruction with Southern charm, keeping it concise but warm. Make it sound like a friendly Southern cook giving directions, but keep the same meaning and steps:
 
 ${content}
 
@@ -38,15 +38,24 @@ Please provide an enhanced description that makes the recipe more inviting and a
       body: JSON.stringify({
         model: 'gpt-4o-mini',
         messages: [
-          { role: 'system', content: 'You are a helpful Southern cooking expert who enhances recipe content with warmth and authenticity while keeping instructions clear and concise.' },
+          { 
+            role: 'system', 
+            content: 'You are a helpful Southern cooking expert who enhances recipe content with warmth and authenticity while keeping instructions clear and concise. Never change the meaning or steps of the instructions.' 
+          },
           { role: 'user', content: prompt }
         ],
+        temperature: 0.7,
         max_tokens: 200
       }),
     });
 
     const data = await response.json();
-    const enhancedContent = data.choices[0].message.content;
+    
+    if (!data.choices?.[0]?.message?.content) {
+      throw new Error('No content received from OpenAI');
+    }
+
+    const enhancedContent = data.choices[0].message.content.trim();
 
     return new Response(
       JSON.stringify({ enhancedContent }),
