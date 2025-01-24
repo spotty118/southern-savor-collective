@@ -28,7 +28,7 @@ serve(async (req) => {
       : '';
 
     for (const instruction of instructions) {
-      const prompt = `Rewrite this cooking instruction in plain English:
+      const prompt = `Rewrite the following recipe instructions in plain English:
 
 Ingredients:
 ${ingredientsList}
@@ -36,12 +36,13 @@ ${ingredientsList}
 Instruction: "${instruction}"
 
 Rules:
+- Convert any decimal measurements to fractions (e.g., 1/2 cup instead of 0.5 cup)
+- Remove any formatting like bold text or special markers
+- Focus only on essential cooking steps and ingredient details
 - Keep it concise and natural
-- Focus on the core cooking steps
-- Include only essential details
-- Use the listed ingredients
 - Write in paragraph form
-- No formatting or special markers`;
+- No extra commentary or AI-sounding prompts
+- No visual cues or timing indicators`;
 
       console.log('Sending prompt to OpenAI:', prompt);
 
