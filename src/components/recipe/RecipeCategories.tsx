@@ -12,6 +12,14 @@ export const RecipeCategories = ({
   selectedCategories,
   setSelectedCategories,
 }: RecipeCategoriesProps) => {
+  const handleCategoryClick = (categoryId: string) => {
+    const updatedCategories = selectedCategories.includes(categoryId)
+      ? selectedCategories.filter(id => id !== categoryId)
+      : [...selectedCategories, categoryId];
+    
+    setSelectedCategories(updatedCategories);
+  };
+
   return (
     <div className="space-y-2">
       <label className="text-sm font-medium">Categories</label>
@@ -21,13 +29,7 @@ export const RecipeCategories = ({
             key={category.id}
             type="button"
             variant={selectedCategories.includes(category.id) ? "default" : "outline"}
-            onClick={() => {
-              setSelectedCategories(prev =>
-                prev.includes(category.id)
-                  ? prev.filter(id => id !== category.id)
-                  : [...prev, category.id]
-              );
-            }}
+            onClick={() => handleCategoryClick(category.id)}
             className={`
               rounded-full px-4 py-2 text-sm
               ${selectedCategories.includes(category.id)
