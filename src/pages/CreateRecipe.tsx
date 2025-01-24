@@ -11,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Home, Plus, Minus}"lucide-react";
+import { Home, Plus, Minus } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { Tables, Json } from "@/integrations/supabase/types";
 import { AIEnhanceButton } from "@/components/recipe/AIEnhanceButton";
@@ -52,7 +52,9 @@ const CreateRecipe = () => {
   const [categories, setCategories] = useState<Tables<"categories">[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 
-   try {
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
         const { data, error } = await supabase
           .from("categories")
           .select("*")
@@ -101,6 +103,18 @@ const CreateRecipe = () => {
     const newInstructions = [...instructions];
     newInstructions[index] = value;
     setInstructions(newInstructions);
+  };
+
+  const handleDescriptionEnhancement = (enhanced: string[]) => {
+    if (enhanced.length > 0) {
+      setDescription(enhanced[0]);
+    }
+  };
+
+  const handleInstructionsEnhancement = (enhanced: string[]) => {
+    if (enhanced.length > 0) {
+      setInstructions(enhanced);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -376,26 +390,7 @@ const CreateRecipe = () => {
 };
 
 export default CreateRecipe;
-{instrcions.map((insructi,index)=>(
- <div ke={indx} classNameflex gap-2><Texte  vauei  onChng() => ndleIstrutonChae(index,e.trget.vlu)  plaehodr{`Stp${dx +1}`}  /Butto
-                 typbuttonvrt=linsize="icon"
-onClick={()=>handleRemoveI(index)}
-                  dibled={s.lngth==1}  >
-                  Mush-4w4 //Buton></div>
-        ))}
-            <Btto
-              ype="bt"variant="outline"
-          lickAdd}
-             clssNm="w-full">
-        <Pus assNam"mr-2h-4w-4"/>           AddStep
-<Button    </div>
-
-sumiclassName="w-fullbg-[#FEC6A1]text-cce-foregrd hovr:bg-[#FDE1D3]diabld{loadg}    >
-{ladig ? "reatng...":"Sr cip"}
-          </Bu></form>
-</div>
-</v>
   );
 };
 
-export defut CraeRep;
+export default CreateRecipe;
