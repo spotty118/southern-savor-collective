@@ -31,7 +31,7 @@ serve(async (req) => {
 
     // Enhance each instruction individually
     for (const instruction of instructions) {
-      const prompt = `As a cooking expert, enhance this specific cooking instruction with clear details and visual cues, using the available ingredients. Focus on what the cook should look for and key techniques.
+      const prompt = `As a cooking expert, enhance this cooking instruction with clear details and visual cues, using only the available ingredients. Focus on what the cook should look for and key techniques.
 
 Available Ingredients:
 ${ingredientsList}
@@ -44,9 +44,8 @@ Important guidelines:
 3. Include timing indicators where relevant
 4. Mention key technique details
 5. Keep it practical and clear
-6. Please try to keep response short and still make sense 
-7. Do not cut off responses while keeping it short
-8. Only reference ingredients that are actually listed above
+6. Keep response concise but complete
+7. Only reference ingredients that are listed above
 Enhanced version:`;
 
       console.log('Sending prompt to OpenAI:', prompt);
@@ -62,7 +61,7 @@ Enhanced version:`;
           messages: [
             {
               "role": "system",
-              "content": "You are a helpful Southern cooking expert who enhances recipe instructions and descriptions with Southern charm while maintaining their exact meaning."
+              "content": "You are a helpful cooking expert who enhances recipe instructions to be clear and practical. Keep responses concise but complete."
             },
             {
               "role": "user",
