@@ -11,6 +11,7 @@ interface Ingredient {
   amount: string;
   unit: string;
   item: string;
+  [key: string]: string;
 }
 
 interface RecipeDetailContentProps {
@@ -112,6 +113,16 @@ export const RecipeDetailContent = ({
           </div>
         )}
       </div>
+
+      {recipe.image_url && (
+        <div className="relative w-full h-[300px] rounded-lg overflow-hidden">
+          <img
+            src={recipe.image_url}
+            alt={recipe.title}
+            className="w-full h-full object-cover"
+          />
+        </div>
+      )}
 
       <RecipeBasicInfo {...basicInfoProps} />
       
