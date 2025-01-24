@@ -28,21 +28,26 @@ serve(async (req) => {
       : '';
 
     for (const instruction of instructions) {
-      const prompt = `Rewrite the following recipe instructions in plain English:
+      const prompt = `Enhance this single cooking instruction step to be clear and natural, while preserving its unique actions and measurements:
 
-Ingredients:
+Ingredients List:
 ${ingredientsList}
 
-Instruction: "${instruction}"
+Original Step: "${instruction}"
 
-Rules:
-- Convert any decimal measurements to fractions (e.g., 1/2 cup instead of 0.5 cup)
-- Remove any formatting like bold text or special markers
-- Focus only on essential cooking steps and ingredient details
-- Keep it concise and natural
-- Write in paragraph form
-- No extra commentary or AI-sounding prompts
-- No visual cues or timing indicators`;
+Requirements:
+1. Keep this specific step's unique actions and measurements
+2. Use clear, natural language
+3. Convert any decimal measurements to fractions
+4. Remove formatting or markers
+5. Focus only on the essential cooking actions
+6. Keep the original meaning intact
+7. Don't add new ingredients or steps
+8. Don't repeat information from other steps
+9. Don't provide multiple variations
+10. Don't add commentary or timing indicators
+
+Output the enhanced step as a single, clear instruction.`;
 
       console.log('Sending prompt to OpenAI:', prompt);
 
@@ -57,14 +62,14 @@ Rules:
           messages: [
             {
               "role": "system",
-              "content": "You are a cooking expert. Write clear, natural instructions without any special formatting or markers."
+              "content": "You are a cooking expert that enhances recipe instructions. Keep each step's unique actions while making them clearer and more natural."
             },
             {
               "role": "user",
               "content": prompt
             }
           ],
-          temperature: 0.7,
+          temperature: 0.3, // Lower temperature for more consistent output
         }),
       });
 
@@ -79,14 +84,9 @@ Rules:
       const enhancedInstruction = data.choices[0].message?.content?.trim()
         ?.replace(/^["']|["']$/g, '')
         ?.replace(/^\d+\.\s*/, '')
-        ?.replace(/^(By following these steps,\s*)/i, '')
-        ?.replace(/^(Enhanced Instruction:\s*)/i, '')
-        ?.replace(/^(Here's the enhanced instruction:\s*)/i, '')
-        ?.replace(/^(Enhanced version:\s*)/i, '')
-        ?.replace(/^(Instructions?:?\s*)/i, '')
-        ?.replace(/^(Steps?:?\s*)/i, '')
-        ?.replace(/^(Directions?:?\s*)/i, '')
-        ?.replace(/^(Method:?\s*)/i, '')
+        ?.replace(/^(Enhanced:?\s*)/i, '')
+        ?.replace(/^(Step:?\s*)/i, '')
+        ?.replace(/^(Instruction:?\s*)/i, '')
         ?.replace(/\*\*/g, '')
         ?? instruction;
 
