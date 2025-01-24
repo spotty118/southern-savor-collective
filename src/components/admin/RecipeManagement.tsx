@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Share2, BookX, Edit2, Eye } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -10,12 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { RecipeTable } from "./RecipeTable";
 
 interface Recipe {
   id: string;
@@ -68,9 +62,7 @@ export const RecipeManagement = ({
   };
 
   const generateShareableLink = (recipeId: string) => {
-    // Reset any existing shareable link first
     setShareableLink("");
-    
     const link = `${window.location.origin}/recipe/${recipeId}`;
     setShareableLink(link);
     navigator.clipboard.writeText(link);
@@ -81,13 +73,8 @@ export const RecipeManagement = ({
   };
 
   const handleAddNewRecipe = () => {
-    // Reset shareable link when adding a new recipe
     setShareableLink("");
     navigate("/create-recipe");
-  };
-
-  const canEditRecipe = (authorId: string) => {
-    return isAdmin || currentUserId === authorId;
   };
 
   return (
@@ -104,118 +91,15 @@ export const RecipeManagement = ({
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="rounded-md border">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Recipe
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Author
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Created
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {recipes.map((recipe) => (
-                <tr key={recipe.id}>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">
-                      {recipe.title}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {recipe.author?.username || "Anonymous"}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {new Date(recipe.created_at).toLocaleDateString()}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">
-                    <div className="flex gap-2">
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => generateShareableLink(recipe.id)}
-                            >
-                              <Share2 className="h-4 w-4" />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>Share Recipe</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => navigate(`/recipe/${recipe.id}`)}
-                            >
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>View Recipe</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-
-                      {canEditRecipe(recipe.author?.id) && (
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => navigate(`/recipe/${recipe.id}/edit`)}
-                              >
-                                <Edit2 className="h-4 w-4" />
-                              </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>Edit Recipe</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      )}
-
-                      {(isAdmin || currentUserId === recipe.author?.id) && (
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleDeleteRecipe(recipe.id)}
-                              >
-                                <BookX className="h-4 w-4" />
-                              </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>Delete Recipe</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <RecipeTable
+          recipes={recipes}
+          currentUserId={currentUserId}
+          isAdmin={isAdmin}
+          onShare={generateShareableLink}
+          onView={(id) => navigate(`/recipe/${id}`)}
+          onEdit={(id) => navigate(`/recipe/${id}/edit`)}
+          onDelete={handleDeleteRecipe}
+        />
       </CardContent>
     </Card>
   );
