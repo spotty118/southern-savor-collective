@@ -1,14 +1,14 @@
 Recipe Management:
 - Share recipe should be blank when a user is submitting a recipe
-✓ Add recipe version history to track modifications
-✓ Implement recipe scaling functionality (adjust servings/portions)
-✓ Add print-friendly recipe format
+- Add recipe version history to track modifications
+- Implement recipe scaling functionality (adjust servings/portions)
+- Add print-friendly recipe format
 - Enable recipe saving to collections/folders
 - Add cooking timer feature for recipe steps
 - Implement ingredient unit conversion (metric/imperial)
 
 User Experience:
-⚡ Need better user management in admin dashboard
+- Need better user management in admin dashboard
 - Enhance user profiles with:
   * Profile pictures
   * Cooking skill level
@@ -22,7 +22,7 @@ User Experience:
 
 Social Features:
 - Add comments from users on recipes and optionally allow them to tag a location
-✓ Enable recipe rating system (1-5 stars)
+- Enable recipe rating system (1-5 stars)
 - Add ability to follow other users
 - Implement recipe sharing on social media platforms
 - Create recipe challenges/contests
@@ -36,10 +36,9 @@ Technical Improvements:
 - Add recipe nutrition calculation
 - Implement ingredient inventory tracking
 - Add automatic unit conversion
-- Enable recipe API integration
 
 Mobile Experience:
-⚡ Optimize mobile UI/UX (use-mobile.tsx hook exists)
+- Optimize mobile UI/UX
 - Add push notifications for:
   * New followers
   * Recipe comments
