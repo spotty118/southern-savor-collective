@@ -20,6 +20,7 @@ interface RecipeDetailContentProps {
     instructions: string[];
     author_id: string;
     default_servings: number;
+    image_url: string | null;
   };
   currentUserId?: string | null;
 }
@@ -40,6 +41,7 @@ export const RecipeDetailContent = ({
       instructions: version.instructions,
       cook_time: version.cook_time || "",
       difficulty: version.difficulty || "",
+      image_url: version.image_url,
     });
     setCurrentIngredients(version.ingredients);
   };

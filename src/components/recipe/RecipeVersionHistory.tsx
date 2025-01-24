@@ -58,7 +58,7 @@ export const RecipeVersionHistory = ({
         .order("version_number", { ascending: false });
 
       if (error) throw error;
-      setVersions(data);
+      setVersions(data as Version[]);
       setShowHistory(true);
     } catch (error) {
       console.error("Error fetching recipe versions:", error);
@@ -75,6 +75,9 @@ export const RecipeVersionHistory = ({
   const createVersion = async () => {
     try {
       setLoading(true);
+      const user = await supabase.auth.getUser();
+      if (!user.data.user) throw new Error("No user found");
+
       const { error } = await supabase.from("recipe_versions").insert({
         recipe_id: recipeId,
         title: currentVersion.title,
@@ -84,6 +87,7 @@ export const RecipeVersionHistory = ({
         cook_time: currentVersion.cook_time,
         difficulty: currentVersion.difficulty,
         image_url: currentVersion.image_url,
+        created_by: user.data.user.id,
       });
 
       if (error) throw error;
