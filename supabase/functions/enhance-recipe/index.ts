@@ -33,7 +33,8 @@ Important guidelines:
 3. Include timing indicators where relevant
 4. Mention key technique details
 5. Keep it practical and clear
-
+6. Please try to keep response short and still make sense 
+7. Do not cut off responses while keeping it short
 Enhanced version:`;
 
     console.log('Sending prompt to OpenAI:', prompt);
