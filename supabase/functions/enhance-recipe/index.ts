@@ -69,7 +69,7 @@ Output the enhanced step as a single, clear instruction.`;
               "content": prompt
             }
           ],
-          temperature: 0.3, // Lower temperature for more consistent output
+          temperature: 0.4, // Lower temperature for more consistent output
         }),
       });
 
