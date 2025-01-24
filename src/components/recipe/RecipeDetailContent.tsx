@@ -42,10 +42,23 @@ export const RecipeDetailContent = ({
   const canModify = isAdmin || isEditor || isRecipeOwner;
 
   // Type guard to check if value is an Ingredient
-  const isIngredient = (value: any): value is Ingredient => {
-    return value && typeof value === 'object' && 
-      'amount' in value && 'unit' in value && 'item' in value;
+  const isIngredient = (value: unknown): value is Ingredient => {
+    if (!value || typeof value !== 'object') return false;
+    const ing = value as Record<string, unknown>;
+    return typeof ing.amount === 'string' && 
+           typeof ing.unit === 'string' && 
+           typeof ing.item === 'string';
   };
+
+  // Parse ingredients from JSON
+  const ingredients = Array.isArray(recipe.ingredients) 
+    ? recipe.ingredients.filter(isIngredient)
+    : [];
+
+  // Parse instructions from JSON
+  const instructions = Array.isArray(recipe.instructions)
+    ? recipe.instructions.filter((i): i is string => typeof i === 'string')
+    : [];
 
   // Extract basic recipe info for PrintRecipe component
   const printRecipeProps = {
@@ -53,18 +66,8 @@ export const RecipeDetailContent = ({
     description: recipe.description || "",
     cookTime: recipe.cook_time?.toString() || "",
     difficulty: recipe.difficulty || "",
-    ingredients: Array.isArray(recipe.ingredients) 
-      ? recipe.ingredients.filter(isIngredient).map(ing => ({
-          amount: ing.amount || "",
-          unit: ing.unit || "",
-          item: ing.item || ""
-        }))
-      : [],
-    instructions: Array.isArray(recipe.instructions) 
-      ? recipe.instructions.map(instruction => 
-          typeof instruction === 'string' ? instruction : ''
-        )
-      : []
+    ingredients,
+    instructions
   };
 
   // Extract basic recipe info for RecipeBasicInfo component
@@ -132,7 +135,7 @@ export const RecipeDetailContent = ({
             <h2 className="text-xl font-semibold text-gray-900">Ingredients</h2>
           </div>
           <ul className="list-disc list-inside space-y-2">
-            {Array.isArray(recipe.ingredients) && recipe.ingredients.filter(isIngredient).map((ingredient, index) => (
+            {ingredients.map((ingredient, index) => (
               <li key={index} className="text-gray-700">
                 {ingredient.amount} {ingredient.unit} {ingredient.item}
               </li>
@@ -145,26 +148,22 @@ export const RecipeDetailContent = ({
             <h2 className="text-xl font-semibold text-gray-900">Instructions</h2>
             {currentUserId && onEnhanceInstructions && (
               <AIEnhanceButton
-                content={Array.isArray(recipe.instructions) 
-                  ? recipe.instructions.filter((i): i is string => typeof i === 'string')
-                  : []}
+                content={instructions}
                 type="instructions"
-                onEnhanced={() => onEnhanceInstructions()}
+                onEnhanced={onEnhanceInstructions}
                 disabled={enhancing}
               />
             )}
           </div>
           <ol className="list-decimal list-inside space-y-4">
-            {Array.isArray(recipe.instructions) && recipe.instructions.map((instruction, index) => (
-              typeof instruction === 'string' && (
-                <li
-                  key={index}
-                  className="text-gray-700 leading-relaxed pl-2"
-                  style={{ textIndent: "-1.5rem", paddingLeft: "1.5rem" }}
-                >
-                  {instruction}
-                </li>
-              )
+            {instructions.map((instruction, index) => (
+              <li
+                key={index}
+                className="text-gray-700 leading-relaxed pl-2"
+                style={{ textIndent: "-1.5rem", paddingLeft: "1.5rem" }}
+              >
+                {instruction}
+              </li>
             ))}
           </ol>
         </div>

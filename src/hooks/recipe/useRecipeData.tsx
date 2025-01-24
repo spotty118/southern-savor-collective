@@ -37,26 +37,27 @@ export const useRecipeData = (id: string | undefined) => {
 
         if (error) throw error;
 
+        // Type guard for ingredients
+        const isIngredient = (value: unknown): value is Ingredient => {
+          if (!value || typeof value !== 'object') return false;
+          const ing = value as Record<string, unknown>;
+          return typeof ing.amount === 'string' && 
+                 typeof ing.unit === 'string' && 
+                 typeof ing.item === 'string';
+        };
+
         const ingredients = Array.isArray(data.ingredients) 
-          ? data.ingredients.map(ingredient => {
-              if (typeof ingredient === 'object' && ingredient !== null) {
-                const typedIngredient = ingredient as Record<string, unknown>;
-                return {
-                  amount: String(typedIngredient.amount || ''),
-                  unit: String(typedIngredient.unit || ''),
-                  item: String(typedIngredient.item || '')
-                };
-              }
-              return { amount: '', unit: '', item: '' };
-            })
+          ? data.ingredients.filter(isIngredient)
+          : [];
+
+        const instructions = Array.isArray(data.instructions)
+          ? data.instructions.filter((item): item is string => typeof item === 'string')
           : [];
 
         const formattedData: RecipeData = {
           ...data,
           ingredients,
-          instructions: Array.isArray(data.instructions) 
-            ? data.instructions.filter((item): item is string => typeof item === 'string')
-            : [],
+          instructions,
           cook_time: data.cook_time?.toString() || '',
           default_servings: data.default_servings || 4,
           author: data.author as { username: string | null },
