@@ -42,11 +42,13 @@ export const RecipeCard = ({
   };
 
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-    console.log("Image failed to load:", image);
+    console.error("Image failed to load:", image);
     const img = e.target as HTMLImageElement;
     img.src = "/placeholder.svg";
-    img.onerror = null; // Prevent infinite loop if placeholder also fails
   };
+
+  // Log the image URL to help with debugging
+  console.log("Recipe image URL:", image);
 
   return (
     <div 
@@ -59,6 +61,7 @@ export const RecipeCard = ({
           alt={title}
           className="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105"
           onError={handleImageError}
+          loading="lazy"
         />
         <div className="absolute right-2 top-2 flex gap-2">
           {canEdit && (
