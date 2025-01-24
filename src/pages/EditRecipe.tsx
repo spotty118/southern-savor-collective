@@ -258,6 +258,7 @@ const EditRecipe = () => {
 
           <InstructionsList
             instructions={instructions}
+            ingredients={ingredients}
             onAddInstruction={handleAddInstruction}
             onRemoveInstruction={handleRemoveInstruction}
             onInstructionChange={handleInstructionChange}

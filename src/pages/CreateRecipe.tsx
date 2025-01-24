@@ -215,6 +215,7 @@ const CreateRecipe = () => {
 
           <InstructionsList
             instructions={instructions}
+            ingredients={ingredients}
             onAddInstruction={handleAddInstruction}
             onRemoveInstruction={handleRemoveInstruction}
             onInstructionChange={handleInstructionChange}
