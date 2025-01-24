@@ -94,7 +94,7 @@ export const RecipeVersionHistory = ({
         difficulty: currentVersion.difficulty,
         image_url: currentVersion.image_url,
         created_by: user.data.user.id,
-      } as any); // Using type assertion here since we know the trigger will handle version_number
+      } as any); // Using type assertion since version_number is handled by trigger
 
       if (error) throw error;
 
