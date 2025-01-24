@@ -86,6 +86,18 @@ const CreateRecipe = () => {
     setInstructions(newInstructions);
   };
 
+  const resetForm = () => {
+    setTitle("");
+    setDescription("");
+    setCookTime("");
+    setDifficulty("");
+    setImageUrl("");
+    setIngredients([{ item: "", amount: "", unit: "" }]);
+    setInstructions([""]);
+    setSelectedCategories([]);
+    setDefaultServings(4);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -139,6 +151,7 @@ const CreateRecipe = () => {
         title: "Success!",
         description: "Your recipe has been created",
       });
+      resetForm();
       navigate("/");
     } catch (error: any) {
       console.error("Error creating recipe:", error);
@@ -216,13 +229,23 @@ const CreateRecipe = () => {
             }}
           />
 
-          <Button
-            type="submit"
-            className="w-full bg-[#FEC6A1] text-accent-foreground hover:bg-[#FDE1D3]"
-            disabled={loading}
-          >
-            {loading ? "Creating..." : "Share Recipe"}
-          </Button>
+          <div className="flex gap-4">
+            <Button
+              type="submit"
+              className="flex-1 bg-[#FEC6A1] text-accent-foreground hover:bg-[#FDE1D3]"
+              disabled={loading}
+            >
+              {loading ? "Creating..." : "Share Recipe"}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={resetForm}
+              disabled={loading}
+            >
+              Clear Form
+            </Button>
+          </div>
         </form>
       </div>
     </div>
