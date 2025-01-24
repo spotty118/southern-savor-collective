@@ -143,19 +143,8 @@ const EditRecipe = () => {
     setDescription(enhancedContent);
   };
 
-  const handleInstructionEnhancement = (index: number, enhancedContent: string) => {
-    try {
-      const newInstructions = [...instructions];
-      newInstructions[index] = enhancedContent;
-      setInstructions(newInstructions);
-    } catch (error) {
-      console.error('Error updating instruction:', error);
-      toast({
-        title: "Error",
-        description: "Failed to update instruction",
-        variant: "destructive",
-      });
-    }
+  const handleInstructionsEnhancement = (enhancedInstructions: string[]) => {
+    setInstructions(enhancedInstructions);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -265,7 +254,7 @@ const EditRecipe = () => {
                 placeholder="Share the story behind your recipe"
               />
               <AIEnhanceButton
-                content={description}
+                content={[description]}
                 type="description"
                 onEnhanced={handleDescriptionEnhancement}
                 disabled={!description}
@@ -383,42 +372,45 @@ const EditRecipe = () => {
 
           <div className="space-y-4">
             <label className="text-sm font-medium">Instructions</label>
-            {instructions.map((instruction, index) => (
-              <div key={index} className="flex gap-2">
-                <div className="flex-1 space-y-2">
-                  <Textarea
-                    value={instruction}
-                    onChange={(e) => handleInstructionChange(index, e.target.value)}
-                    placeholder={`Step ${index + 1}`}
-                  />
-                  <AIEnhanceButton
-                    content={instruction}
-                    type="instructions"
-                    onEnhanced={(content) => handleInstructionEnhancement(index, content)}
-                    disabled={!instruction}
-                    index={index}
-                  />
+            <div className="space-y-4">
+              {instructions.map((instruction, index) => (
+                <div key={index} className="flex gap-2">
+                  <div className="flex-1">
+                    <Textarea
+                      value={instruction}
+                      onChange={(e) => handleInstructionChange(index, e.target.value)}
+                      placeholder={`Step ${index + 1}`}
+                    />
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    onClick={() => handleRemoveInstruction(index)}
+                    disabled={instructions.length === 1}
+                  >
+                    <Minus className="h-4 w-4" />
+                  </Button>
                 </div>
+              ))}
+              <div className="flex justify-between items-center gap-4">
                 <Button
                   type="button"
                   variant="outline"
-                  size="icon"
-                  onClick={() => handleRemoveInstruction(index)}
-                  disabled={instructions.length === 1}
+                  onClick={handleAddInstruction}
+                  className="flex-1"
                 >
-                  <Minus className="h-4 w-4" />
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add Step
                 </Button>
+                <AIEnhanceButton
+                  content={instructions}
+                  type="instructions"
+                  onEnhanced={handleInstructionsEnhancement}
+                  disabled={instructions.some(i => !i.trim())}
+                />
               </div>
-            ))}
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleAddInstruction}
-              className="w-full"
-            >
-              <Plus className="mr-2 h-4 w-4" />
-              Add Step
-            </Button>
+            </div>
           </div>
 
           <Button
