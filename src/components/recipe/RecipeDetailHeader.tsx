@@ -1,7 +1,6 @@
 import { Home, Heart, Wand2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { SaveToCollectionDialog } from "./SaveToCollectionDialog";
 
 interface RecipeDetailHeaderProps {
   isLoved: boolean;
@@ -9,8 +8,6 @@ interface RecipeDetailHeaderProps {
   isRecipeOwner: boolean;
   onEnhanceClick: () => void;
   enhancing: boolean;
-  recipeId: string;
-  userId?: string | null;
 }
 
 export const RecipeDetailHeader = ({
@@ -19,8 +16,6 @@ export const RecipeDetailHeader = ({
   isRecipeOwner,
   onEnhanceClick,
   enhancing,
-  recipeId,
-  userId,
 }: RecipeDetailHeaderProps) => {
   const navigate = useNavigate();
 
@@ -35,7 +30,6 @@ export const RecipeDetailHeader = ({
         Back to Home
       </Button>
       <div className="flex gap-2">
-        {userId && <SaveToCollectionDialog recipeId={recipeId} userId={userId} />}
         <Button
           variant="ghost"
           size="icon"

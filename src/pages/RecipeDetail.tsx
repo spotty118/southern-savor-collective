@@ -44,8 +44,6 @@ const RecipeDetail = () => {
           isRecipeOwner={isRecipeOwner}
           onEnhanceClick={() => enhanceRecipe("description")}
           enhancing={enhancing}
-          recipeId={recipe.id}
-          userId={user?.id}
         />
 
         <RecipeDetailContent
