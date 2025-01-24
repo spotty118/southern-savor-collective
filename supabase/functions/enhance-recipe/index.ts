@@ -10,23 +10,31 @@ serve(async (req) => {
   }
 
   try {
-    const { content, type, singleInstruction } = await req.json();
-    console.log('Received request:', { type, singleInstruction, content });
+    const { content, type } = await req.json() as EnhanceRequest;
+    console.log('Received request:', { type, content });
 
-    let prompt = '';
-    if (type === 'instructions') {
-      prompt = `You are a Southern cooking expert. Please enhance the following cooking instruction with Southern charm and flair, while maintaining the exact same meaning and steps. Make it warm and inviting, like a Southern grandmother would explain it:
-
-${content}
-
-Important: Keep the exact same meaning and steps, just make it more Southern and charming.`;
-    } else {
-      prompt = `You are a Southern cooking expert. Here's a recipe description:
-
-${content}
-
-Please provide an enhanced description that makes the recipe more inviting and authentic to Southern cuisine.`;
+    if (type !== 'instructions') {
+      throw new Error('Only instruction enhancement is supported');
     }
+
+    // Parse instructions array
+    const instructions = Array.isArray(content) ? content : [content];
+    const enhancedInstructions: string[] = [];
+
+    // Enhance each instruction individually
+    for (const instruction of instructions) {
+      const prompt = `As a cooking expert, enhance this specific cooking instruction with clear details and visual cues. Focus on what the cook should look for and key techniques:
+
+Instruction: "${instruction}"
+
+Important guidelines:
+1. Keep the exact same meaning and core step
+2. Add specific visual cues (e.g. color changes, textures)
+3. Include timing indicators where relevant
+4. Mention key technique details
+5. Keep it practical and clear
+
+Enhanced version:`;
 
     console.log('Sending prompt to OpenAI:', prompt);
 
@@ -60,9 +68,17 @@ Please provide an enhanced description that makes the recipe more inviting and a
       throw new Error('No content received from OpenAI');
     }
 
-    const enhancedContent = data.choices[0].message.content.trim();
-    console.log('Enhanced content:', enhancedContent);
+      const enhancedInstruction = data.choices[0].message?.content?.trim()
+        ?.replace(/^["']|["']$/g, '') // Remove any quotes
+        ?.replace(/^\d+\.\s*/, '') // Remove any leading numbers
+        ?? instruction; // Fallback to original if enhancement fails
 
+      enhancedInstructions.push(enhancedInstruction);
+    }
+
+    console.log('Enhanced instructions:', enhancedInstructions);
+
+    const response: EnhanceResponse = { enhancedContent: enhancedInstructions };
     return new Response(
       JSON.stringify({ enhancedContent }),
       { 
