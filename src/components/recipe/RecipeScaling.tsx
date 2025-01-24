@@ -15,16 +15,20 @@ interface RecipeScalingProps {
   recipeId: string;
   defaultServings: number;
   ingredients: Ingredient[];
+  instructions: string[];
   currentUserId?: string | null;
   onIngredientsScale: (scaledIngredients: Ingredient[]) => void;
+  onInstructionsScale: (scaledInstructions: string[]) => void;
 }
 
 export const RecipeScaling = ({
   recipeId,
   defaultServings,
   ingredients,
+  instructions,
   currentUserId,
   onIngredientsScale,
+  onInstructionsScale,
 }: RecipeScalingProps) => {
   const [servings, setServings] = useState(defaultServings);
   const [isLoading, setIsLoading] = useState(false);
@@ -44,7 +48,7 @@ export const RecipeScaling = ({
         if (error) throw error;
         if (data) {
           setServings(data.servings);
-          scaleIngredients(data.servings);
+          scaleRecipe(data.servings);
         }
       } catch (error) {
         console.error("Error fetching scaling preference:", error);
@@ -54,8 +58,10 @@ export const RecipeScaling = ({
     fetchUserPreference();
   }, [currentUserId, recipeId, defaultServings]);
 
-  const scaleIngredients = (newServings: number) => {
+  const scaleRecipe = (newServings: number) => {
     const scaleFactor = newServings / defaultServings;
+    
+    // Scale ingredients
     const scaledIngredients = ingredients.map(ing => {
       const originalAmount = parseFloat(ing.amount);
       if (isNaN(originalAmount)) return ing;
@@ -66,14 +72,23 @@ export const RecipeScaling = ({
         amount: scaledAmount.toString()
       };
     });
-
     onIngredientsScale(scaledIngredients);
+
+    // Scale instructions - look for numbers and scale them
+    const scaledInstructions = instructions.map(instruction => {
+      return instruction.replace(/(\d+(\.\d+)?)/g, (match) => {
+        const num = parseFloat(match);
+        if (isNaN(num)) return match;
+        return (num * scaleFactor).toFixed(2);
+      });
+    });
+    onInstructionsScale(scaledInstructions);
   };
 
   const handleServingsChange = async (newServings: number) => {
     if (newServings < 1) return;
     setServings(newServings);
-    scaleIngredients(newServings);
+    scaleRecipe(newServings);
 
     if (!currentUserId) return;
 

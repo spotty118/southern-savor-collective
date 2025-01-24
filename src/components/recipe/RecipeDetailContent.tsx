@@ -38,6 +38,7 @@ export const RecipeDetailContent = ({
   enhancing,
 }: RecipeDetailContentProps) => {
   const [scaledIngredients, setScaledIngredients] = useState(recipe.ingredients);
+  const [scaledInstructions, setScaledInstructions] = useState(recipe.instructions);
   
   const handleDeleteClick = () => {
     if (window.confirm("Are you sure you want to delete this recipe?")) {
@@ -78,7 +79,7 @@ export const RecipeDetailContent = ({
             cookTime={recipe.cook_time?.toString() || ""}
             difficulty={recipe.difficulty || ""}
             ingredients={scaledIngredients}
-            instructions={recipe.instructions as string[]}
+            instructions={scaledInstructions}
           />
           {(currentUserId === recipe.author_id || isAdmin || isEditor) && (
             <div className="flex gap-2">
@@ -103,8 +104,10 @@ export const RecipeDetailContent = ({
             recipeId={recipe.id}
             defaultServings={recipe.default_servings || 4}
             ingredients={recipe.ingredients}
+            instructions={recipe.instructions}
             currentUserId={currentUserId}
             onIngredientsScale={setScaledIngredients}
+            onInstructionsScale={setScaledInstructions}
           />
         </div>
         
@@ -118,7 +121,7 @@ export const RecipeDetailContent = ({
         
         <h2 className="text-xl font-semibold">Instructions</h2>
         <ol className="list-decimal pl-5">
-          {recipe.instructions.map((instruction, index) => (
+          {scaledInstructions.map((instruction, index) => (
             <li key={index}>{instruction}</li>
           ))}
         </ol>
