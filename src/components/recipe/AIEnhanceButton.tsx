@@ -21,10 +21,7 @@ export const AIEnhanceButton = ({
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const enhanceContent = async () => {
-    if (!content?.length) {
-      console.log('No content to enhance');
-      return;
-    }
+    if (!content.length) return;
     
     setIsEnhancing(true);
     const enhancedContent = [...content];
@@ -37,11 +34,7 @@ export const AIEnhanceButton = ({
         setCurrentIndex(i);
         const item = content[i];
         
-        // Skip empty or invalid items
-        if (!item?.trim()) {
-          console.log(`Skipping empty ${type} item ${i + 1}`);
-          continue;
-        }
+        if (!item.trim()) continue;
 
         console.log(`Enhancing ${type} item ${i + 1}/${content.length}`);
         const { data, error } = await supabase.functions.invoke('enhance-recipe', {
@@ -58,11 +51,11 @@ export const AIEnhanceButton = ({
           throw error;
         }
 
-        if (data?.enhancedContent?.[0]) {
-          console.log(`Successfully enhanced ${type} item ${i + 1}:`, data.enhancedContent[0]);
-          enhancedContent[i] = data.enhancedContent[0];
+        if (data?.enhancedContent) {
+          console.log(`Successfully enhanced ${type} item ${i + 1}:`, data.enhancedContent);
+          enhancedContent[i] = data.enhancedContent;
           // Update content as we go
-          onEnhanced([...enhancedContent]);
+          onEnhanced(enhancedContent);
         } else {
           console.error(`No enhanced content received for ${type} item ${i + 1}`);
           hasError = true;
@@ -90,18 +83,13 @@ export const AIEnhanceButton = ({
     }
   };
 
-  // Ensure content is valid before enabling the button
-  const isContentValid = Array.isArray(content) && content.every(item => 
-    typeof item === 'string' && item !== null
-  );
-
   return (
     <Button
       type="button"
       variant="outline"
       size="sm"
       onClick={enhanceContent}
-      disabled={disabled || isEnhancing || !isContentValid}
+      disabled={disabled || isEnhancing}
       className="gap-2"
     >
       <Wand2 className="h-4 w-4" />
