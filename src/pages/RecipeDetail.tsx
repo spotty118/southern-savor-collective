@@ -284,6 +284,36 @@ const RecipeDetail = () => {
 
   const isRecipeOwner = user && recipe && user.id === recipe.author_id;
 
+  const handleDelete = async () => {
+    try {
+      const { error } = await supabase
+        .from("recipes")
+        .delete()
+        .eq("id", recipe?.id);
+
+      if (error) throw error;
+
+      navigate("/");
+      toast({
+        title: "Success",
+        description: "Recipe deleted successfully",
+      });
+    } catch (error) {
+      console.error("Error deleting recipe:", error);
+      if (error instanceof Error) {
+        toast({
+          title: "Error",
+          description: error.message,
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
+  const handleEdit = () => {
+    navigate(`/recipes/edit/${id}`);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-[#FDE1D3] to-[#FDFCFB] p-8">
@@ -330,6 +360,11 @@ const RecipeDetail = () => {
 
         <RecipeDetailContent
           recipe={recipe}
+          currentUserId={user?.id || null}
+          isAdmin={false} // You might want to add logic to determine if user is admin
+          isEditor={false} // You might want to add logic to determine if user is editor
+          onDelete={handleDelete}
+          onEdit={handleEdit}
           isRecipeOwner={isRecipeOwner}
           onEnhanceInstructions={() => enhanceRecipe("instructions")}
           enhancing={enhancing}
