@@ -17,6 +17,9 @@ interface RecipeDetailContentProps {
   isEditor: boolean;
   onDelete: () => void;
   onEdit: () => void;
+  isRecipeOwner: boolean;
+  onEnhanceInstructions: () => Promise<void>;
+  enhancing: boolean;
 }
 
 export const RecipeDetailContent = ({
@@ -26,6 +29,9 @@ export const RecipeDetailContent = ({
   isEditor,
   onDelete,
   onEdit,
+  isRecipeOwner,
+  onEnhanceInstructions,
+  enhancing,
 }: RecipeDetailContentProps) => {
   const handleDeleteClick = () => {
     if (window.confirm("Are you sure you want to delete this recipe?")) {
