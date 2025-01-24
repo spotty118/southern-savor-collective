@@ -38,6 +38,7 @@ interface RecipeDetailContentProps {
   isRecipeOwner?: boolean;
   onEnhanceInstructions?: () => void;
   enhancing?: boolean;
+  isEditMode?: boolean;
 }
 
 export const RecipeDetailContent = ({
@@ -50,9 +51,9 @@ export const RecipeDetailContent = ({
   isRecipeOwner,
   onEnhanceInstructions,
   enhancing,
+  isEditMode,
 }: RecipeDetailContentProps) => {
   const canModify = isAdmin || isEditor || isRecipeOwner;
-  const isEditing = Boolean(onEdit && onDelete);
 
   // Extract basic recipe info for PrintRecipe component
   const printRecipeProps = {
@@ -79,7 +80,7 @@ export const RecipeDetailContent = ({
     defaultServings: recipe.default_servings || 4,
     setDefaultServings: () => {}, // Read-only in detail view
     onDescriptionEnhancement: () => {}, // Not used in detail view
-    isEditing,
+    isEditing: isEditMode,
   };
 
   return (
@@ -90,7 +91,7 @@ export const RecipeDetailContent = ({
           <p className="text-gray-600">{recipe.description}</p>
         </div>
         
-        {canModify && isEditing && (
+        {canModify && isEditMode && (
           <div className="flex gap-2">
             <Button
               onClick={onEdit}
@@ -147,7 +148,7 @@ export const RecipeDetailContent = ({
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-semibold text-gray-900">Instructions</h2>
-            {currentUserId && onEnhanceInstructions && isRecipeOwner && isEditing && (
+            {currentUserId && onEnhanceInstructions && isRecipeOwner && isEditMode && (
               <AIEnhanceButton
                 content={recipe.instructions}
                 type="instructions"

@@ -1,4 +1,4 @@
-import { Home, Heart, Wand2 } from "lucide-react";
+import { Home, Heart, Wand2, Edit, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 
@@ -8,6 +8,9 @@ interface RecipeDetailHeaderProps {
   isRecipeOwner: boolean;
   onEnhanceClick: () => void;
   enhancing: boolean;
+  canModify: boolean;
+  isEditMode: boolean;
+  onToggleEditMode: () => void;
 }
 
 export const RecipeDetailHeader = ({
@@ -16,6 +19,9 @@ export const RecipeDetailHeader = ({
   isRecipeOwner,
   onEnhanceClick,
   enhancing,
+  canModify,
+  isEditMode,
+  onToggleEditMode,
 }: RecipeDetailHeaderProps) => {
   const navigate = useNavigate();
 
@@ -42,7 +48,7 @@ export const RecipeDetailHeader = ({
             }`}
           />
         </Button>
-        {isRecipeOwner && (
+        {isRecipeOwner && isEditMode && (
           <Button
             variant="ghost"
             size="icon"
@@ -51,6 +57,20 @@ export const RecipeDetailHeader = ({
             disabled={enhancing}
           >
             <Wand2 className="h-5 w-5 text-[#FEC6A1]" />
+          </Button>
+        )}
+        {canModify && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="bg-white/90 hover:bg-white"
+            onClick={onToggleEditMode}
+          >
+            {isEditMode ? (
+              <X className="h-5 w-5 text-gray-500" />
+            ) : (
+              <Edit className="h-5 w-5 text-gray-500" />
+            )}
           </Button>
         )}
       </div>
