@@ -5,7 +5,7 @@ import { RecipeScaling } from "@/components/recipe/RecipeScaling";
 
 interface RecipeDetailContentProps {
   recipe: {
-    id: string; // Added id property
+    id: string;
     title: string;
     description: string;
     cook_time: string;
@@ -14,6 +14,7 @@ interface RecipeDetailContentProps {
     instructions: string[];
     author_id: string;
     default_servings: number;
+    image_url?: string;
   };
   currentUserId: string | null;
   isAdmin: boolean;
@@ -44,11 +45,33 @@ export const RecipeDetailContent = ({
     }
   };
 
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    console.error("Recipe image failed to load:", recipe.image_url);
+    const img = e.target as HTMLImageElement;
+    img.src = "/placeholder.svg";
+  };
+
+  // Log the image URL to help with debugging
+  console.log("Recipe detail image URL:", recipe.image_url);
+
   return (
     <div className="max-w-4xl mx-auto p-6">
       <div className="flex justify-between items-start mb-6">
-        <h1 className="text-3xl font-display font-bold">{recipe.title}</h1>
-        <div className="flex gap-2">
+        <div className="space-y-4 w-full">
+          <h1 className="text-3xl font-display font-bold">{recipe.title}</h1>
+          {recipe.image_url && (
+            <div className="relative w-full h-[400px] rounded-lg overflow-hidden">
+              <img
+                src={recipe.image_url}
+                alt={recipe.title}
+                className="w-full h-full object-cover"
+                onError={handleImageError}
+                loading="lazy"
+              />
+            </div>
+          )}
+        </div>
+        <div className="flex gap-2 ml-4">
           <PrintRecipe
             title={recipe.title}
             description={recipe.description || ""}
