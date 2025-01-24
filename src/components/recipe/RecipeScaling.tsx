@@ -74,19 +74,19 @@ export const RecipeScaling = ({
     });
     onIngredientsScale(scaledIngredients);
 
-    // Only scale ingredient-related numbers in instructions
-    // This will look for numbers that are followed by common ingredient units
-    const commonUnits = /(\d+(\.\d+)?)\s*(cup|cups|tablespoon|tablespoons|tbsp|teaspoon|teaspoons|tsp|ounce|ounces|oz|pound|pounds|lb|lbs|gram|grams|g|kilogram|kilograms|kg|ml|milliliter|milliliters|liter|liters|l)/gi;
+    // Instruction scaling temporarily disabled
+    // const commonUnits = /(\d+(\.\d+)?)\s*(cup|cups|tablespoon|tablespoons|tbsp|teaspoon|teaspoons|tsp|ounce|ounces|oz|pound|pounds|lb|lbs|gram|grams|g|kilogram|kilograms|kg|ml|milliliter|milliliters|liter|liters|l)/gi;
+    // const scaledInstructions = instructions.map(instruction => {
+    //   return instruction.replace(commonUnits, (match, number) => {
+    //     const num = parseFloat(number);
+    //     if (isNaN(num)) return match;
+    //     const scaledNum = (num * scaleFactor).toFixed(2);
+    //     return match.replace(number, scaledNum);
+    //   });
+    // });
     
-    const scaledInstructions = instructions.map(instruction => {
-      return instruction.replace(commonUnits, (match, number) => {
-        const num = parseFloat(number);
-        if (isNaN(num)) return match;
-        const scaledNum = (num * scaleFactor).toFixed(2);
-        return match.replace(number, scaledNum);
-      });
-    });
-    onInstructionsScale(scaledInstructions);
+    // Just pass the original instructions without scaling
+    onInstructionsScale(instructions);
   };
 
   const handleServingsChange = async (newServings: number) => {
