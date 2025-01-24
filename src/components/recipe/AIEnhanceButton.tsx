@@ -38,7 +38,7 @@ export const AIEnhanceButton = ({
         const item = content[i];
         
         // Skip empty or invalid items
-        if (!item?.toString()?.trim()) {
+        if (!item?.trim()) {
           console.log(`Skipping empty ${type} item ${i + 1}`);
           continue;
         }
@@ -46,7 +46,7 @@ export const AIEnhanceButton = ({
         console.log(`Enhancing ${type} item ${i + 1}/${content.length}`);
         const { data, error } = await supabase.functions.invoke('enhance-recipe', {
           body: { 
-            content: item.toString(), 
+            content: item, 
             type,
             singleInstruction: true
           }
@@ -91,8 +91,8 @@ export const AIEnhanceButton = ({
   };
 
   // Ensure content is valid before enabling the button
-  const isContentValid = content?.every(item => 
-    typeof item === 'string' || typeof item?.toString === 'function'
+  const isContentValid = Array.isArray(content) && content.every(item => 
+    typeof item === 'string' && item !== null
   );
 
   return (
