@@ -20,29 +20,15 @@ interface Ingredient {
 const CreateRecipe = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const [title, setTitle] = useState("Classic Baked Macaroni and Cheese");
-  const [description, setDescription] = useState("A comforting Southern classic with perfectly cooked macaroni in a rich, creamy cheese sauce, baked until golden and bubbly.");
-  const [cookTime, setCookTime] = useState("35 minutes");
-  const [difficulty, setDifficulty] = useState("Medium");
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [cookTime, setCookTime] = useState("");
+  const [difficulty, setDifficulty] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [ingredients, setIngredients] = useState<Ingredient[]>([
-    { item: "elbow macaroni", amount: "8", unit: "oz" },
-    { item: "milk", amount: "2", unit: "cups" },
-    { item: "butter", amount: "2", unit: "Tbsp" },
-    { item: "all-purpose flour", amount: "2", unit: "Tbsp" },
-    { item: "salt", amount: "1/2", unit: "tsp" },
-    { item: "black pepper", amount: "1/4", unit: "tsp" },
-    { item: "extra sharp Cheddar cheese", amount: "10", unit: "oz" },
-    { item: "ground red pepper", amount: "1/4", unit: "tsp" },
+    { item: "", amount: "", unit: "" }
   ]);
-  const [instructions, setInstructions] = useState([
-    "Preheat oven to 400°F. Prepare pasta according to package directions. Grease a 2-qt. baking dish with cooking spray.",
-    "Microwave milk at HIGH for 1 1/2 minutes. Melt butter in a large skillet or Dutch oven over medium-low heat; whisk in flour until smooth. Cook, whisking constantly, 1 minute.",
-    "Gradually whisk in warm milk, and cook, whisking constantly, 5 minutes or until thickened.",
-    "Whisk in salt, black pepper, 1 cup shredded cheese, and, if desired, red pepper until smooth.",
-    "Stir in hot cooked pasta. Spoon pasta mixture into prepared dish; top with remaining cheese.",
-    "Bake at 400°F for 20 minutes or until golden and bubbly."
-  ]);
+  const [instructions, setInstructions] = useState<string[]>([""]);
   const [categories, setCategories] = useState<Tables<"categories">[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 
