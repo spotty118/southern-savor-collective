@@ -5,6 +5,8 @@ import { toast } from "@/hooks/use-toast";
 import { RecipeDetailHeader } from "@/components/recipe/RecipeDetailHeader";
 import { RecipeDetailContent } from "@/components/recipe/RecipeDetailContent";
 import { AIEnhancementDialog } from "@/components/recipe/AIEnhancementDialog";
+import { Button } from "@/components/ui/button";
+import { Home } from "lucide-react";
 import type { Database } from "@/integrations/supabase/types";
 
 type RecipeRow = Database['public']['Tables']['recipes']['Row']
@@ -82,11 +84,12 @@ const RecipeDetail = () => {
           ? data.instructions.filter((item): item is string => typeof item === 'string')
           : [];
 
-        // Format the data
+        // Format the data and ensure cook_time is a string
         const formattedData: RecipeData = {
           ...data,
           ingredients: validatedIngredients,
           instructions,
+          cook_time: data.cook_time?.toString() || '',
           author: data.author as { username: string | null }
         };
 
