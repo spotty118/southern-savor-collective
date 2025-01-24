@@ -2,25 +2,19 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Home, Plus, Minus } from "lucide-react";
+import { Home } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { Tables, Json } from "@/integrations/supabase/types";
-import { AIEnhanceButton } from "@/components/recipe/AIEnhanceButton";
+import { RecipeBasicInfo } from "@/components/recipe/RecipeBasicInfo";
+import { RecipeCategories } from "@/components/recipe/RecipeCategories";
+import { IngredientsList } from "@/components/recipe/IngredientsList";
+import { InstructionsList } from "@/components/recipe/InstructionsList";
 
 interface Ingredient {
   item: string;
   amount: string;
   unit: string;
-  [key: string]: string; // Index signature for Json compatibility
+  [key: string]: string;
 }
 
 const CreateRecipe = () => {
@@ -105,18 +99,6 @@ const CreateRecipe = () => {
     setInstructions(newInstructions);
   };
 
-  const handleDescriptionEnhancement = (enhanced: string[]) => {
-    if (enhanced.length > 0) {
-      setDescription(enhanced[0]);
-    }
-  };
-
-  const handleInstructionsEnhancement = (enhanced: string[]) => {
-    if (enhanced.length > 0) {
-      setInstructions(enhanced);
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -135,7 +117,6 @@ const CreateRecipe = () => {
         return;
       }
 
-      // Insert recipe
       const { data: recipe, error: recipeError } = await supabase
         .from("recipes")
         .insert({
@@ -153,7 +134,6 @@ const CreateRecipe = () => {
 
       if (recipeError) throw recipeError;
 
-      // Insert recipe categories
       if (selectedCategories.length > 0 && recipe) {
         const { error: categoryError } = await supabase
           .from("recipe_categories")
@@ -202,179 +182,48 @@ const CreateRecipe = () => {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Recipe Title</label>
-            <Input
-              required
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Enter your recipe title"
-            />
-          </div>
+          <RecipeBasicInfo
+            title={title}
+            setTitle={setTitle}
+            description={description}
+            setDescription={setDescription}
+            cookTime={cookTime}
+            setCookTime={setCookTime}
+            difficulty={difficulty}
+            setDifficulty={setDifficulty}
+            imageUrl={imageUrl}
+            setImageUrl={setImageUrl}
+            onDescriptionEnhancement={(enhanced) => {
+              if (enhanced.length > 0) {
+                setDescription(enhanced[0]);
+              }
+            }}
+          />
 
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Description</label>
-            <div className="space-y-2">
-              <Textarea
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="Share the story behind your recipe"
-              />
-              <AIEnhanceButton
-                content={[description]}
-                type="description"
-                onEnhanced={handleDescriptionEnhancement}
-                disabled={!description}
-              />
-            </div>
-          </div>
+          <RecipeCategories
+            categories={categories}
+            selectedCategories={selectedCategories}
+            setSelectedCategories={setSelectedCategories}
+          />
 
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Cooking Time</label>
-            <Input
-              value={cookTime}
-              onChange={(e) => setCookTime(e.target.value)}
-              placeholder="e.g., 1 hour 30 minutes"
-            />
-          </div>
+          <IngredientsList
+            ingredients={ingredients}
+            onAddIngredient={handleAddIngredient}
+            onRemoveIngredient={handleRemoveIngredient}
+            onIngredientChange={handleIngredientChange}
+          />
 
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Difficulty</label>
-            <Select value={difficulty} onValueChange={setDifficulty}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select difficulty" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Easy">Easy as Pie</SelectItem>
-                <SelectItem value="Medium">Sunday Supper Simple</SelectItem>
-                <SelectItem value="Hard">Down-Home Challenge</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Image URL</label>
-            <Input
-              type="url"
-              value={imageUrl}
-              onChange={(e) => setImageUrl(e.target.value)}
-              placeholder="Enter image URL"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Categories</label>
-            <div className="flex flex-wrap gap-2">
-              {categories.map((category) => (
-                <Button
-                  key={category.id}
-                  type="button"
-                  variant={selectedCategories.includes(category.id) ? "default" : "outline"}
-                  onClick={() => {
-                    setSelectedCategories(prev =>
-                      prev.includes(category.id)
-                        ? prev.filter(id => id !== category.id)
-                        : [...prev, category.id]
-                    );
-                  }}
-                  className={`
-                    rounded-full px-4 py-2 text-sm
-                    ${selectedCategories.includes(category.id)
-                      ? 'bg-[#FEC6A1] text-accent hover:bg-[#FDE1D3]'
-                      : 'border-[#FEC6A1] text-accent hover:bg-[#FDE1D3]'
-                    }
-                  `}
-                >
-                  {category.name}
-                </Button>
-              ))}
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            <label className="text-sm font-medium">Ingredients</label>
-            {ingredients.map((ingredient, index) => (
-              <div key={index} className="grid grid-cols-4 gap-2">
-                <Input
-                  className="col-span-2"
-                  value={ingredient.item}
-                  onChange={(e) => handleIngredientChange(index, "item", e.target.value)}
-                  placeholder="Ingredient name"
-                />
-                <Input
-                  value={ingredient.amount}
-                  onChange={(e) => handleIngredientChange(index, "amount", e.target.value)}
-                  placeholder="Amount"
-                />
-                <div className="flex gap-2">
-                  <Input
-                    value={ingredient.unit}
-                    onChange={(e) => handleIngredientChange(index, "unit", e.target.value)}
-                    placeholder="Unit"
-                  />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="icon"
-                    onClick={() => handleRemoveIngredient(index)}
-                    disabled={ingredients.length === 1}
-                  >
-                    <Minus className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            ))}
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleAddIngredient}
-              className="w-full"
-            >
-              <Plus className="mr-2 h-4 w-4" />
-              Add Ingredient
-            </Button>
-          </div>
-
-          <div className="space-y-4">
-            <label className="text-sm font-medium">Instructions</label>
-            {instructions.map((instruction, index) => (
-              <div key={index} className="flex gap-2">
-                <div className="flex-1 space-y-2">
-                  <Textarea
-                    value={instruction}
-                    onChange={(e) => handleInstructionChange(index, e.target.value)}
-                    placeholder={`Step ${index + 1}`}
-                  />
-                  <AIEnhanceButton
-                    content={instructions}
-                    type="instructions"
-                    onEnhanced={handleInstructionsEnhancement}
-                    disabled={!instruction}
-                  />
-                </div>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="icon"
-                  onClick={() => handleRemoveInstruction(index)}
-                  disabled={instructions.length === 1}
-                >
-                  <Minus className="h-4 w-4" />
-                </Button>
-              </div>
-            ))}
-            <div className="flex justify-between items-center">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleAddInstruction}
-                className="w-full"
-              >
-                <Plus className="mr-2 h-4 w-4" />
-                Add Step
-              </Button>
-            </div>
-          </div>
+          <InstructionsList
+            instructions={instructions}
+            onAddInstruction={handleAddInstruction}
+            onRemoveInstruction={handleRemoveInstruction}
+            onInstructionChange={handleInstructionChange}
+            onInstructionsEnhancement={(enhanced) => {
+              if (enhanced.length > 0) {
+                setInstructions(enhanced);
+              }
+            }}
+          />
 
           <Button
             type="submit"
