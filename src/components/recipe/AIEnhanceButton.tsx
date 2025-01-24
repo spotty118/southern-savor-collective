@@ -9,13 +9,15 @@ interface AIEnhanceButtonProps {
   type: "instructions" | "description";
   onEnhanced: (enhancedContent: string[]) => void;
   disabled?: boolean;
+  ingredients?: Array<{ amount: string; unit: string; item: string; }>;
 }
 
 export const AIEnhanceButton = ({ 
   content, 
   type, 
   onEnhanced,
-  disabled 
+  disabled,
+  ingredients 
 }: AIEnhanceButtonProps) => {
   const [isEnhancing, setIsEnhancing] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -52,7 +54,8 @@ export const AIEnhanceButton = ({
           body: { 
             content: item, 
             type,
-            singleInstruction: true
+            singleInstruction: true,
+            ingredients: type === 'instructions' ? ingredients : undefined
           }
         });
 
@@ -88,11 +91,13 @@ export const AIEnhanceButton = ({
       }
     } catch (error) {
       console.error('Error enhancing content:', error);
-      toast({
-        title: "Error",
-        description: "Failed to enhance content. Please try again.",
-        variant: "destructive",
-      });
+      if (error instanceof Error) {
+        toast({
+          title: "Error",
+          description: error.message,
+          variant: "destructive",
+        });
+      }
     } finally {
       setIsEnhancing(false);
       setCurrentIndex(0);

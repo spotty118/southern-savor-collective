@@ -5,6 +5,7 @@ import { AIEnhanceButton } from "@/components/recipe/AIEnhanceButton";
 
 interface InstructionsListProps {
   instructions: string[];
+  ingredients: Array<{ amount: string; unit: string; item: string; }>;
   onAddInstruction: () => void;
   onRemoveInstruction: (index: number) => void;
   onInstructionChange: (index: number, value: string) => void;
@@ -13,6 +14,7 @@ interface InstructionsListProps {
 
 export const InstructionsList = ({
   instructions,
+  ingredients,
   onAddInstruction,
   onRemoveInstruction,
   onInstructionChange,
@@ -56,6 +58,7 @@ export const InstructionsList = ({
           type="instructions"
           onEnhanced={onInstructionsEnhancement}
           disabled={instructions.some(i => !i.trim())}
+          ingredients={ingredients}
         />
       </div>
     </div>

@@ -1,5 +1,4 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4'
 import { corsHeaders } from '../_shared/cors.ts'
 
 console.log("Loading enhance-recipe function...")
@@ -10,8 +9,8 @@ serve(async (req) => {
   }
 
   try {
-    const { content, type } = await req.json() as EnhanceRequest;
-    console.log('Received request:', { type, content });
+    const { content, type, ingredients } = await req.json();
+    console.log('Received request:', { type, content, ingredients });
 
     if (type !== 'instructions') {
       throw new Error('Only instruction enhancement is supported');
@@ -21,9 +20,17 @@ serve(async (req) => {
     const instructions = Array.isArray(content) ? content : [content];
     const enhancedInstructions: string[] = [];
 
+    // Format ingredients for context
+    const ingredientsList = ingredients 
+      ? ingredients.map((ing: any) => `${ing.amount} ${ing.unit} ${ing.item}`).join('\n')
+      : '';
+
     // Enhance each instruction individually
     for (const instruction of instructions) {
-      const prompt = `As a cooking expert, enhance this specific cooking instruction with clear details and visual cues. Focus on what the cook should look for and key techniques:
+      const prompt = `As a cooking expert, enhance this specific cooking instruction with clear details and visual cues, using the available ingredients. Focus on what the cook should look for and key techniques.
+
+Available Ingredients:
+${ingredientsList}
 
 Instruction: "${instruction}"
 
@@ -35,39 +42,40 @@ Important guidelines:
 5. Keep it practical and clear
 6. Please try to keep response short and still make sense 
 7. Do not cut off responses while keeping it short
+8. Only reference ingredients that are actually listed above
 Enhanced version:`;
 
-    console.log('Sending prompt to OpenAI:', prompt);
+      console.log('Sending prompt to OpenAI:', prompt);
 
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${Deno.env.get('OPENAI_API_KEY')}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: "gpt-3.5-turbo",
-        messages: [
-          {
-            "role": "system",
-            "content": "You are a helpful Southern cooking expert who enhances recipe instructions and descriptions with Southern charm while maintaining their exact meaning."
-          },
-          {
-            "role": "user",
-            "content": prompt
-          }
-        ],
-        temperature: 0.7,
-      }),
-    });
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${Deno.env.get('OPENAI_API_KEY')}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: "gpt-4o-mini",
+          messages: [
+            {
+              "role": "system",
+              "content": "You are a helpful Southern cooking expert who enhances recipe instructions and descriptions with Southern charm while maintaining their exact meaning."
+            },
+            {
+              "role": "user",
+              "content": prompt
+            }
+          ],
+          temperature: 0.7,
+        }),
+      });
 
-    const data = await response.json();
-    console.log('OpenAI response:', data);
-    
-    if (!data.choices?.[0]?.message?.content) {
-      console.error('No content received from OpenAI:', data);
-      throw new Error('No content received from OpenAI');
-    }
+      const data = await response.json();
+      console.log('OpenAI response:', data);
+      
+      if (!data.choices?.[0]?.message?.content) {
+        console.error('No content received from OpenAI:', data);
+        throw new Error('No content received from OpenAI');
+      }
 
       const enhancedInstruction = data.choices[0].message?.content?.trim()
         ?.replace(/^["']|["']$/g, '') // Remove any quotes
@@ -79,9 +87,8 @@ Enhanced version:`;
 
     console.log('Enhanced instructions:', enhancedInstructions);
 
-    const response: EnhanceResponse = { enhancedContent: enhancedInstructions };
     return new Response(
-      JSON.stringify({ enhancedContent }),
+      JSON.stringify({ enhancedContent: enhancedInstructions }),
       { 
         headers: { 
           ...corsHeaders,
