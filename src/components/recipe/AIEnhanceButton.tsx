@@ -25,8 +25,10 @@ export const AIEnhanceButton = ({
     
     setIsEnhancing(true);
     const enhancedContent = [...content];
+    let hasError = false;
     
     try {
+      console.log('Starting enhancement process for:', type);
       // Sequentially enhance each item
       for (let i = 0; i < content.length; i++) {
         setCurrentIndex(i);
@@ -34,6 +36,7 @@ export const AIEnhanceButton = ({
         
         if (!item.trim()) continue;
 
+        console.log(`Enhancing ${type} item ${i + 1}/${content.length}`);
         const { data, error } = await supabase.functions.invoke('enhance-recipe', {
           body: { 
             content: item, 
@@ -42,21 +45,31 @@ export const AIEnhanceButton = ({
           }
         });
 
-        if (error) throw error;
+        if (error) {
+          console.error(`Error enhancing ${type} item ${i + 1}:`, error);
+          hasError = true;
+          throw error;
+        }
 
         if (data?.enhancedContent) {
+          console.log(`Successfully enhanced ${type} item ${i + 1}:`, data.enhancedContent);
           enhancedContent[i] = data.enhancedContent;
           // Update content as we go
           onEnhanced(enhancedContent);
+        } else {
+          console.error(`No enhanced content received for ${type} item ${i + 1}`);
+          hasError = true;
         }
       }
 
-      toast({
-        title: "Success!",
-        description: type === "instructions" 
-          ? "All instructions enhanced with Southern charm"
-          : "Description enhanced with Southern charm",
-      });
+      if (!hasError) {
+        toast({
+          title: "Success!",
+          description: type === "instructions" 
+            ? "All instructions enhanced with Southern charm"
+            : "Description enhanced with Southern charm",
+        });
+      }
     } catch (error) {
       console.error('Error enhancing content:', error);
       toast({

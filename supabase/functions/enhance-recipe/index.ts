@@ -1,14 +1,12 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import "https://deno.land/x/xhr@0.1.0/mod.ts";
+import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4'
+import { corsHeaders } from '../_shared/cors.ts'
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+console.log("Loading enhance-recipe function...")
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+    return new Response('ok', { headers: corsHeaders })
   }
 
   try {
@@ -17,13 +15,13 @@ serve(async (req) => {
 
     let prompt = '';
     if (type === 'instructions') {
-      prompt = `As a Southern cooking expert, enhance these cooking instructions with more detailed steps, cooking tips, and Southern charm. Make it warm and inviting, like a grandmother sharing her secrets:
+      prompt = `You are a Southern cooking expert. Please enhance the following cooking instruction with Southern charm and flair, while maintaining the exact same meaning and steps. Make it warm and inviting, like a Southern grandmother would explain it:
 
 ${content}
 
-Please provide ONE enhanced instruction that maintains the same meaning but adds Southern warmth. Keep it brief but clear.`;
-    } else if (type === 'description') {
-      prompt = `As a Southern food writer, enhance this recipe description with more warmth, charm, and storytelling elements that capture the essence of Southern cooking. Keep the response concise and focused:
+Important: Keep the exact same meaning and steps, just make it more Southern and charming.`;
+    } else {
+      prompt = `You are a Southern cooking expert. Here's a recipe description:
 
 ${content}
 
@@ -35,18 +33,22 @@ Please provide an enhanced description that makes the recipe more inviting and a
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer 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`,
+        'Authorization': `Bearer ${Deno.env.get('OPENAI_API_KEY')}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-3.5-turbo',
+        model: "gpt-3.5-turbo",
         messages: [
-          { 
-            role: 'system', 
-            content: 'You are a helpful Southern cooking expert who enhances recipe content with warmth and authenticity while keeping instructions clear and concise. Never change the meaning or steps of the instructions.' 
+          {
+            "role": "system",
+            "content": "You are a helpful Southern cooking expert who enhances recipe instructions and descriptions with Southern charm while maintaining their exact meaning."
           },
-          { role: 'user', content: prompt }
+          {
+            "role": "user",
+            "content": prompt
+          }
         ],
+        temperature: 0.7,
       }),
     });
 
@@ -63,13 +65,24 @@ Please provide an enhanced description that makes the recipe more inviting and a
 
     return new Response(
       JSON.stringify({ enhancedContent }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
+      { 
+        headers: { 
+          ...corsHeaders,
+          'Content-Type': 'application/json',
+        },
+      },
+    )
   } catch (error) {
-    console.error('Error in enhance-recipe function:', error);
+    console.error('Error:', error);
     return new Response(
       JSON.stringify({ error: error.message }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
+      { 
+        headers: { 
+          ...corsHeaders,
+          'Content-Type': 'application/json',
+        },
+        status: 400,
+      },
+    )
   }
-});
+})
