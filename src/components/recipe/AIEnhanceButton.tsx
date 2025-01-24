@@ -70,8 +70,8 @@ export const AIEnhanceButton = ({
             : cleanEnhancedContent(data.enhancedContent);
             
           enhancedContent[i] = enhancedText;
-          // Update content as we go
-          onEnhanced(enhancedContent);
+          // Update content as we go to show progress
+          onEnhanced([...enhancedContent]);
         } else {
           console.error(`No enhanced content received for ${type} item ${i + 1}`);
           hasError = true;
