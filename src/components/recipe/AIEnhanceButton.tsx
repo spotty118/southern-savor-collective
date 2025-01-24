@@ -20,6 +20,14 @@ export const AIEnhanceButton = ({
   const [isEnhancing, setIsEnhancing] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
 
+  const cleanEnhancedContent = (content: string): string => {
+    return content
+      .replace(/^Enhanced Version:?\s*/i, '')  // Remove "Enhanced Version:" prefix
+      .replace(/^"(.+)"$/, '$1')              // Remove surrounding quotes
+      .replace(/^\d+\.\s*/, '')               // Remove leading numbers
+      .trim();
+  };
+
   const enhanceContent = async () => {
     if (!content?.length) return;
     
@@ -56,10 +64,10 @@ export const AIEnhanceButton = ({
 
         if (data?.enhancedContent) {
           console.log(`Successfully enhanced ${type} item ${i + 1}:`, data.enhancedContent);
-          // Ensure we're getting a string, not an array
+          // Ensure we're getting a string, not an array, and clean it up
           const enhancedText = Array.isArray(data.enhancedContent) 
-            ? data.enhancedContent[0] 
-            : data.enhancedContent;
+            ? cleanEnhancedContent(data.enhancedContent[0])
+            : cleanEnhancedContent(data.enhancedContent);
             
           enhancedContent[i] = enhancedText;
           // Update content as we go
