@@ -1,29 +1,25 @@
-import React, { useState } from "react";
+import { Tables } from "@/integrations/supabase/types";
 import { Button } from "@/components/ui/button";
+import { AIEnhanceButton } from "@/components/recipe/AIEnhanceButton";
+import { RecipeBasicInfo } from "@/components/recipe/RecipeBasicInfo";
+import { RecipeCategories } from "@/components/recipe/RecipeCategories";
+import { RecipeRating } from "@/components/recipe/RecipeRating";
 import { PrintRecipe } from "@/components/recipe/PrintRecipe";
-import { RecipeScaling } from "@/components/recipe/RecipeScaling";
+import { Trash2, Edit } from "lucide-react";
 
 interface RecipeDetailContentProps {
-  recipe: {
-    id: string;
-    title: string;
-    description: string;
-    cook_time: string;
-    difficulty: string;
-    ingredients: Array<{ amount: string; unit: string; item: string }>;
-    instructions: string[];
-    author_id: string;
-    default_servings: number;
-    image_url?: string;
+  recipe: Tables<"recipes"> & {
+    author: { username: string | null };
+    categories: Tables<"categories">[];
   };
   currentUserId: string | null;
-  isAdmin: boolean;
-  isEditor: boolean;
-  onDelete: () => void;
-  onEdit: () => void;
-  isRecipeOwner: boolean;
-  onEnhanceInstructions: () => Promise<void>;
-  enhancing: boolean;
+  isAdmin?: boolean;
+  isEditor?: boolean;
+  onDelete?: () => void;
+  onEdit?: () => void;
+  isRecipeOwner?: boolean;
+  onEnhanceInstructions?: () => void;
+  enhancing?: boolean;
 }
 
 export const RecipeDetailContent = ({
@@ -37,94 +33,87 @@ export const RecipeDetailContent = ({
   onEnhanceInstructions,
   enhancing,
 }: RecipeDetailContentProps) => {
-  const [scaledIngredients, setScaledIngredients] = useState(recipe.ingredients);
-  const [scaledInstructions, setScaledInstructions] = useState(recipe.instructions);
-  
-  const handleDeleteClick = () => {
-    if (window.confirm("Are you sure you want to delete this recipe?")) {
-      onDelete();
-    }
-  };
-
-  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-    console.error("Recipe image failed to load:", recipe.image_url);
-    const img = e.target as HTMLImageElement;
-    img.src = "/placeholder.svg";
-  };
-
-  // Log the image URL to help with debugging
-  console.log("Recipe detail image URL:", recipe.image_url);
+  const canModify = isAdmin || isEditor || isRecipeOwner;
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <div className="flex justify-between items-start mb-6">
-        <div className="space-y-4 w-full">
-          <h1 className="text-3xl font-display font-bold">{recipe.title}</h1>
-          {recipe.image_url && (
-            <div className="relative w-full h-[400px] rounded-lg overflow-hidden">
-              <img
-                src={recipe.image_url}
-                alt={recipe.title}
-                className="w-full h-full object-cover"
-                onError={handleImageError}
-                loading="lazy"
-              />
-            </div>
-          )}
+    <div className="bg-white rounded-lg shadow-lg p-6 space-y-6">
+      <div className="flex justify-between items-start">
+        <div className="space-y-2">
+          <h1 className="text-3xl font-bold text-gray-900">{recipe.title}</h1>
+          <p className="text-gray-600">{recipe.description}</p>
         </div>
-        <div className="flex gap-2 ml-4">
-          <PrintRecipe
-            title={recipe.title}
-            description={recipe.description || ""}
-            cookTime={recipe.cook_time?.toString() || ""}
-            difficulty={recipe.difficulty || ""}
-            ingredients={scaledIngredients}
-            instructions={scaledInstructions}
-          />
-          {(currentUserId === recipe.author_id || isAdmin || isEditor) && (
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={onEdit}>
-                Edit Recipe
+        
+        {canModify && (
+          <div className="flex gap-2">
+            {onEdit && (
+              <Button
+                onClick={onEdit}
+                variant="outline"
+                size="icon"
+                className="h-8 w-8"
+              >
+                <Edit className="h-4 w-4" />
               </Button>
-              <Button variant="destructive" onClick={handleDeleteClick}>
-                Delete Recipe
+            )}
+            {onDelete && (
+              <Button
+                onClick={onDelete}
+                variant="outline"
+                size="icon"
+                className="h-8 w-8 text-red-600 hover:text-red-700"
+              >
+                <Trash2 className="h-4 w-4" />
               </Button>
-            </div>
-          )}
+            )}
+          </div>
+        )}
+      </div>
+
+      <RecipeBasicInfo recipe={recipe} />
+      
+      <RecipeCategories categories={recipe.categories} />
+      
+      <div className="space-y-6">
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-semibold text-gray-900">Ingredients</h2>
+          </div>
+          <ul className="list-disc list-inside space-y-2">
+            {recipe.ingredients.map((ingredient: any, index: number) => (
+              <li key={index} className="text-gray-700">
+                {ingredient.amount} {ingredient.unit} {ingredient.item}
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-semibold text-gray-900">Instructions</h2>
+            {currentUserId && (
+              <AIEnhanceButton
+                onClick={onEnhanceInstructions}
+                loading={enhancing}
+              />
+            )}
+          </div>
+          <ol className="list-decimal list-inside space-y-4">
+            {recipe.instructions.map((instruction: string, index: number) => (
+              <li
+                key={index}
+                className="text-gray-700 leading-relaxed pl-2"
+                style={{ textIndent: "-1.5rem", paddingLeft: "1.5rem" }}
+              >
+                {instruction}
+              </li>
+            ))}
+          </ol>
         </div>
       </div>
-      
-      <div className="space-y-4">
-        <h2 className="text-xl font-semibold">Description</h2>
-        <p>{recipe.description}</p>
-        
-        <div className="flex justify-between items-center">
-          <h2 className="text-xl font-semibold">Ingredients</h2>
-          <RecipeScaling
-            recipeId={recipe.id}
-            defaultServings={recipe.default_servings || 4}
-            ingredients={recipe.ingredients}
-            instructions={recipe.instructions}
-            currentUserId={currentUserId}
-            onIngredientsScale={setScaledIngredients}
-            onInstructionsScale={setScaledInstructions}
-          />
-        </div>
-        
-        <ul className="list-disc pl-5">
-          {scaledIngredients.map((ingredient, index) => (
-            <li key={index}>
-              {ingredient.amount} {ingredient.unit} {ingredient.item}
-            </li>
-          ))}
-        </ul>
-        
-        <h2 className="text-xl font-semibold">Instructions</h2>
-        <ol className="list-decimal pl-5">
-          {scaledInstructions.map((instruction, index) => (
-            <li key={index}>{instruction}</li>
-          ))}
-        </ol>
+
+      <div className="flex justify-between items-center pt-4 border-t">
+        <RecipeRating recipeId={recipe.id} currentUserId={currentUserId} />
+        <PrintRecipe recipe={recipe} />
       </div>
     </div>
   );
