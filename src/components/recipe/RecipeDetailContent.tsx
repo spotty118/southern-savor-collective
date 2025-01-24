@@ -88,28 +88,24 @@ export const RecipeDetailContent = ({
           <p className="text-gray-600">{recipe.description}</p>
         </div>
         
-        {canModify && (
+        {canModify && onEdit && onDelete && (
           <div className="flex gap-2">
-            {onEdit && (
-              <Button
-                onClick={onEdit}
-                variant="outline"
-                size="icon"
-                className="h-8 w-8"
-              >
-                <Edit className="h-4 w-4" />
-              </Button>
-            )}
-            {onDelete && (
-              <Button
-                onClick={onDelete}
-                variant="outline"
-                size="icon"
-                className="h-8 w-8 text-red-600 hover:text-red-700"
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            )}
+            <Button
+              onClick={onEdit}
+              variant="outline"
+              size="icon"
+              className="h-8 w-8"
+            >
+              <Edit className="h-4 w-4" />
+            </Button>
+            <Button
+              onClick={onDelete}
+              variant="outline"
+              size="icon"
+              className="h-8 w-8 text-red-600 hover:text-red-700"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
           </div>
         )}
       </div>
@@ -155,6 +151,7 @@ export const RecipeDetailContent = ({
                 type="instructions"
                 onEnhanced={onEnhanceInstructions}
                 disabled={enhancing}
+                ingredients={recipe.ingredients}
               />
             )}
           </div>
