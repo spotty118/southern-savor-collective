@@ -121,6 +121,24 @@ const EditRecipe = () => {
         return;
       }
 
+      // Create a new version before updating the recipe
+      const { error: versionError } = await supabase
+        .from("recipe_versions")
+        .insert({
+          recipe_id: id,
+          title,
+          description,
+          ingredients: ingredients as Json,
+          instructions: instructions.filter(Boolean) as Json,
+          cook_time: cookTime,
+          difficulty,
+          image_url: imageUrl,
+          created_by: user.id,
+        });
+
+      if (versionError) throw versionError;
+
+      // Update the recipe
       const { error: recipeError } = await supabase
         .from("recipes")
         .update({
@@ -137,6 +155,7 @@ const EditRecipe = () => {
 
       if (recipeError) throw recipeError;
 
+      // Update categories
       const { error: deleteError } = await supabase
         .from("recipe_categories")
         .delete()
@@ -159,7 +178,7 @@ const EditRecipe = () => {
 
       toast({
         title: "Success!",
-        description: "Your recipe has been updated",
+        description: "Your recipe has been updated and versioned",
       });
       navigate(`/recipe/${id}`);
     } catch (error: any) {
