@@ -79,6 +79,7 @@ export const RecipeDetailContent = ({
     defaultServings: recipe.default_servings || 4,
     setDefaultServings: () => {}, // Read-only in detail view
     onDescriptionEnhancement: () => {}, // Not used in detail view
+    isEditing,
   };
 
   return (

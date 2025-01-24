@@ -23,6 +23,7 @@ interface RecipeBasicInfoProps {
   defaultServings: number;
   setDefaultServings: (value: number) => void;
   onDescriptionEnhancement: (enhanced: string[]) => void;
+  isEditing?: boolean;
 }
 
 export const RecipeBasicInfo = ({
@@ -39,7 +40,41 @@ export const RecipeBasicInfo = ({
   defaultServings,
   setDefaultServings,
   onDescriptionEnhancement,
+  isEditing = false,
 }: RecipeBasicInfoProps) => {
+  if (!isEditing) {
+    return (
+      <>
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Recipe Title</label>
+          <p className="text-gray-700">{title}</p>
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Description</label>
+          <p className="text-gray-700">{description}</p>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Cooking Time</label>
+            <p className="text-gray-700">{cookTime}</p>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Default Servings</label>
+            <p className="text-gray-700">{defaultServings}</p>
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Difficulty</label>
+          <p className="text-gray-700">{difficulty}</p>
+        </div>
+      </>
+    );
+  }
+
   return (
     <>
       <div className="space-y-2">
