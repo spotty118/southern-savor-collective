@@ -18,6 +18,7 @@ interface RecipeData {
   difficulty: string | null;
   image_url: string | null;
   author_id: string;
+  default_servings: number;  // Added this
   author?: {
     username: string | null;
   };
@@ -62,6 +63,7 @@ export const useRecipeData = (id: string | undefined) => {
             ? data.instructions.filter((item): item is string => typeof item === 'string')
             : [],
           cook_time: data.cook_time?.toString() || '',
+          default_servings: data.default_servings || 4,  // Added default value
           author: data.author as { username: string | null }
         };
 

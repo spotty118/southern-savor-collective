@@ -5,6 +5,7 @@ import { RecipeScaling } from "@/components/recipe/RecipeScaling";
 
 interface RecipeDetailContentProps {
   recipe: {
+    id: string;  // Added this
     title: string;
     description: string;
     cook_time: string;
