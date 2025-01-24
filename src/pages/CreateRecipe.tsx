@@ -105,23 +105,14 @@ const CreateRecipe = () => {
     setInstructions(newInstructions);
   };
 
-  const handleDescriptionEnhancement = (enhancedContent: string) => {
-    setDescription(enhancedContent);
+  const handleDescriptionEnhancement = (enhancedContent: string[]) => {
+    if (enhancedContent.length > 0) {
+      setDescription(enhancedContent[0]);
+    }
   };
 
-  const handleInstructionsEnhancement = (index: number, enhancedContent: string) => {
-    try {
-      const newInstructions = [...instructions];
-      newInstructions[index] = enhancedContent;
-      setInstructions(newInstructions);
-    } catch (error) {
-      console.error('Error updating instruction:', error);
-      toast({
-        title: "Error",
-        description: "Failed to update instruction",
-        variant: "destructive",
-      });
-    }
+  const handleInstructionsEnhancement = (enhancedInstructions: string[]) => {
+    setInstructions(enhancedInstructions);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -228,7 +219,7 @@ const CreateRecipe = () => {
                 placeholder="Share the story behind your recipe"
               />
               <AIEnhanceButton
-                content={description}
+                content={[description]}
                 type="description"
                 onEnhanced={handleDescriptionEnhancement}
                 disabled={!description}
@@ -353,11 +344,10 @@ const CreateRecipe = () => {
                     placeholder={`Step ${index + 1}`}
                   />
                   <AIEnhanceButton
-                    content={instruction}
+                    content={instructions}
                     type="instructions"
-                    onEnhanced={(content) => handleInstructionsEnhancement(index, content)}
+                    onEnhanced={handleInstructionsEnhancement}
                     disabled={!instruction}
-                    index={index}
                   />
                 </div>
                 <Button

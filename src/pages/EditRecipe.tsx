@@ -139,8 +139,10 @@ const EditRecipe = () => {
     setInstructions(newInstructions);
   };
 
-  const handleDescriptionEnhancement = (enhancedContent: string) => {
-    setDescription(enhancedContent);
+  const handleDescriptionEnhancement = (enhancedContent: string[]) => {
+    if (enhancedContent.length > 0) {
+      setDescription(enhancedContent[0]);
+    }
   };
 
   const handleInstructionsEnhancement = (enhancedInstructions: string[]) => {

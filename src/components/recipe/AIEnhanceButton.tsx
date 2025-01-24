@@ -21,22 +21,22 @@ export const AIEnhanceButton = ({
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const enhanceContent = async () => {
-    if (type !== "instructions" || !content.length) return;
+    if (!content.length) return;
     
     setIsEnhancing(true);
-    const enhancedInstructions = [...content];
+    const enhancedContent = [...content];
     
     try {
-      // Sequentially enhance each instruction
+      // Sequentially enhance each item
       for (let i = 0; i < content.length; i++) {
         setCurrentIndex(i);
-        const instruction = content[i];
+        const item = content[i];
         
-        if (!instruction.trim()) continue;
+        if (!item.trim()) continue;
 
         const { data, error } = await supabase.functions.invoke('enhance-recipe', {
           body: { 
-            content: instruction, 
+            content: item, 
             type,
             singleInstruction: true
           }
@@ -45,21 +45,23 @@ export const AIEnhanceButton = ({
         if (error) throw error;
 
         if (data?.enhancedContent) {
-          enhancedInstructions[i] = data.enhancedContent;
-          // Update instructions as we go
-          onEnhanced(enhancedInstructions);
+          enhancedContent[i] = data.enhancedContent;
+          // Update content as we go
+          onEnhanced(enhancedContent);
         }
       }
 
       toast({
         title: "Success!",
-        description: "All instructions enhanced with Southern charm",
+        description: type === "instructions" 
+          ? "All instructions enhanced with Southern charm"
+          : "Description enhanced with Southern charm",
       });
     } catch (error) {
       console.error('Error enhancing content:', error);
       toast({
         title: "Error",
-        description: "Failed to enhance instructions. Please try again.",
+        description: "Failed to enhance content. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -79,8 +81,8 @@ export const AIEnhanceButton = ({
     >
       <Wand2 className="h-4 w-4" />
       {isEnhancing 
-        ? `Enhancing step ${currentIndex + 1} of ${content.length}...` 
-        : "Add Southern Charm to All Steps"}
+        ? `Enhancing ${type === "instructions" ? `step ${currentIndex + 1} of ${content.length}` : "description"}...` 
+        : `Add Southern Charm${type === "instructions" ? " to All Steps" : ""}`}
     </Button>
   );
 };
