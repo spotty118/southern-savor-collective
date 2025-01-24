@@ -74,12 +74,16 @@ export const RecipeScaling = ({
     });
     onIngredientsScale(scaledIngredients);
 
-    // Scale instructions - look for numbers and scale them
+    // Only scale ingredient-related numbers in instructions
+    // This will look for numbers that are followed by common ingredient units
+    const commonUnits = /(\d+(\.\d+)?)\s*(cup|cups|tablespoon|tablespoons|tbsp|teaspoon|teaspoons|tsp|ounce|ounces|oz|pound|pounds|lb|lbs|gram|grams|g|kilogram|kilograms|kg|ml|milliliter|milliliters|liter|liters|l)/gi;
+    
     const scaledInstructions = instructions.map(instruction => {
-      return instruction.replace(/(\d+(\.\d+)?)/g, (match) => {
-        const num = parseFloat(match);
+      return instruction.replace(commonUnits, (match, number) => {
+        const num = parseFloat(number);
         if (isNaN(num)) return match;
-        return (num * scaleFactor).toFixed(2);
+        const scaledNum = (num * scaleFactor).toFixed(2);
+        return match.replace(number, scaledNum);
       });
     });
     onInstructionsScale(scaledInstructions);
