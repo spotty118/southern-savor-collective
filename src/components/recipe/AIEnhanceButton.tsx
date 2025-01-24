@@ -1,113 +1,99 @@
 import { useState } from "react";
 import { Wand2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
+import { recipeAPI, type Ingredient } from "@/lib/api/recipe";
+import { z } from "zod";
 
 interface AIEnhanceButtonProps {
   content: string[];
   type: "instructions" | "description";
   onEnhanced: (enhancedContent: string[]) => void;
   disabled?: boolean;
-  ingredients?: Array<{ amount: string; unit: string; item: string; }>;
+  ingredients?: Ingredient[];
 }
 
-export const AIEnhanceButton = ({ 
-  content, 
-  type, 
+const contentSchema = z.array(z.string().min(1, "Content items cannot be empty"));
+
+export const AIEnhanceButton = ({
+  content,
+  type,
   onEnhanced,
   disabled,
-  ingredients 
+  ingredients
 }: AIEnhanceButtonProps) => {
   const [isEnhancing, setIsEnhancing] = useState(false);
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [progress, setProgress] = useState({ current: 0, total: 0 });
 
-  const cleanEnhancedContent = (content: string): string => {
-    return content
-      .replace(/^Enhanced Version:?\s*/i, '')  // Remove "Enhanced Version:" prefix
-      .replace(/^"(.+)"$/, '$1')              // Remove surrounding quotes
-      .replace(/^\d+\.\s*/, '')               // Remove leading numbers
-      .trim();
+  const validateContent = (content: unknown): string[] => {
+    try {
+      return contentSchema.parse(content);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        throw new Error(`Invalid content format: ${error.errors.map(e => e.message).join(', ')}`);
+      }
+      throw error;
+    }
   };
 
   const enhanceContent = async () => {
     if (!content?.length) return;
-    
-    setIsEnhancing(true);
-    const enhancedContent = [...content];
-    let hasError = false;
-    
+
     try {
-      console.log('Starting enhancement process for:', type);
-      // Sequentially enhance each item
-      for (let i = 0; i < content.length; i++) {
-        setCurrentIndex(i);
-        const item = content[i];
-        
-        if (!item?.trim()) {
-          console.log(`Skipping empty ${type} item ${i + 1}`);
-          continue;
-        }
+      setIsEnhancing(true);
+      setProgress({ current: 0, total: content.length });
 
-        console.log(`Enhancing ${type} item ${i + 1}/${content.length}`);
-        const { data, error } = await supabase.functions.invoke('enhance-recipe', {
-          body: { 
-            content: item, 
-            type,
-            singleInstruction: true,
-            ingredients: type === 'instructions' ? ingredients : undefined
-          }
-        });
-
-        if (error) {
-          console.error(`Error enhancing ${type} item ${i + 1}:`, error);
-          hasError = true;
-          throw error;
-        }
-
-        if (data?.enhancedContent) {
-          console.log(`Successfully enhanced ${type} item ${i + 1}:`, data.enhancedContent);
-          // Ensure we're getting a string, not an array, and clean it up
-          const enhancedText = Array.isArray(data.enhancedContent) 
-            ? cleanEnhancedContent(data.enhancedContent[0])
-            : cleanEnhancedContent(data.enhancedContent);
-            
-          enhancedContent[i] = enhancedText;
-          // Update content as we go to show progress
-          onEnhanced([...enhancedContent]);
-        } else {
-          console.error(`No enhanced content received for ${type} item ${i + 1}`);
-          hasError = true;
-        }
+      // Validate inputs
+      const validatedContent = validateContent(content);
+      if (ingredients) {
+        await recipeAPI.validateIngredients(ingredients);
       }
 
-      if (!hasError) {
-        toast({
-          title: "Success!",
-          description: type === "instructions" 
-            ? "All instructions enhanced with Southern charm"
-            : "Description enhanced with Southern charm",
-        });
-      }
+      // Process enhancement
+      const enhancedContent = await recipeAPI.enhanceRecipeWithRateLimit(
+        validatedContent,
+        ingredients
+      );
+
+      // Update content as we go to show progress
+      onEnhanced(enhancedContent);
+
+      toast({
+        title: "Success!",
+        description: type === "instructions"
+          ? "All instructions enhanced with Southern charm"
+          : "Description enhanced with Southern charm",
+      });
     } catch (error) {
       console.error('Error enhancing content:', error);
+      
+      // Handle specific error types
       if (error instanceof Error) {
+        let errorMessage = error.message;
+        
+        // Parse rate limit error
+        if (error.message.includes('Rate limit')) {
+          errorMessage = "You've reached the enhancement limit. Please try again in a minute.";
+        }
+        // Parse validation errors
+        else if (error.message.includes('Invalid')) {
+          errorMessage = "Please check your recipe content and try again.";
+        }
+        
         toast({
-          title: "Error",
-          description: error.message,
+          title: "Enhancement Failed",
+          description: errorMessage,
           variant: "destructive",
         });
       }
     } finally {
       setIsEnhancing(false);
-      setCurrentIndex(0);
+      setProgress({ current: 0, total: 0 });
     }
   };
 
   // Ensure content is valid before enabling the button
-  const isContentValid = Array.isArray(content) && content.every(item => 
-    typeof item === 'string' && item !== null
-  );
+  const isContentValid = Array.isArray(content) && content.length > 0;
 
   return (
     <Button
@@ -117,10 +103,13 @@ export const AIEnhanceButton = ({
       onClick={enhanceContent}
       disabled={disabled || isEnhancing || !isContentValid}
       className="gap-2"
+      aria-busy={isEnhancing}
     >
       <Wand2 className="h-4 w-4" />
-      {isEnhancing 
-        ? `Enhancing ${type === "instructions" ? `step ${currentIndex + 1} of ${content.length}` : "description"}...` 
+      {isEnhancing
+        ? progress.total > 0 
+          ? `Enhancing ${type === "instructions" ? `step ${progress.current + 1} of ${progress.total}` : "description"}...`
+          : `Enhancing ${type}...`
         : `Add Southern Charm${type === "instructions" ? " to All Steps" : ""}`}
     </Button>
   );
