@@ -255,6 +255,66 @@ export type Database = {
           },
         ]
       }
+      recipe_versions: {
+        Row: {
+          cook_time: unknown | null
+          created_at: string
+          created_by: string
+          description: string | null
+          difficulty: string | null
+          id: string
+          image_url: string | null
+          ingredients: Json
+          instructions: Json
+          recipe_id: string
+          title: string
+          version_number: number
+        }
+        Insert: {
+          cook_time?: unknown | null
+          created_at?: string
+          created_by: string
+          description?: string | null
+          difficulty?: string | null
+          id?: string
+          image_url?: string | null
+          ingredients: Json
+          instructions: Json
+          recipe_id: string
+          title: string
+          version_number: number
+        }
+        Update: {
+          cook_time?: unknown | null
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          difficulty?: string | null
+          id?: string
+          image_url?: string | null
+          ingredients?: Json
+          instructions?: Json
+          recipe_id?: string
+          title?: string
+          version_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recipe_versions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "recipe_versions_recipe_id_fkey"
+            columns: ["recipe_id"]
+            isOneToOne: false
+            referencedRelation: "recipes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       recipes: {
         Row: {
           author_id: string | null
