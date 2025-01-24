@@ -28,19 +28,20 @@ serve(async (req) => {
       : '';
 
     for (const instruction of instructions) {
-      const prompt = `Enhance this instruction to be clear and practical:
+      const prompt = `Rewrite this cooking instruction in plain English:
 
 Ingredients:
 ${ingredientsList}
 
 Instruction: "${instruction}"
 
-Make it:
-1. Clear and direct
-2. Include visual cues
-3. Add timing if needed
-4. Keep original meaning
-5. Only use listed ingredients`;
+Rules:
+- Keep it concise and natural
+- Focus on the core cooking steps
+- Include only essential details
+- Use the listed ingredients
+- Write in paragraph form
+- No formatting or special markers`;
 
       console.log('Sending prompt to OpenAI:', prompt);
 
@@ -55,7 +56,7 @@ Make it:
           messages: [
             {
               "role": "system",
-              "content": "You are a cooking expert. Be direct and concise. No introductions or conclusions."
+              "content": "You are a cooking expert. Write clear, natural instructions without any special formatting or markers."
             },
             {
               "role": "user",
@@ -85,6 +86,7 @@ Make it:
         ?.replace(/^(Steps?:?\s*)/i, '')
         ?.replace(/^(Directions?:?\s*)/i, '')
         ?.replace(/^(Method:?\s*)/i, '')
+        ?.replace(/\*\*/g, '')
         ?? instruction;
 
       enhancedInstructions.push(enhancedInstruction);
