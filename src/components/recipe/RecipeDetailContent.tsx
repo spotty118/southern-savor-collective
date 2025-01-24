@@ -7,6 +7,12 @@ import { RecipeRating } from "@/components/recipe/RecipeRating";
 import { PrintRecipe } from "@/components/recipe/PrintRecipe";
 import { Trash2, Edit } from "lucide-react";
 
+interface Ingredient {
+  amount: string;
+  unit: string;
+  item: string;
+}
+
 interface RecipeDetailContentProps {
   recipe: Tables<"recipes"> & {
     author: { username: string | null };
@@ -35,6 +41,12 @@ export const RecipeDetailContent = ({
 }: RecipeDetailContentProps) => {
   const canModify = isAdmin || isEditor || isRecipeOwner;
 
+  // Type guard to check if value is an Ingredient
+  const isIngredient = (value: any): value is Ingredient => {
+    return value && typeof value === 'object' && 
+      'amount' in value && 'unit' in value && 'item' in value;
+  };
+
   // Extract basic recipe info for PrintRecipe component
   const printRecipeProps = {
     title: recipe.title,
@@ -42,7 +54,7 @@ export const RecipeDetailContent = ({
     cookTime: recipe.cook_time?.toString() || "",
     difficulty: recipe.difficulty || "",
     ingredients: Array.isArray(recipe.ingredients) 
-      ? recipe.ingredients.map(ing => ({
+      ? recipe.ingredients.filter(isIngredient).map(ing => ({
           amount: ing.amount || "",
           unit: ing.unit || "",
           item: ing.item || ""
@@ -120,7 +132,7 @@ export const RecipeDetailContent = ({
             <h2 className="text-xl font-semibold text-gray-900">Ingredients</h2>
           </div>
           <ul className="list-disc list-inside space-y-2">
-            {Array.isArray(recipe.ingredients) && recipe.ingredients.map((ingredient: any, index: number) => (
+            {Array.isArray(recipe.ingredients) && recipe.ingredients.filter(isIngredient).map((ingredient, index) => (
               <li key={index} className="text-gray-700">
                 {ingredient.amount} {ingredient.unit} {ingredient.item}
               </li>
@@ -133,7 +145,9 @@ export const RecipeDetailContent = ({
             <h2 className="text-xl font-semibold text-gray-900">Instructions</h2>
             {currentUserId && onEnhanceInstructions && (
               <AIEnhanceButton
-                content={Array.isArray(recipe.instructions) ? recipe.instructions : []}
+                content={Array.isArray(recipe.instructions) 
+                  ? recipe.instructions.filter((i): i is string => typeof i === 'string')
+                  : []}
                 type="instructions"
                 onEnhanced={() => onEnhanceInstructions()}
                 disabled={enhancing}
@@ -141,14 +155,16 @@ export const RecipeDetailContent = ({
             )}
           </div>
           <ol className="list-decimal list-inside space-y-4">
-            {Array.isArray(recipe.instructions) && recipe.instructions.map((instruction: string, index: number) => (
-              <li
-                key={index}
-                className="text-gray-700 leading-relaxed pl-2"
-                style={{ textIndent: "-1.5rem", paddingLeft: "1.5rem" }}
-              >
-                {instruction}
-              </li>
+            {Array.isArray(recipe.instructions) && recipe.instructions.map((instruction, index) => (
+              typeof instruction === 'string' && (
+                <li
+                  key={index}
+                  className="text-gray-700 leading-relaxed pl-2"
+                  style={{ textIndent: "-1.5rem", paddingLeft: "1.5rem" }}
+                >
+                  {instruction}
+                </li>
+              )
             ))}
           </ol>
         </div>

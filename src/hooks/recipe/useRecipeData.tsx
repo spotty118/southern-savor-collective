@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
+import { Tables } from "@/integrations/supabase/types";
 
 interface Ingredient {
   amount: string;
@@ -8,20 +9,13 @@ interface Ingredient {
   item: string;
 }
 
-interface RecipeData {
-  id: string;
-  title: string;
-  description: string | null;
+interface RecipeData extends Omit<Tables<"recipes">, "ingredients" | "instructions"> {
   ingredients: Ingredient[];
   instructions: string[];
-  cook_time: string;
-  difficulty: string | null;
-  image_url: string | null;
-  author_id: string;
-  default_servings: number;
   author?: {
     username: string | null;
   };
+  categories?: Tables<"categories">[];
 }
 
 export const useRecipeData = (id: string | undefined) => {
@@ -35,7 +29,8 @@ export const useRecipeData = (id: string | undefined) => {
           .from("recipes")
           .select(`
             *,
-            author:profiles(username)
+            author:profiles(username),
+            categories:recipe_categories(categories(*))
           `)
           .eq("id", id)
           .single();
@@ -64,7 +59,8 @@ export const useRecipeData = (id: string | undefined) => {
             : [],
           cook_time: data.cook_time?.toString() || '',
           default_servings: data.default_servings || 4,
-          author: data.author as { username: string | null }
+          author: data.author as { username: string | null },
+          categories: data.categories?.map(cat => cat.categories) || []
         };
 
         setRecipe(formattedData);
@@ -82,7 +78,9 @@ export const useRecipeData = (id: string | undefined) => {
       }
     };
 
-    fetchRecipe();
+    if (id) {
+      fetchRecipe();
+    }
   }, [id]);
 
   return { recipe, loading, setRecipe };
