@@ -57,6 +57,8 @@ Original Step: "${instruction}"
 
 6. Convert spelled-out numbers in measurements into numeric form
       
+7. For any mention of "degrees Fahrenheit," convert it to "°F" and keep the numeric value
+      
       console.log('Sending prompt to OpenAI:', prompt);
 
       const response = await fetch('https://api.openai.com/v1/chat/completions', {
