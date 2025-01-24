@@ -15,7 +15,7 @@ type AISuggestionRow = Database['public']['Tables']['recipe_ai_suggestions']['Ro
 interface Ingredient {
   item: string;
   unit: string;
-  amount: number | string;
+  amount: string; // Changed to string only to match RecipeDetailContent expectations
 }
 
 const isIngredient = (item: unknown): item is Ingredient => {
