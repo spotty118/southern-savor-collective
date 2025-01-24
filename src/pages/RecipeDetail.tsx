@@ -47,7 +47,10 @@ const RecipeDetail = () => {
         />
 
         <RecipeDetailContent
-          recipe={recipe}
+          recipe={{
+            ...recipe,
+            author: recipe.author || { username: null },
+          }}
           currentUserId={user?.id || null}
           isAdmin={isAdmin}
           isEditor={isEditor}

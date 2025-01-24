@@ -9,13 +9,23 @@ interface Ingredient {
   item: string;
 }
 
-interface RecipeData extends Omit<Tables<"recipes">, "ingredients" | "instructions"> {
+interface RecipeData {
+  id: string;
+  title: string;
+  description: string | null;
   ingredients: Ingredient[];
   instructions: string[];
-  author?: {
+  cook_time: unknown;
+  difficulty: string | null;
+  image_url: string | null;
+  default_servings: number | null;
+  author: {
     username: string | null;
   };
-  categories?: Tables<"categories">[];
+  categories: Tables<"categories">[];
+  author_id: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
 export const useRecipeData = (id: string | undefined) => {
@@ -63,7 +73,10 @@ export const useRecipeData = (id: string | undefined) => {
           cook_time: data.cook_time?.toString() || '',
           default_servings: data.default_servings || 4,
           author: data.author as { username: string | null },
-          categories: data.categories?.map(cat => cat.categories) || []
+          categories: data.categories?.map(cat => cat.categories) || [],
+          created_at: data.created_at,
+          updated_at: data.updated_at,
+          author_id: data.author_id
         };
 
         setRecipe(formattedData);
