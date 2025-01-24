@@ -52,6 +52,7 @@ export const RecipeDetailContent = ({
   enhancing,
 }: RecipeDetailContentProps) => {
   const canModify = isAdmin || isEditor || isRecipeOwner;
+  const isEditing = Boolean(onEdit && onDelete);
 
   // Extract basic recipe info for PrintRecipe component
   const printRecipeProps = {
@@ -88,7 +89,7 @@ export const RecipeDetailContent = ({
           <p className="text-gray-600">{recipe.description}</p>
         </div>
         
-        {canModify && onEdit && onDelete && (
+        {canModify && isEditing && (
           <div className="flex gap-2">
             <Button
               onClick={onEdit}
@@ -145,7 +146,7 @@ export const RecipeDetailContent = ({
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-semibold text-gray-900">Instructions</h2>
-            {currentUserId && onEnhanceInstructions && isRecipeOwner && (
+            {currentUserId && onEnhanceInstructions && isRecipeOwner && isEditing && (
               <AIEnhanceButton
                 content={recipe.instructions}
                 type="instructions"
