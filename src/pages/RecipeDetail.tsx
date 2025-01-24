@@ -1,18 +1,11 @@
-import * as React from "react";
-import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { Home, Heart, Wand2 } from "lucide-react";
+import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
-import type { Database, Json } from "@/integrations/supabase/types";
+import { RecipeDetailHeader } from "@/components/recipe/RecipeDetailHeader";
+import { RecipeDetailContent } from "@/components/recipe/RecipeDetailContent";
+import { AIEnhancementDialog } from "@/components/recipe/AIEnhancementDialog";
+import type { Database } from "@/integrations/supabase/types";
 
 type RecipeRow = Database['public']['Tables']['recipes']['Row']
 type AISuggestionRow = Database['public']['Tables']['recipe_ai_suggestions']['Row']
@@ -20,20 +13,8 @@ type AISuggestionRow = Database['public']['Tables']['recipe_ai_suggestions']['Ro
 interface Ingredient {
   item: string;
   unit: string;
-  amount: number;
+  amount: string;
 }
-
-// Type guard to validate ingredient shape
-const isIngredient = (value: unknown): value is Ingredient => {
-  if (!value || typeof value !== 'object') return false;
-  
-  const candidate = value as Record<string, unknown>;
-  return (
-    typeof candidate.item === 'string' &&
-    typeof candidate.unit === 'string' &&
-    typeof candidate.amount === 'number'
-  );
-};
 
 interface RecipeData extends Omit<RecipeRow, 'ingredients' | 'instructions'> {
   ingredients: Ingredient[];
@@ -242,6 +223,48 @@ const RecipeDetail = () => {
     }
   };
 
+  const handleApplyChanges = async () => {
+    try {
+      if (!recipe || !aiSuggestion || !aiSuggestion.enhanced_content) return;
+
+      const updates =
+        aiSuggestion.content_type === "instructions"
+          ? {
+              instructions: aiSuggestion.enhanced_content
+                .split("\n")
+                .filter(Boolean),
+            }
+          : { description: aiSuggestion.enhanced_content };
+
+      const { error } = await supabase
+        .from("recipes")
+        .update(updates)
+        .eq("id", recipe.id);
+
+      if (error) throw error;
+
+      await supabase
+        .from("recipe_ai_suggestions")
+        .update({ is_applied: true })
+        .eq("id", aiSuggestion.id);
+
+      setRecipe({ ...recipe, ...updates });
+      setShowAiDialog(false);
+      toast({
+        title: "Success",
+        description: "Recipe updated with AI suggestions",
+      });
+    } catch (error) {
+      if (error instanceof Error) {
+        toast({
+          title: "Error",
+          description: error.message,
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
   const isRecipeOwner = user && recipe && user.id === recipe.author_id;
 
   if (loading) {
@@ -280,181 +303,27 @@ const RecipeDetail = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#FDE1D3] to-[#FDFCFB] p-8">
       <div className="max-w-4xl mx-auto space-y-8">
-        <div className="mb-6 flex items-center justify-between">
-          <Button
-            variant="ghost"
-            onClick={() => navigate("/")}
-            className="flex items-center gap-2 hover:bg-[hsl(var(--vintage-cream))]"
-          >
-            <Home className="h-4 w-4" />
-            Back to Home
-          </Button>
-          <div className="flex gap-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="bg-white/90 hover:bg-white"
-              onClick={handleLoveClick}
-            >
-              <Heart
-                className={`h-5 w-5 ${
-                  isLoved ? "fill-red-500 text-red-500" : "text-gray-500"
-                }`}
-              />
-            </Button>
-            {isRecipeOwner && (
-              <Button
-                variant="ghost"
-                size="icon"
-                className="bg-white/90 hover:bg-white"
-                onClick={() => enhanceRecipe("description")}
-                disabled={enhancing}
-              >
-                <Wand2 className="h-5 w-5 text-[#FEC6A1]" />
-              </Button>
-            )}
-          </div>
-        </div>
+        <RecipeDetailHeader
+          isLoved={isLoved}
+          onLoveClick={handleLoveClick}
+          isRecipeOwner={isRecipeOwner}
+          onEnhanceClick={() => enhanceRecipe("description")}
+          enhancing={enhancing}
+        />
 
-        <div className="vintage-paper rounded-lg shadow-lg overflow-hidden">
-          <img
-            src={
-              recipe.image_url ||
-              "https://images.unsplash.com/photo-1546069901-ba9599a7e63c"
-            }
-            alt={recipe.title}
-            className="w-full h-96 object-cover"
-          />
-          <div className="p-8">
-            <h1 className="text-4xl font-display text-accent-foreground mb-4 heading-underline">
-              {recipe.title}
-            </h1>
-            <p className="text-gray-600 mb-6 font-script text-xl">
-              By {recipe.author?.username || "Anonymous"}
-            </p>
-            <div className="prose prose-lg max-w-none">
-              <p className="text-gray-700 mb-8">{recipe.description}</p>
+        <RecipeDetailContent
+          recipe={recipe}
+          isRecipeOwner={isRecipeOwner}
+          onEnhanceInstructions={() => enhanceRecipe("instructions")}
+          enhancing={enhancing}
+        />
 
-              <div className="mb-8">
-                <h2 className="text-2xl font-display text-accent-foreground mb-4 heading-underline">
-                  Ingredients
-                </h2>
-                <ul className="list-disc pl-6 space-y-2 marker:text-[#FEC6A1]">
-                  {recipe.ingredients.map((ingredient, index) => (
-                    <li key={index} className="text-gray-700">
-                      {`${ingredient.amount} ${ingredient.unit} ${ingredient.item}`}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div className="mb-8">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-2xl font-display text-accent-foreground heading-underline">
-                    Instructions
-                  </h2>
-                  {isRecipeOwner && (
-                    <Button
-                      variant="ghost"
-                      onClick={() => enhanceRecipe("instructions")}
-                      disabled={enhancing}
-                      className="flex items-center gap-2 hover:bg-[hsl(var(--vintage-cream))]"
-                    >
-                      <Wand2 className="h-4 w-4" />
-                      Enhance with AI
-                    </Button>
-                  )}
-                </div>
-                <ol className="list-decimal pl-6 space-y-4">
-                  {recipe.instructions.map((instruction, index) => (
-                    <li key={index} className="text-gray-700">
-                      {instruction}
-                    </li>
-                  ))}
-                </ol>
-              </div>
-
-              <div className="flex items-center justify-between text-sm text-gray-500 border-t pt-4">
-                <span className="font-script text-lg">Cook Time: {String(recipe.cook_time)}</span>
-                <span className="font-script text-lg text-[#FEC6A1]">
-                  Difficulty: {recipe.difficulty}
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <Dialog open={showAiDialog} onOpenChange={setShowAiDialog}>
-          <DialogContent className="vintage-paper">
-            <DialogHeader>
-              <DialogTitle className="font-display">AI Enhanced Version</DialogTitle>
-              <DialogDescription>
-                Here's an AI-enhanced version of your recipe content. Would you
-                like to apply these changes?
-              </DialogDescription>
-            </DialogHeader>
-            <div className="mt-4 space-y-4">
-              <div className="p-4 bg-white/50 rounded-lg">
-                <h3 className="font-display font-medium mb-2">Enhanced Content:</h3>
-                <p className="text-gray-700">{aiSuggestion?.enhanced_content}</p>
-              </div>
-              <div className="flex justify-end gap-2">
-                <Button 
-                  variant="outline" 
-                  onClick={() => setShowAiDialog(false)}
-                  className="hover:bg-[hsl(var(--vintage-cream))] hover:text-accent-foreground"
-                >
-                  Keep Original
-                </Button>
-                <Button
-                  onClick={async () => {
-                    try {
-                      if (!recipe || !aiSuggestion || !aiSuggestion.enhanced_content) return;
-
-                      const updates =
-                        aiSuggestion.content_type === "instructions"
-                          ? {
-                              instructions: aiSuggestion.enhanced_content
-                                .split("\n")
-                                .filter(Boolean),
-                            }
-                          : { description: aiSuggestion.enhanced_content };
-
-                      const { error } = await supabase
-                        .from("recipes")
-                        .update(updates)
-                        .eq("id", recipe.id);
-
-                      if (error) throw error;
-
-                      await supabase
-                        .from("recipe_ai_suggestions")
-                        .update({ is_applied: true })
-                        .eq("id", aiSuggestion.id);
-
-                      setRecipe({ ...recipe, ...updates });
-                      setShowAiDialog(false);
-                      toast({
-                        title: "Success",
-                        description: "Recipe updated with AI suggestions",
-                      });
-                    } catch (error) {
-                      if (error instanceof Error) {
-                        toast({
-                          title: "Error",
-                          description: error.message,
-                          variant: "destructive",
-                        });
-                      }
-                    }
-                  }}
-                >
-                  Apply Changes
-                </Button>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
+        <AIEnhancementDialog
+          open={showAiDialog}
+          onOpenChange={setShowAiDialog}
+          enhancedContent={aiSuggestion?.enhanced_content}
+          onApplyChanges={handleApplyChanges}
+        />
       </div>
     </div>
   );
