@@ -15,7 +15,7 @@ type AISuggestionRow = Database['public']['Tables']['recipe_ai_suggestions']['Ro
 interface Ingredient {
   item: string;
   unit: string;
-  amount: string;
+  amount: number | string; // Updated to accept both number and string
 }
 
 const isIngredient = (item: unknown): item is Ingredient => {
@@ -24,7 +24,7 @@ const isIngredient = (item: unknown): item is Ingredient => {
   return (
     typeof ingredient.item === 'string' &&
     typeof ingredient.unit === 'string' &&
-    typeof ingredient.amount === 'string'
+    (typeof ingredient.amount === 'string' || typeof ingredient.amount === 'number')
   );
 };
 
@@ -79,16 +79,13 @@ const RecipeDetail = () => {
           return true;
         });
 
-        // Validate instructions array
-        const instructions = Array.isArray(data.instructions)
-          ? data.instructions.filter((item): item is string => typeof item === 'string')
-          : [];
-
-        // Format the data and ensure cook_time is a string
+        // Format the data
         const formattedData: RecipeData = {
           ...data,
           ingredients: validatedIngredients,
-          instructions,
+          instructions: Array.isArray(data.instructions) 
+            ? data.instructions.filter((item): item is string => typeof item === 'string')
+            : [],
           cook_time: data.cook_time?.toString() || '',
           author: data.author as { username: string | null }
         };
