@@ -21,7 +21,7 @@ ${content}
 
 Important: Keep the exact same meaning and steps, just add clear, practical details that help ensure success.`;
     } else {
-      prompt = `You are a Southern cooking expert. Here's a recipe description:
+      prompt = `You are a cooking expert. Here's a recipe description:
 
 ${content}
 
