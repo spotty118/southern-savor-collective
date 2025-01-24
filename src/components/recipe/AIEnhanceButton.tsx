@@ -21,7 +21,7 @@ export const AIEnhanceButton = ({
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const enhanceContent = async () => {
-    if (!content.length) return;
+    if (!content?.length) return;
     
     setIsEnhancing(true);
     const enhancedContent = [...content];
@@ -34,7 +34,10 @@ export const AIEnhanceButton = ({
         setCurrentIndex(i);
         const item = content[i];
         
-        if (!item.trim()) continue;
+        if (!item?.trim()) {
+          console.log(`Skipping empty ${type} item ${i + 1}`);
+          continue;
+        }
 
         console.log(`Enhancing ${type} item ${i + 1}/${content.length}`);
         const { data, error } = await supabase.functions.invoke('enhance-recipe', {
@@ -53,7 +56,12 @@ export const AIEnhanceButton = ({
 
         if (data?.enhancedContent) {
           console.log(`Successfully enhanced ${type} item ${i + 1}:`, data.enhancedContent);
-          enhancedContent[i] = data.enhancedContent;
+          // Ensure we're getting a string, not an array
+          const enhancedText = Array.isArray(data.enhancedContent) 
+            ? data.enhancedContent[0] 
+            : data.enhancedContent;
+            
+          enhancedContent[i] = enhancedText;
           // Update content as we go
           onEnhanced(enhancedContent);
         } else {
@@ -83,13 +91,18 @@ export const AIEnhanceButton = ({
     }
   };
 
+  // Ensure content is valid before enabling the button
+  const isContentValid = Array.isArray(content) && content.every(item => 
+    typeof item === 'string' && item !== null
+  );
+
   return (
     <Button
       type="button"
       variant="outline"
       size="sm"
       onClick={enhanceContent}
-      disabled={disabled || isEnhancing}
+      disabled={disabled || isEnhancing || !isContentValid}
       className="gap-2"
     >
       <Wand2 className="h-4 w-4" />
