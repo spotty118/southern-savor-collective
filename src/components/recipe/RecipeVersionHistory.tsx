@@ -83,6 +83,7 @@ export const RecipeVersionHistory = ({
       const ingredients = currentVersion.ingredients as Json;
       const instructions = currentVersion.instructions as Json;
 
+      // Note: version_number is handled by database trigger
       const { error } = await supabase.from("recipe_versions").insert({
         recipe_id: recipeId,
         title: currentVersion.title,
@@ -93,7 +94,7 @@ export const RecipeVersionHistory = ({
         difficulty: currentVersion.difficulty,
         image_url: currentVersion.image_url,
         created_by: user.data.user.id,
-      });
+      } as any); // Using type assertion here since we know the trigger will handle version_number
 
       if (error) throw error;
 
