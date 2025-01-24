@@ -1,4 +1,5 @@
-import { Tables } from "@/integrations/supabase/types";
+import { Button } from "@/components/ui/button";
+import { Wand2 } from "lucide-react";
 
 interface RecipeDetailContentProps {
   recipe: {
@@ -15,6 +16,7 @@ interface RecipeDetailContentProps {
     instructions: string[];
     cook_time: string;
     difficulty: string;
+    image_url?: string;
   };
   isRecipeOwner: boolean;
   onEnhanceInstructions: () => void;

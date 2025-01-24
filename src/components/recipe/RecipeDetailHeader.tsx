@@ -1,4 +1,4 @@
-import { Home, Heart } from "lucide-react";
+import { Home, Heart, Wand2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 

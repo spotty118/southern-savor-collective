@@ -16,9 +16,20 @@ interface Ingredient {
   amount: string;
 }
 
-interface RecipeData extends Omit<RecipeRow, 'ingredients' | 'instructions'> {
+const isIngredient = (item: unknown): item is Ingredient => {
+  if (typeof item !== 'object' || item === null) return false;
+  const ingredient = item as Record<string, unknown>;
+  return (
+    typeof ingredient.item === 'string' &&
+    typeof ingredient.unit === 'string' &&
+    typeof ingredient.amount === 'string'
+  );
+};
+
+interface RecipeData extends Omit<RecipeRow, 'ingredients' | 'instructions' | 'cook_time'> {
   ingredients: Ingredient[];
   instructions: string[];
+  cook_time: string;
   author?: {
     username: string | null;
   };
