@@ -35,19 +35,25 @@ ${ingredientsList}
 
 Original Step: "${instruction}"
 
-Requirements:
-1. Keep this specific step's unique actions and measurements
-2. Use clear, natural language
-3. Convert any decimal measurements to fractions
-4. Remove formatting or markers
-5. Focus only on the essential cooking actions
-6. Keep the original meaning intact
-7. Don't add new ingredients or steps
-8. Don't repeat information from other steps
-9. Don't provide multiple variations
-10. Don't add commentary or timing indicators
+1. Preserve Unique Details
+   - Keep all original measurements and actions intact.
 
-Output the enhanced step as a single, clear instruction.`;
+2. Use Clear, Natural Language
+   - Make the text easy to understand.
+
+3. Convert Measurements
+   - Change decimal measurements to fractions (e.g., 0.5 → ½).
+   - Convert spelled-out temperatures to numeric form with the °F symbol (e.g., “four hundred” → “400°F”).
+   - Use standard abbreviations (tbsp, tsp, cup, oz, lb, etc.).
+
+4. Remove Extras
+   - No added formatting (bold, italics, etc.).
+   - No commentary or timing indicators.
+   - No new ingredients or steps.
+   - No repeated information or multiple variations.
+
+5. Output One Instruction
+   - Present the final version as a single, concise step, preserving the original meaning but focusing only on essential cooking actions.
 
       console.log('Sending prompt to OpenAI:', prompt);
 
