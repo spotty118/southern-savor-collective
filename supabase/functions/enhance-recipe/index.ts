@@ -13,12 +13,23 @@ serve(async (req) => {
   }
 
   try {
-    const { content, type, ingredients } = await req.json();
-    console.log('Received request:', { type, content, ingredients });
+    const { content, type, ingredients, singleInstruction } = await req.json();
+    console.log('Received request:', { type, content, ingredients, singleInstruction });
+
+    if (!content) {
+      throw new Error('Content is required');
+    }
+
+    if (!type || !['instructions', 'description'].includes(type)) {
+      throw new Error('Valid type (instructions or description) is required');
+    }
 
     const isInstructions = type === 'instructions';
-    const prompt = isInstructions 
-      ? `Enhance this single cooking instruction step to be clear and natural, while preserving its unique actions and measurements:
+    let prompt;
+
+    if (isInstructions) {
+      prompt = singleInstruction 
+        ? `Enhance this single cooking instruction step to be clear and natural, while preserving its unique actions and measurements:
 
 Ingredients List:
 ${ingredients ? ingredients.map((ing: any) => `${ing.amount} ${ing.unit} ${ing.item}`).join('\n') : ''}
@@ -48,7 +59,21 @@ Original Step: "${content}"
 6. Convert spelled-out numbers in measurements into numeric form
       
 7. For any mention of "degrees Fahrenheit," convert it to "°F" and keep the numeric value`
-      : `Enhance this recipe description with Southern charm and warmth:
+        : `Enhance these cooking instructions to be clear and natural, while preserving their unique actions and measurements:
+
+Original Instructions:
+${content}
+
+Guidelines:
+1. Keep all measurements and actions intact
+2. Make instructions clear and easy to follow
+3. Add Southern warmth to the tone
+4. Keep each step focused and concise
+5. Maintain proper grammar and clarity
+6. Convert temperatures to °F format
+7. Use standard cooking abbreviations`;
+    } else {
+      prompt = `Enhance this recipe description with Southern charm and warmth:
 
 Original Description: "${content}"
 
@@ -60,6 +85,7 @@ Guidelines:
 5. Don't add specific ingredients or steps
 6. Focus on the emotional appeal and tradition
 7. Maintain proper grammar and clarity`;
+    }
 
     console.log('Sending prompt to OpenAI:', prompt);
 
@@ -108,7 +134,7 @@ Guidelines:
     console.log('Enhanced content:', enhancedContent);
 
     return new Response(
-      JSON.stringify({ enhancedContent: isInstructions ? [enhancedContent] : enhancedContent }),
+      JSON.stringify({ enhancedContent }),
       { 
         headers: { 
           ...corsHeaders,
