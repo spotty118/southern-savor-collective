@@ -35,6 +35,43 @@ export const RecipeDetailContent = ({
 }: RecipeDetailContentProps) => {
   const canModify = isAdmin || isEditor || isRecipeOwner;
 
+  // Extract basic recipe info for PrintRecipe component
+  const printRecipeProps = {
+    title: recipe.title,
+    description: recipe.description || "",
+    cookTime: recipe.cook_time?.toString() || "",
+    difficulty: recipe.difficulty || "",
+    ingredients: Array.isArray(recipe.ingredients) 
+      ? recipe.ingredients.map(ing => ({
+          amount: ing.amount || "",
+          unit: ing.unit || "",
+          item: ing.item || ""
+        }))
+      : [],
+    instructions: Array.isArray(recipe.instructions) 
+      ? recipe.instructions.map(instruction => 
+          typeof instruction === 'string' ? instruction : ''
+        )
+      : []
+  };
+
+  // Extract basic recipe info for RecipeBasicInfo component
+  const basicInfoProps = {
+    title: recipe.title,
+    setTitle: () => {}, // Read-only in detail view
+    description: recipe.description || "",
+    setDescription: () => {}, // Read-only in detail view
+    cookTime: recipe.cook_time?.toString() || "",
+    setCookTime: () => {}, // Read-only in detail view
+    difficulty: recipe.difficulty || "",
+    setDifficulty: () => {}, // Read-only in detail view
+    imageUrl: recipe.image_url || "",
+    setImageUrl: () => {}, // Read-only in detail view
+    defaultServings: recipe.default_servings || 4,
+    setDefaultServings: () => {}, // Read-only in detail view
+    onDescriptionEnhancement: () => {}, // Not used in detail view
+  };
+
   return (
     <div className="bg-white rounded-lg shadow-lg p-6 space-y-6">
       <div className="flex justify-between items-start">
@@ -69,9 +106,13 @@ export const RecipeDetailContent = ({
         )}
       </div>
 
-      <RecipeBasicInfo recipe={recipe} />
+      <RecipeBasicInfo {...basicInfoProps} />
       
-      <RecipeCategories categories={recipe.categories} />
+      <RecipeCategories 
+        categories={recipe.categories}
+        selectedCategories={[]} // Read-only in detail view
+        setSelectedCategories={() => {}} // Read-only in detail view
+      />
       
       <div className="space-y-6">
         <div className="space-y-4">
@@ -79,7 +120,7 @@ export const RecipeDetailContent = ({
             <h2 className="text-xl font-semibold text-gray-900">Ingredients</h2>
           </div>
           <ul className="list-disc list-inside space-y-2">
-            {recipe.ingredients.map((ingredient: any, index: number) => (
+            {Array.isArray(recipe.ingredients) && recipe.ingredients.map((ingredient: any, index: number) => (
               <li key={index} className="text-gray-700">
                 {ingredient.amount} {ingredient.unit} {ingredient.item}
               </li>
@@ -90,15 +131,17 @@ export const RecipeDetailContent = ({
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-semibold text-gray-900">Instructions</h2>
-            {currentUserId && (
+            {currentUserId && onEnhanceInstructions && (
               <AIEnhanceButton
-                onClick={onEnhanceInstructions}
-                loading={enhancing}
+                content={Array.isArray(recipe.instructions) ? recipe.instructions : []}
+                type="instructions"
+                onEnhanced={() => onEnhanceInstructions()}
+                disabled={enhancing}
               />
             )}
           </div>
           <ol className="list-decimal list-inside space-y-4">
-            {recipe.instructions.map((instruction: string, index: number) => (
+            {Array.isArray(recipe.instructions) && recipe.instructions.map((instruction: string, index: number) => (
               <li
                 key={index}
                 className="text-gray-700 leading-relaxed pl-2"
@@ -112,8 +155,11 @@ export const RecipeDetailContent = ({
       </div>
 
       <div className="flex justify-between items-center pt-4 border-t">
-        <RecipeRating recipeId={recipe.id} currentUserId={currentUserId} />
-        <PrintRecipe recipe={recipe} />
+        <RecipeRating 
+          recipeId={recipe.id} 
+          userId={currentUserId} 
+        />
+        <PrintRecipe {...printRecipeProps} />
       </div>
     </div>
   );
