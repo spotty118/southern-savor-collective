@@ -41,6 +41,13 @@ export const RecipeCard = ({
     onClick?.();
   };
 
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    console.log("Image failed to load:", image);
+    const img = e.target as HTMLImageElement;
+    img.src = "/placeholder.svg";
+    img.onerror = null; // Prevent infinite loop if placeholder also fails
+  };
+
   return (
     <div 
       className="recipe-card group vintage-paper cursor-pointer transform transition-all duration-300 hover:-translate-y-1"
@@ -48,13 +55,10 @@ export const RecipeCard = ({
     >
       <div className="relative overflow-hidden">
         <img 
-          src={image} 
+          src={image || "/placeholder.svg"}
           alt={title}
           className="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105"
-          onError={(e) => {
-            const img = e.target as HTMLImageElement;
-            img.src = "/placeholder.svg";
-          }}
+          onError={handleImageError}
         />
         <div className="absolute right-2 top-2 flex gap-2">
           {canEdit && (
