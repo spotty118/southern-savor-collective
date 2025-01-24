@@ -20,34 +20,27 @@ serve(async (req) => {
       throw new Error('Only instruction enhancement is supported');
     }
 
-    // Parse instructions array
     const instructions = Array.isArray(content) ? content : [content];
     const enhancedInstructions: string[] = [];
 
-    // Format ingredients for context
     const ingredientsList = ingredients 
       ? ingredients.map((ing: any) => `${ing.amount} ${ing.unit} ${ing.item}`).join('\n')
       : '';
 
-    // Enhance each instruction individually
     for (const instruction of instructions) {
-      const prompt = `Enhance this cooking instruction with clear details and visual cues:
+      const prompt = `Enhance this instruction to be clear and practical:
 
-Available Ingredients:
+Ingredients:
 ${ingredientsList}
 
 Instruction: "${instruction}"
 
-Guidelines:
-1. Keep exact meaning and core step
-2. Add visual cues (color changes, textures)
-3. Include timing indicators
-4. Add technique details
-5. Keep practical and clear
-6. Be concise but complete
-7. Only use listed ingredients
-
-Response:`;
+Make it:
+1. Clear and direct
+2. Include visual cues
+3. Add timing if needed
+4. Keep original meaning
+5. Only use listed ingredients`;
 
       console.log('Sending prompt to OpenAI:', prompt);
 
@@ -62,7 +55,7 @@ Response:`;
           messages: [
             {
               "role": "system",
-              "content": "You are a cooking expert. Enhance instructions to be clear and practical. Be direct and concise."
+              "content": "You are a cooking expert. Be direct and concise. No introductions or conclusions."
             },
             {
               "role": "user",
@@ -82,13 +75,17 @@ Response:`;
       }
 
       const enhancedInstruction = data.choices[0].message?.content?.trim()
-        ?.replace(/^["']|["']$/g, '') // Remove quotes
-        ?.replace(/^\d+\.\s*/, '') // Remove leading numbers
-        ?.replace(/^(By following these steps,\s*)/i, '') // Remove "By following these steps"
-        ?.replace(/^(Enhanced Instruction:\s*)/i, '') // Remove "Enhanced Instruction:"
-        ?.replace(/^(Here's the enhanced instruction:\s*)/i, '') // Remove "Here's the enhanced instruction:"
-        ?.replace(/^(Enhanced version:\s*)/i, '') // Remove "Enhanced version:"
-        ?? instruction; // Fallback to original if enhancement fails
+        ?.replace(/^["']|["']$/g, '')
+        ?.replace(/^\d+\.\s*/, '')
+        ?.replace(/^(By following these steps,\s*)/i, '')
+        ?.replace(/^(Enhanced Instruction:\s*)/i, '')
+        ?.replace(/^(Here's the enhanced instruction:\s*)/i, '')
+        ?.replace(/^(Enhanced version:\s*)/i, '')
+        ?.replace(/^(Instructions?:?\s*)/i, '')
+        ?.replace(/^(Steps?:?\s*)/i, '')
+        ?.replace(/^(Directions?:?\s*)/i, '')
+        ?.replace(/^(Method:?\s*)/i, '')
+        ?? instruction;
 
       enhancedInstructions.push(enhancedInstruction);
     }
