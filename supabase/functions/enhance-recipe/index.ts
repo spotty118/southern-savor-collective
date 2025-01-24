@@ -16,24 +16,14 @@ serve(async (req) => {
     const { content, type, ingredients } = await req.json();
     console.log('Received request:', { type, content, ingredients });
 
-    if (type !== 'instructions') {
-      throw new Error('Only instruction enhancement is supported');
-    }
-
-    const instructions = Array.isArray(content) ? content : [content];
-    const enhancedInstructions: string[] = [];
-
-    const ingredientsList = ingredients 
-      ? ingredients.map((ing: any) => `${ing.amount} ${ing.unit} ${ing.item}`).join('\n')
-      : '';
-
-    for (const instruction of instructions) {
-      const prompt = `Enhance this single cooking instruction step to be clear and natural, while preserving its unique actions and measurements:
+    const isInstructions = type === 'instructions';
+    const prompt = isInstructions 
+      ? `Enhance this single cooking instruction step to be clear and natural, while preserving its unique actions and measurements:
 
 Ingredients List:
-${ingredientsList}
+${ingredients ? ingredients.map((ing: any) => `${ing.amount} ${ing.unit} ${ing.item}`).join('\n') : ''}
 
-Original Step: "${instruction}"
+Original Step: "${content}"
 
 1. Preserve Unique Details
    - Keep all original measurements and actions intact.
@@ -57,57 +47,68 @@ Original Step: "${instruction}"
 
 6. Convert spelled-out numbers in measurements into numeric form
       
-7. For any mention of "degrees Fahrenheit," convert it to "°F" and keep the numeric value`;
-      
-      console.log('Sending prompt to OpenAI:', prompt);
+7. For any mention of "degrees Fahrenheit," convert it to "°F" and keep the numeric value`
+      : `Enhance this recipe description with Southern charm and warmth:
 
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${Deno.env.get('OPENAI_API_KEY')}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: "gpt-4o-mini",
-          messages: [
-            {
-              "role": "system",
-              "content": "You are a cooking expert that enhances recipe instructions. Keep each step's unique actions while making them clearer and more natural."
-            },
-            {
-              "role": "user",
-              "content": prompt
-            }
-          ],
-          temperature: 0.3, // Lower temperature for more consistent output
-        }),
-      });
+Original Description: "${content}"
 
-      const data = await response.json();
-      console.log('OpenAI response:', data);
-      
-      if (!data.choices?.[0]?.message?.content) {
-        console.error('No content received from OpenAI:', data);
-        throw new Error('No content received from OpenAI');
-      }
+Guidelines:
+1. Keep the core meaning intact
+2. Add warmth and Southern hospitality to the tone
+3. Make it inviting and personal
+4. Keep it concise and natural
+5. Don't add specific ingredients or steps
+6. Focus on the emotional appeal and tradition
+7. Maintain proper grammar and clarity`;
 
-      const enhancedInstruction = data.choices[0].message?.content?.trim()
-        ?.replace(/^["']|["']$/g, '')
-        ?.replace(/^\d+\.\s*/, '')
-        ?.replace(/^(Enhanced:?\s*)/i, '')
-        ?.replace(/^(Step:?\s*)/i, '')
-        ?.replace(/^(Instruction:?\s*)/i, '')
-        ?.replace(/\*\*/g, '')
-        ?.replace(/(\d+)\s*degrees?\s*Fahrenheit/gi, '$1°F')
-        ?? instruction;
+    console.log('Sending prompt to OpenAI:', prompt);
 
-      enhancedInstructions.push(enhancedInstruction);
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${Deno.env.get('OPENAI_API_KEY')}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: "gpt-4o-mini",
+        messages: [
+          {
+            "role": "system",
+            "content": isInstructions 
+              ? "You are a cooking expert that enhances recipe instructions. Keep each step's unique actions while making them clearer and more natural."
+              : "You are a Southern cookbook author who adds warmth and charm to recipe descriptions while keeping them authentic and inviting."
+          },
+          {
+            "role": "user",
+            "content": prompt
+          }
+        ],
+        temperature: 0.3,
+      }),
+    });
+
+    const data = await response.json();
+    console.log('OpenAI response:', data);
+    
+    if (!data.choices?.[0]?.message?.content) {
+      console.error('No content received from OpenAI:', data);
+      throw new Error('No content received from OpenAI');
     }
 
-    console.log('Enhanced instructions:', enhancedInstructions);
+    const enhancedContent = data.choices[0].message?.content?.trim()
+      ?.replace(/^["']|["']$/g, '')
+      ?.replace(/^\d+\.\s*/, '')
+      ?.replace(/^(Enhanced:?\s*)/i, '')
+      ?.replace(/^(Step:?\s*)/i, '')
+      ?.replace(/^(Instruction:?\s*)/i, '')
+      ?.replace(/\*\*/g, '')
+      ?.replace(/(\d+)\s*degrees?\s*Fahrenheit/gi, '$1°F')
+      ?? content;
+
+    console.log('Enhanced content:', enhancedContent);
 
     return new Response(
-      JSON.stringify({ enhancedContent: enhancedInstructions }),
+      JSON.stringify({ enhancedContent: isInstructions ? [enhancedContent] : enhancedContent }),
       { 
         headers: { 
           ...corsHeaders,
