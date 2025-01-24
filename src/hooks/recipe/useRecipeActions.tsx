@@ -2,7 +2,9 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
-import type { AISuggestionRow } from "@/types/supabase";
+import { Database } from "@/integrations/supabase/types";
+
+type AISuggestionRow = Database['public']['Tables']['recipe_ai_suggestions']['Row'];
 
 export const useRecipeActions = (
   id: string | undefined,
