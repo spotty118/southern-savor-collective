@@ -149,7 +149,7 @@ export const RecipeDetailContent = ({
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-semibold text-gray-900">Instructions</h2>
-            {currentUserId && onEnhanceInstructions && (
+            {currentUserId && onEnhanceInstructions && isRecipeOwner && (
               <AIEnhanceButton
                 content={recipe.instructions}
                 type="instructions"
