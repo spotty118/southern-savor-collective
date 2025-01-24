@@ -43,7 +43,7 @@ Original Step: "${instruction}"
 
 3. Convert Measurements
    - Change decimal measurements to fractions (e.g., 0.5 → ½).
-   - Convert spelled-out temperatures to numeric form with the °F symbol (e.g., “four hundred” → “400°F”).
+   - Convert spelled-out temperatures to numeric form with the °F symbol (e.g., "four hundred degrees Fahrenheit" → "400°F").
    - Use standard abbreviations (tbsp, tsp, cup, oz, lb, etc.).
 
 4. Remove Extras
@@ -57,7 +57,7 @@ Original Step: "${instruction}"
 
 6. Convert spelled-out numbers in measurements into numeric form
       
-7. For any mention of "degrees Fahrenheit," convert it to "°F" and keep the numeric value
+7. For any mention of "degrees Fahrenheit," convert it to "°F" and keep the numeric value`;
       
       console.log('Sending prompt to OpenAI:', prompt);
 
@@ -79,7 +79,7 @@ Original Step: "${instruction}"
               "content": prompt
             }
           ],
-          temperature: 0.4, // Lower temperature for more consistent output
+          temperature: 0.3, // Lower temperature for more consistent output
         }),
       });
 
@@ -98,6 +98,7 @@ Original Step: "${instruction}"
         ?.replace(/^(Step:?\s*)/i, '')
         ?.replace(/^(Instruction:?\s*)/i, '')
         ?.replace(/\*\*/g, '')
+        ?.replace(/(\d+)\s*degrees?\s*Fahrenheit/gi, '$1°F')
         ?? instruction;
 
       enhancedInstructions.push(enhancedInstruction);
