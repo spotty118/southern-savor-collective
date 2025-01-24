@@ -13,6 +13,7 @@ serve(async (req) => {
 
   try {
     const { content, type, singleInstruction } = await req.json();
+    console.log('Received request:', { type, singleInstruction, content });
 
     let prompt = '';
     if (type === 'instructions' && singleInstruction) {
@@ -28,6 +29,8 @@ ${content}
 
 Please provide an enhanced description that makes the recipe more inviting and authentic to Southern cuisine.`;
     }
+
+    console.log('Sending prompt to OpenAI:', prompt);
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -50,12 +53,15 @@ Please provide an enhanced description that makes the recipe more inviting and a
     });
 
     const data = await response.json();
+    console.log('OpenAI response:', data);
     
     if (!data.choices?.[0]?.message?.content) {
+      console.error('No content received from OpenAI:', data);
       throw new Error('No content received from OpenAI');
     }
 
     const enhancedContent = data.choices[0].message.content.trim();
+    console.log('Enhanced content:', enhancedContent);
 
     return new Response(
       JSON.stringify({ enhancedContent }),
