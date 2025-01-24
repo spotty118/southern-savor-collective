@@ -68,6 +68,9 @@ export const RecipeManagement = ({
   };
 
   const generateShareableLink = (recipeId: string) => {
+    // Reset any existing shareable link first
+    setShareableLink("");
+    
     const link = `${window.location.origin}/recipe/${recipeId}`;
     setShareableLink(link);
     navigator.clipboard.writeText(link);
@@ -75,6 +78,12 @@ export const RecipeManagement = ({
       title: "Link Copied!",
       description: "Shareable link has been copied to your clipboard",
     });
+  };
+
+  const handleAddNewRecipe = () => {
+    // Reset shareable link when adding a new recipe
+    setShareableLink("");
+    navigate("/create-recipe");
   };
 
   const canEditRecipe = (authorId: string) => {
@@ -88,7 +97,7 @@ export const RecipeManagement = ({
           <span>Recipe Management</span>
           <Button 
             variant="outline" 
-            onClick={() => navigate("/create-recipe")}
+            onClick={handleAddNewRecipe}
           >
             Add New Recipe
           </Button>
