@@ -12,15 +12,15 @@ serve(async (req) => {
   }
 
   try {
-    const { content, type } = await req.json();
+    const { content, type, singleInstruction } = await req.json();
 
     let prompt = '';
-    if (type === 'instructions') {
-      prompt = `As a Southern cooking expert, enhance these cooking instructions with more detailed steps, cooking tips, and Southern charm. Make it warm and inviting, like a grandmother sharing her secrets:
+    if (type === 'instructions' && singleInstruction) {
+      prompt = `As a Southern cooking expert, enhance this single cooking instruction with Southern charm, keeping it concise but warm. Make it sound like a friendly Southern cook giving directions:
 
 ${content}
 
-Please provide enhanced instructions that maintain the same steps but add more detail and Southern flair.`;
+Please provide ONE enhanced instruction that maintains the same meaning but adds Southern warmth. Keep it brief but clear.`;
     } else if (type === 'description') {
       prompt = `As a Southern food writer, enhance this recipe description with more warmth, charm, and storytelling elements that capture the essence of Southern cooking:
 
@@ -38,10 +38,10 @@ Please provide an enhanced description that makes the recipe more inviting and a
       body: JSON.stringify({
         model: 'gpt-4o-mini',
         messages: [
-          { role: 'system', content: 'You are a helpful Southern cooking expert who enhances recipe content with warmth and authenticity.' },
+          { role: 'system', content: 'You are a helpful Southern cooking expert who enhances recipe content with warmth and authenticity while keeping instructions clear and concise.' },
           { role: 'user', content: prompt }
         ],
-        max_tokens: 500
+        max_tokens: 200
       }),
     });
 

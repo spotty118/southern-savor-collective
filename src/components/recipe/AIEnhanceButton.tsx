@@ -25,7 +25,11 @@ export const AIEnhanceButton = ({
     setIsEnhancing(true);
     try {
       const { data, error } = await supabase.functions.invoke('enhance-recipe', {
-        body: { content, type, singleInstruction: type === "instructions" }
+        body: { 
+          content, 
+          type,
+          singleInstruction: type === "instructions"
+        }
       });
 
       if (error) throw error;
