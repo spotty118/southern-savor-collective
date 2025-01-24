@@ -18,10 +18,15 @@ export const InstructionsList = ({
   onInstructionChange,
   onInstructionsEnhancement,
 }: InstructionsListProps) => {
+  // Ensure all instructions are strings and handle null/undefined values
+  const validInstructions = instructions.map(instruction => 
+    instruction?.toString() || ""
+  );
+
   return (
     <div className="space-y-4">
       <label className="text-sm font-medium">Instructions</label>
-      {instructions.map((instruction, index) => (
+      {validInstructions.map((instruction, index) => (
         <div key={index} className="flex gap-2">
           <div className="flex-1">
             <Textarea
@@ -35,7 +40,7 @@ export const InstructionsList = ({
             variant="outline"
             size="icon"
             onClick={() => onRemoveInstruction(index)}
-            disabled={instructions.length === 1}
+            disabled={validInstructions.length === 1}
           >
             <Minus className="h-4 w-4" />
           </Button>
@@ -52,10 +57,10 @@ export const InstructionsList = ({
           Add Step
         </Button>
         <AIEnhanceButton
-          content={instructions}
+          content={validInstructions}
           type="instructions"
           onEnhanced={onInstructionsEnhancement}
-          disabled={instructions.some(i => !i.trim())}
+          disabled={validInstructions.some(i => !i?.trim?.())}
         />
       </div>
     </div>
