@@ -15,7 +15,7 @@ type AISuggestionRow = Database['public']['Tables']['recipe_ai_suggestions']['Ro
 interface Ingredient {
   item: string;
   unit: string;
-  amount: string; // Changed to string only to match RecipeDetailContent expectations
+  amount: string;
 }
 
 const isIngredient = (item: unknown): item is Ingredient => {
@@ -51,6 +51,32 @@ const RecipeDetail = () => {
   const [showAiDialog, setShowAiDialog] = useState(false);
   const [enhancing, setEnhancing] = useState(false);
   const [aiSuggestion, setAiSuggestion] = useState<Partial<AISuggestionRow> | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [isEditor, setIsEditor] = useState(false);
+
+  useEffect(() => {
+    const fetchUserRoles = async () => {
+      if (!user) return;
+      
+      try {
+        const { data: roles, error } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', user.id);
+
+        if (error) throw error;
+
+        if (roles) {
+          setIsAdmin(roles.some(role => role.role === 'admin'));
+          setIsEditor(roles.some(role => role.role === 'editor'));
+        }
+      } catch (error) {
+        console.error('Error fetching user roles:', error);
+      }
+    };
+
+    fetchUserRoles();
+  }, [user]);
 
   useEffect(() => {
     const fetchRecipe = async () => {
@@ -311,7 +337,7 @@ const RecipeDetail = () => {
   };
 
   const handleEdit = () => {
-    navigate(`/recipes/edit/${id}`);
+    navigate(`/recipe/${id}/edit`);
   };
 
   if (loading) {
@@ -361,8 +387,8 @@ const RecipeDetail = () => {
         <RecipeDetailContent
           recipe={recipe}
           currentUserId={user?.id || null}
-          isAdmin={false} // You might want to add logic to determine if user is admin
-          isEditor={false} // You might want to add logic to determine if user is editor
+          isAdmin={isAdmin}
+          isEditor={isEditor}
           onDelete={handleDelete}
           onEdit={handleEdit}
           isRecipeOwner={isRecipeOwner}
