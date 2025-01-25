@@ -22,3 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Lovable specific files
+lovable-tagger.log
+lovable-tagger.json
