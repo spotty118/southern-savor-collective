@@ -1,114 +1,41 @@
-import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "@/hooks/use-toast";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
-
-interface User {
-  id: string;
-  username: string;
-}
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 interface ChangeOwnerDialogProps {
-  isOpen: boolean;
+  open: boolean;
   onClose: () => void;
-  onConfirm: (newOwnerId: string) => Promise<void>;
-  currentOwnerId: string | null;
 }
 
-export const ChangeOwnerDialog = ({
-  isOpen,
-  onClose,
-  onConfirm,
-  currentOwnerId,
-}: ChangeOwnerDialogProps) => {
-  const [users, setUsers] = useState<User[]>([]);
-  const [selectedUserId, setSelectedUserId] = useState<string>("");
-  const [newUsername, setNewUsername] = useState<string>("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<"existing" | "new">("existing");
-
-  useEffect(() => {
-    const fetchUsers = async () => {
-      if (!isOpen) return;
-      
-      console.log("Fetching users for owner change dialog");
-      try {
-        const { data, error } = await supabase
-          .from("profiles")
-          .select("id, username")
-          .order("username");
-
-        if (error) throw error;
-        
-        const validUsers = (data || []).filter(
-          (user): user is User => 
-            user && 
-            typeof user.id === 'string' && 
-            typeof user.username === 'string'
-        );
-        
-        console.log("Fetched users:", validUsers.length);
-        setUsers(validUsers);
-      } catch (error) {
-        console.error("Error fetching users:", error);
-        toast({
-          title: "Error",
-          description: "Failed to load users",
-          variant: "destructive",
-        });
-      }
-    };
-
-    if (isOpen) {
-      fetchUsers();
-      setSelectedUserId("");
-      setNewUsername("");
-      setActiveTab("existing");
-    }
-  }, [isOpen]);
+const ChangeOwnerDialog = ({ open, onClose }: ChangeOwnerDialogProps) => {
+  const [username, setUsername] = useState("");
 
   const createNewUser = async (username: string): Promise<string> => {
     try {
       console.log("Creating new user with username:", username);
       
-      // First create auth user with a temporary email and password
+      // Create auth user with metadata including username and full_name
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: `${username.toLowerCase().replace(/\s+/g, '_')}_${Date.now()}@temp.com`,
         password: crypto.randomUUID(),
+        options: {
+          data: {
+            username: username.trim(),
+            full_name: username.trim(), // Using username as full_name for now
+          }
+        }
       });
 
       if (authError) throw authError;
       if (!authData.user) throw new Error("Failed to create auth user");
 
-      console.log("Created auth user:", authData.user.id);
+      console.log("Created auth user with metadata:", authData.user);
 
-      // The profile should be created automatically by the handle_new_user trigger
-      // Wait a moment for the trigger to complete
+      // Wait a moment for the handle_new_user trigger to complete
       await new Promise(resolve => setTimeout(resolve, 1000));
 
-      // Verify the profile was created
+      // Verify the profile was created with the correct data
       const { data: profile, error: profileError } = await supabase
         .from("profiles")
         .select()
@@ -126,110 +53,36 @@ export const ChangeOwnerDialog = ({
     }
   };
 
-  const handleConfirm = async () => {
-    if (activeTab === "existing" && !selectedUserId) {
-      toast({
-        title: "Error",
-        description: "Please select a user",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (activeTab === "new" && !newUsername.trim()) {
-      toast({
-        title: "Error",
-        description: "Please enter a username",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsLoading(true);
+  const handleSubmit = async () => {
     try {
-      if (activeTab === "new") {
-        const newUserId = await createNewUser(newUsername);
-        console.log("Created new user with ID:", newUserId);
-        await onConfirm(newUserId);
-      } else {
-        console.log("Updating recipe owner", { selectedUserId, currentOwnerId });
-        await onConfirm(selectedUserId);
-      }
-      
+      const userId = await createNewUser(username);
+      console.log("New user created with ID:", userId);
       onClose();
-      toast({
-        title: "Success",
-        description: "Recipe owner updated successfully",
-      });
     } catch (error) {
-      console.error("Error updating recipe owner:", error);
-      toast({
-        title: "Error",
-        description: "Failed to update recipe owner",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
+      console.error("Error creating user:", error);
     }
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={open} onOpenChange={onClose}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Change Recipe Owner</DialogTitle>
-          <DialogDescription>
-            Select an existing user or create a new one to be the recipe owner.
-          </DialogDescription>
+          <DialogTitle>Change Owner</DialogTitle>
         </DialogHeader>
-        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "existing" | "new")}>
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="existing">Existing User</TabsTrigger>
-            <TabsTrigger value="new">New User</TabsTrigger>
-          </TabsList>
-          <TabsContent value="existing" className="py-4">
-            <Select
-              value={selectedUserId}
-              onValueChange={setSelectedUserId}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select new owner" />
-              </SelectTrigger>
-              <SelectContent>
-                {users
-                  .filter(user => !currentOwnerId || user.id !== currentOwnerId)
-                  .map((user) => (
-                    <SelectItem key={user.id} value={user.id}>
-                      {user.username || 'Unnamed User'}
-                    </SelectItem>
-                  ))}
-              </SelectContent>
-            </Select>
-          </TabsContent>
-          <TabsContent value="new" className="py-4">
-            <Input
-              placeholder="Enter new username"
-              value={newUsername}
-              onChange={(e) => setNewUsername(e.target.value)}
-            />
-          </TabsContent>
-        </Tabs>
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose}>
-            Cancel
-          </Button>
-          <Button 
-            onClick={handleConfirm} 
-            disabled={
-              isLoading || 
-              (activeTab === "existing" && !selectedUserId) || 
-              (activeTab === "new" && !newUsername.trim())
-            }
-          >
-            {isLoading ? "Updating..." : "Update Owner"}
-          </Button>
-        </DialogFooter>
+        <input
+          type="text"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          placeholder="Enter username"
+          className="input"
+        />
+        <div className="flex justify-end mt-4">
+          <Button variant="outline" onClick={onClose}>Cancel</Button>
+          <Button onClick={handleSubmit}>Create User</Button>
+        </div>
       </DialogContent>
     </Dialog>
   );
 };
+
+export default ChangeOwnerDialog;
