@@ -8,7 +8,7 @@ interface ChangeOwnerDialogProps {
   onClose: () => void;
 }
 
-const ChangeOwnerDialog = ({ open, onClose }: ChangeOwnerDialogProps) => {
+export const ChangeOwnerDialog = ({ open, onClose }: ChangeOwnerDialogProps) => {
   const [username, setUsername] = useState("");
 
   const createNewUser = async (username: string): Promise<string> => {
@@ -84,5 +84,3 @@ const ChangeOwnerDialog = ({ open, onClose }: ChangeOwnerDialogProps) => {
     </Dialog>
   );
 };
-
-export default ChangeOwnerDialog;

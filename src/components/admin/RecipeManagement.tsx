@@ -84,7 +84,6 @@ export const RecipeManagement = ({
     console.log("Changing owner for recipe:", recipeId);
     const recipe = recipes.find(r => r.id === recipeId);
     
-    // Check if recipe exists and has a valid author
     if (!recipe) {
       console.error("Recipe not found:", recipeId);
       toast({
@@ -95,7 +94,6 @@ export const RecipeManagement = ({
       return;
     }
 
-    // If recipe has no author, we can still change ownership
     setSelectedRecipe(recipe);
     setShowOwnerDialog(true);
   };
@@ -156,15 +154,13 @@ export const RecipeManagement = ({
           onChangeOwner={handleChangeOwner}
           onDelete={handleDeleteRecipe}
         />
-        {showOwnerDialog && selectedRecipe && (
+        {showOwnerDialog && (
           <ChangeOwnerDialog
-            isOpen={showOwnerDialog}
+            open={showOwnerDialog}
             onClose={() => {
               setShowOwnerDialog(false);
               setSelectedRecipe(null);
             }}
-            onConfirm={handleUpdateOwner}
-            currentOwnerId={selectedRecipe.author?.id || null}
           />
         )}
       </CardContent>
