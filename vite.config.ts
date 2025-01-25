@@ -27,4 +27,13 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  build: {
+    rollupOptions: {
+      input: {
+        main: path.resolve(__dirname, 'index.html'),
+      },
+    },
+    // Ensure _redirects is copied to build output
+    copyPublicDir: true,
+  },
 }));
