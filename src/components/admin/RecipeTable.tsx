@@ -60,7 +60,7 @@ export const RecipeTable = ({
                 </div>
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                {recipe.author?.full_name || recipe.author?.username || "Anonymous"}
+                {recipe.author?.username || recipe.author?.full_name || "User not found"}
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                 {new Date(recipe.created_at).toLocaleDateString()}
