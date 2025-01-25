@@ -6,6 +6,7 @@ interface Recipe {
   author: { 
     id: string;
     username: string | null;
+    full_name: string | null;
   };
   created_at: string;
 }
@@ -59,7 +60,7 @@ export const RecipeTable = ({
                 </div>
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                {recipe.author?.username || "Anonymous"}
+                {recipe.author?.full_name || recipe.author?.username || "Anonymous"}
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                 {new Date(recipe.created_at).toLocaleDateString()}
