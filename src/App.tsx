@@ -9,7 +9,6 @@ import EditRecipe from "@/pages/EditRecipe";
 import { Toaster } from "@/components/ui/toaster";
 
 function App() {
-  // Remove basename prop since we're serving from root
   return (
     <Router>
       <Routes>
