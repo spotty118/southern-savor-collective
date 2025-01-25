@@ -1,18 +1,57 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+interface Profile {
+  id: string;
+  username: string | null;
+  full_name: string | null;
+}
 
 interface ChangeOwnerDialogProps {
   open: boolean;
   onClose: () => void;
-  recipeId: string;  // Add recipeId prop
+  recipeId: string;
 }
 
 export const ChangeOwnerDialog = ({ open, onClose, recipeId }: ChangeOwnerDialogProps) => {
   const [username, setUsername] = useState("");
   const [loading, setLoading] = useState(false);
+  const [existingUsers, setExistingUsers] = useState<Profile[]>([]);
+  const [selectedUserId, setSelectedUserId] = useState<string>("");
+  const [mode, setMode] = useState<"select" | "create">("select");
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("profiles")
+          .select("id, username, full_name")
+          .order("username");
+
+        if (error) throw error;
+        setExistingUsers(data || []);
+      } catch (error) {
+        console.error("Error fetching users:", error);
+        toast({
+          title: "Error",
+          description: "Failed to fetch existing users",
+          variant: "destructive",
+        });
+      }
+    };
+
+    fetchUsers();
+  }, []);
 
   const createNewUser = async (username: string): Promise<string> => {
     try {
@@ -75,7 +114,7 @@ export const ChangeOwnerDialog = ({ open, onClose, recipeId }: ChangeOwnerDialog
   };
 
   const handleSubmit = async () => {
-    if (!username.trim()) {
+    if (mode === "create" && !username.trim()) {
       toast({
         title: "Error",
         description: "Please enter a username",
@@ -84,10 +123,22 @@ export const ChangeOwnerDialog = ({ open, onClose, recipeId }: ChangeOwnerDialog
       return;
     }
 
+    if (mode === "select" && !selectedUserId) {
+      toast({
+        title: "Error",
+        description: "Please select a user",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setLoading(true);
     try {
-      const userId = await createNewUser(username);
-      console.log("User created/found with ID:", userId);
+      const userId = mode === "create" 
+        ? await createNewUser(username)
+        : selectedUserId;
+
+      console.log("User selected/created with ID:", userId);
       
       // Update the recipe's author_id
       const { error: updateError } = await supabase
@@ -125,20 +176,56 @@ export const ChangeOwnerDialog = ({ open, onClose, recipeId }: ChangeOwnerDialog
         <DialogHeader>
           <DialogTitle>Change Owner</DialogTitle>
         </DialogHeader>
-        <input
-          type="text"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          placeholder="Enter username"
-          className="input w-full px-3 py-2 border rounded-md"
-        />
-        <div className="flex justify-end gap-2 mt-4">
-          <Button variant="outline" onClick={onClose} disabled={loading}>
-            Cancel
-          </Button>
-          <Button onClick={handleSubmit} disabled={loading}>
-            {loading ? "Processing..." : "Select/Create User"}
-          </Button>
+        
+        <div className="space-y-4">
+          <div className="flex gap-2">
+            <Button 
+              variant={mode === "select" ? "default" : "outline"}
+              onClick={() => setMode("select")}
+              className="flex-1"
+            >
+              Select Existing
+            </Button>
+            <Button 
+              variant={mode === "create" ? "default" : "outline"}
+              onClick={() => setMode("create")}
+              className="flex-1"
+            >
+              Create New
+            </Button>
+          </div>
+
+          {mode === "select" ? (
+            <Select onValueChange={setSelectedUserId} value={selectedUserId}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select a user" />
+              </SelectTrigger>
+              <SelectContent>
+                {existingUsers.map((user) => (
+                  <SelectItem key={user.id} value={user.id}>
+                    {user.username || user.full_name || "Unnamed User"}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          ) : (
+            <input
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              placeholder="Enter username"
+              className="input w-full px-3 py-2 border rounded-md"
+            />
+          )}
+
+          <div className="flex justify-end gap-2 mt-4">
+            <Button variant="outline" onClick={onClose} disabled={loading}>
+              Cancel
+            </Button>
+            <Button onClick={handleSubmit} disabled={loading}>
+              {loading ? "Processing..." : "Change Owner"}
+            </Button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
