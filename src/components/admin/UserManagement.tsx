@@ -78,13 +78,20 @@ export const UserManagement = ({ users }: UserManagementProps) => {
     if (!selectedUser) return;
 
     try {
-      // Delete from profiles first (this will cascade to user_roles)
+      // First delete from profiles (this will cascade to user_roles and other related tables)
       const { error: profileError } = await supabase
         .from('profiles')
         .delete()
         .eq('id', selectedUser.id);
 
       if (profileError) throw profileError;
+
+      // Then delete from auth.users using admin API
+      const { error: authError } = await supabase.auth.admin.deleteUser(
+        selectedUser.id
+      );
+
+      if (authError) throw authError;
 
       toast({
         title: "Success",
