@@ -78,13 +78,29 @@ export const UserManagement = ({ users }: UserManagementProps) => {
     if (!selectedUser) return;
 
     try {
-      // First delete all recipe versions created by the user
+      console.log('Starting user deletion process for:', selectedUser.id);
+
+      // First, delete all recipes authored by the user
+      const { error: recipesError } = await supabase
+        .from('recipes')
+        .delete()
+        .eq('author_id', selectedUser.id);
+
+      if (recipesError) {
+        console.error('Error deleting recipes:', recipesError);
+        throw recipesError;
+      }
+
+      // Then delete all recipe versions created by the user
       const { error: versionsError } = await supabase
         .from('recipe_versions')
         .delete()
         .eq('created_by', selectedUser.id);
 
-      if (versionsError) throw versionsError;
+      if (versionsError) {
+        console.error('Error deleting recipe versions:', versionsError);
+        throw versionsError;
+      }
 
       // Then delete from profiles (this will cascade to user_roles and other related tables)
       const { error: profileError } = await supabase
@@ -92,14 +108,20 @@ export const UserManagement = ({ users }: UserManagementProps) => {
         .delete()
         .eq('id', selectedUser.id);
 
-      if (profileError) throw profileError;
+      if (profileError) {
+        console.error('Error deleting profile:', profileError);
+        throw profileError;
+      }
 
       // Call the edge function to delete the auth user
       const { error: deleteError } = await supabase.functions.invoke('delete-user', {
         body: { userId: selectedUser.id }
       });
 
-      if (deleteError) throw deleteError;
+      if (deleteError) {
+        console.error('Error calling delete-user function:', deleteError);
+        throw deleteError;
+      }
 
       toast({
         title: "Success",
