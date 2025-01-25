@@ -52,14 +52,14 @@ export const RecipeCard = ({
 
   return (
     <div 
-      className="recipe-card group vintage-paper cursor-pointer transform transition-all duration-300 hover:-translate-y-1"
+      className="recipe-card group vintage-paper cursor-pointer transform transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)]"
       onClick={handleClick}
     >
       <div className="relative overflow-hidden">
         <img 
           src={image || "/placeholder.svg"}
           alt={title}
-          className="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105"
+          className="w-full h-52 object-cover transition-transform duration-300 group-hover:scale-105"
           onError={handleImageError}
           loading="lazy"
         />
@@ -89,17 +89,17 @@ export const RecipeCard = ({
             <Heart className={cn("h-5 w-5", isLoved ? "fill-red-500 text-red-500" : "text-gray-500")} />
           </Button>
         </div>
-        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
       </div>
-      <div className="recipe-card-content p-4">
-        <h3 className="mb-2 text-xl font-semibold font-display text-accent group-hover:text-[#FEC6A1] transition-colors duration-300 heading-underline">
+      <div className="recipe-card-content p-6">
+        <h3 className="mb-3 text-xl font-semibold font-display text-accent group-hover:text-[#FEC6A1] transition-colors duration-300 heading-underline">
           {title}
         </h3>
-        <p className="mb-4 text-sm text-gray-600 line-clamp-2">{description}</p>
+        <p className="mb-5 text-gray-600 line-clamp-2 leading-relaxed">{description}</p>
         <div className="space-y-2">
-          <div className="flex items-center justify-between text-sm text-gray-500">
-            <span className="font-script text-lg">By {author}</span>
-            <div className="flex gap-4">
+          <div className="flex items-center justify-between text-gray-600">
+            <span className="font-script text-lg">From {author}'s Kitchen</span>
+            <div className="flex gap-6">
               <span className="font-script text-base">{cookTime}</span>
               <span className="font-script text-base text-[#FEC6A1]">{difficulty}</span>
             </div>
