@@ -22,6 +22,9 @@ export const RecipeHeader = ({
 }: RecipeHeaderProps) => {
   const navigate = useNavigate();
   
+  // Add console log to debug user data
+  console.log("RecipeHeader user data:", user);
+  
   return (
     <div className="mb-12 bg-gradient-to-b from-[#FDE1D3] to-transparent pb-6">
       <div className="container mx-auto">
@@ -46,7 +49,7 @@ export const RecipeHeader = ({
                   className="border-[#FEC6A1] text-accent hover:bg-[#FDE1D3]"
                 >
                   <UserRound className="mr-2 h-4 w-4" />
-                  Profile
+                  {user.user_metadata?.full_name || user.user_metadata?.username || "Profile"}
                 </Button>
                 {isAdmin && (
                   <Button 
