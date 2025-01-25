@@ -108,9 +108,13 @@ const Index = () => {
 
   useEffect(() => {
     const fetchFavorites = async () => {
-      if (!user) return;
+      if (!user?.id) {
+        console.log("No user ID available for fetching favorites");
+        return;
+      }
 
       try {
+        console.log("Fetching favorites for user:", user.id);
         const { data, error } = await supabase
           .from("favorites")
           .select("recipe_id")
@@ -121,35 +125,47 @@ const Index = () => {
           return;
         }
         
-        setFavorites(new Set(data?.map((fav) => fav.recipe_id) || []));
+        const favoriteIds = new Set(data?.map((fav) => fav.recipe_id) || []);
+        console.log("Fetched favorites:", favoriteIds);
+        setFavorites(favoriteIds);
       } catch (error: any) {
-        console.error("Error fetching favorites:", error);
+        console.error("Error in fetchFavorites:", error);
       }
     };
 
     fetchFavorites();
-  }, [user]);
+  }, [user?.id]); // Changed dependency to user?.id
 
   useEffect(() => {
+    console.log("Setting up auth state listener");
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
+      const currentUser = session?.user ?? null;
+      console.log("Current user from session:", currentUser);
+      setUser(currentUser);
     });
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
+      const currentUser = session?.user ?? null;
+      console.log("Auth state changed, new user:", currentUser);
+      setUser(currentUser);
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
-  // Add back user roles checking
   useEffect(() => {
     const checkUserRoles = async () => {
-      if (!user) return;
+      if (!user?.id) {
+        console.log("No user ID available for checking roles");
+        setIsAdmin(false);
+        setIsEditor(false);
+        return;
+      }
       
       try {
+        console.log("Checking roles for user:", user.id);
         const { data, error } = await supabase
           .from("user_roles")
           .select("role")
@@ -157,6 +173,7 @@ const Index = () => {
 
         if (!error && data) {
           const roles = data.map(r => r.role);
+          console.log("User roles:", roles);
           setIsAdmin(roles.includes('admin'));
           setIsEditor(roles.includes('editor'));
         }
@@ -166,10 +183,10 @@ const Index = () => {
     };
 
     checkUserRoles();
-  }, [user]);
+  }, [user?.id]); // Changed dependency to user?.id
 
   const handleLoveClick = async (recipeId: string) => {
-    if (!user) {
+    if (!user?.id) {
       toast({
         title: "Please login",
         description: "You need to be logged in to favorite recipes",
@@ -254,7 +271,7 @@ const Index = () => {
                 ? "No recipes found in the cookbook yet"
                 : `No ${selectedFilter.toLowerCase()} recipes found`}
             </p>
-            {user && selectedFilter === "All Y'all" && (
+            {user?.id && selectedFilter === "All Y'all" && (
               <Button 
                 onClick={() => navigate("/create-recipe")} 
                 className="bg-[#FEC6A1] text-accent hover:bg-[#FDE1D3] transform transition-transform duration-200 hover:scale-105"
