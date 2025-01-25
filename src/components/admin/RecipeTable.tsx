@@ -17,6 +17,7 @@ interface RecipeTableProps {
   onShare: (recipeId: string) => void;
   onView: (recipeId: string) => void;
   onEdit: (recipeId: string) => void;
+  onChangeOwner: (recipeId: string) => void;
   onDelete: (recipeId: string) => void;
 }
 
@@ -27,6 +28,7 @@ export const RecipeTable = ({
   onShare,
   onView,
   onEdit,
+  onChangeOwner,
   onDelete,
 }: RecipeTableProps) => {
   return (
@@ -71,6 +73,7 @@ export const RecipeTable = ({
                   onShare={onShare}
                   onView={onView}
                   onEdit={onEdit}
+                  onChangeOwner={onChangeOwner}
                   onDelete={onDelete}
                 />
               </td>

@@ -9,6 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { ChangeOwnerDialog } from "./ChangeOwnerDialog";
 import { RecipeTable } from "./RecipeTable";
 
 interface Recipe {
@@ -36,6 +37,8 @@ export const RecipeManagement = ({
 }: RecipeManagementProps) => {
   const navigate = useNavigate();
   const [shareableLink, setShareableLink] = useState<string>("");
+  const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
+  const [showOwnerDialog, setShowOwnerDialog] = useState(false);
   
   const handleDeleteRecipe = async (recipeId: string) => {
     try {
@@ -77,6 +80,42 @@ export const RecipeManagement = ({
     navigate("/create-recipe");
   };
 
+  const handleChangeOwner = (recipeId: string) => {
+    const recipe = recipes.find(r => r.id === recipeId);
+    if (recipe) {
+      setSelectedRecipe(recipe);
+      setShowOwnerDialog(true);
+    }
+  };
+
+  const handleUpdateOwner = async (newOwnerId: string) => {
+    if (!selectedRecipe || !isAdmin) {
+      throw new Error("Unauthorized or invalid recipe");
+    }
+
+    const { error } = await supabase
+      .from("recipes")
+      .update({ 
+        user_id: newOwnerId,
+        updated_at: new Date().toISOString()
+      })
+      .eq("id", selectedRecipe.id);
+
+    if (error) {
+      throw error;
+    }
+
+    // Update local state if needed
+    // This might require a refresh of the recipes list
+    // depending on your app's data management strategy
+
+    setShowOwnerDialog(false);
+    setSelectedRecipe(null);
+
+    // Optionally reload the page or refresh the recipes list
+    window.location.reload();
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -98,8 +137,17 @@ export const RecipeManagement = ({
           onShare={generateShareableLink}
           onView={(id) => navigate(`/recipe/${id}`)}
           onEdit={(id) => navigate(`/recipe/${id}/edit`)}
+          onChangeOwner={handleChangeOwner}
           onDelete={handleDeleteRecipe}
         />
+        {showOwnerDialog && selectedRecipe && (
+          <ChangeOwnerDialog
+            isOpen={showOwnerDialog}
+            onClose={() => setShowOwnerDialog(false)}
+            onConfirm={handleUpdateOwner}
+            currentOwnerId={selectedRecipe.author.id}
+          />
+        )}
       </CardContent>
     </Card>
   );

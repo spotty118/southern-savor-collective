@@ -1,4 +1,4 @@
-import { Share2, BookX, Edit2, Eye } from "lucide-react";
+import { Share2, BookX, Edit2, Eye, UserCog } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -15,6 +15,7 @@ interface RecipeActionButtonsProps {
   onShare: (recipeId: string) => void;
   onView: (recipeId: string) => void;
   onEdit: (recipeId: string) => void;
+  onChangeOwner: (recipeId: string) => void;
   onDelete: (recipeId: string) => void;
 }
 
@@ -26,6 +27,7 @@ export const RecipeActionButtons = ({
   onShare,
   onView,
   onEdit,
+  onChangeOwner,
   onDelete,
 }: RecipeActionButtonsProps) => {
   const canEditRecipe = isAdmin || currentUserId === authorId;
@@ -80,6 +82,25 @@ export const RecipeActionButtons = ({
             </TooltipTrigger>
             <TooltipContent>
               <p>Edit Recipe</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      )}
+
+      {isAdmin && (
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onChangeOwner(recipeId)}
+              >
+                <UserCog className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Change Owner</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
