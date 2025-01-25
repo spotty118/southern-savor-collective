@@ -46,6 +46,7 @@ export const UserManagement = ({ users }: UserManagementProps) => {
   const [resetPasswordDialog, setResetPasswordDialog] = useState(false);
   const [deleteUserDialog, setDeleteUserDialog] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
+  const [localUsers, setLocalUsers] = useState(users);
 
   const handleResetPassword = async () => {
     if (!selectedUser) return;
@@ -123,13 +124,16 @@ export const UserManagement = ({ users }: UserManagementProps) => {
         throw deleteError;
       }
 
+      // Update local state to remove the deleted user
+      setLocalUsers(prevUsers => prevUsers.filter(user => user.id !== selectedUser.id));
+
       toast({
         title: "Success",
         description: "User deleted successfully",
       });
 
-      // Reload the page to refresh the users list
-      window.location.reload();
+      setDeleteUserDialog(false);
+      setSelectedUser(null);
     } catch (error: any) {
       console.error('Error deleting user:', error);
       toast({
@@ -137,9 +141,6 @@ export const UserManagement = ({ users }: UserManagementProps) => {
         description: error.message,
         variant: "destructive",
       });
-    } finally {
-      setDeleteUserDialog(false);
-      setSelectedUser(null);
     }
   };
 
@@ -173,7 +174,7 @@ export const UserManagement = ({ users }: UserManagementProps) => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {users.map((user) => (
+              {localUsers.map((user) => (
                 <tr key={user.id}>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
