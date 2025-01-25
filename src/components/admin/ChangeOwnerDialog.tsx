@@ -62,7 +62,6 @@ export const ChangeOwnerDialog = ({
 
         if (error) throw error;
         
-        // Filter out null usernames and ensure all required fields are present
         const validUsers = (data || []).filter(
           (user): user is User => 
             user && 
@@ -90,6 +89,48 @@ export const ChangeOwnerDialog = ({
     }
   }, [isOpen]);
 
+  const createNewUser = async (username: string): Promise<string> => {
+    // Generate a UUID for the new user
+    const newUserId = crypto.randomUUID();
+    
+    try {
+      // First create auth user
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: `${username.toLowerCase().replace(/\s+/g, '_')}@temp.com`,
+        password: crypto.randomUUID(), // Generate a random password
+      });
+
+      if (authError) throw authError;
+      
+      if (!authData.user) {
+        throw new Error("Failed to create auth user");
+      }
+
+      // Create profile using the auth user's ID
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .insert([
+          {
+            id: authData.user.id,
+            username: username.trim(),
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          }
+        ])
+        .select()
+        .single();
+
+      if (profileError) throw profileError;
+      if (!profile) throw new Error("Failed to create profile");
+
+      console.log("Created new user:", profile);
+      return profile.id;
+    } catch (error) {
+      console.error("Error creating new user:", error);
+      throw error;
+    }
+  };
+
   const handleConfirm = async () => {
     if (activeTab === "existing" && !selectedUserId) {
       toast({
@@ -112,28 +153,9 @@ export const ChangeOwnerDialog = ({
     setIsLoading(true);
     try {
       if (activeTab === "new") {
-        // Generate a new UUID for the user
-        const newUserId = crypto.randomUUID();
-        
-        // Create new profile
-        const { data: newProfile, error: profileError } = await supabase
-          .from("profiles")
-          .insert([
-            { 
-              id: newUserId,
-              username: newUsername.trim(),
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString()
-            }
-          ])
-          .select()
-          .single();
-
-        if (profileError) throw profileError;
-        if (!newProfile?.id) throw new Error("Failed to create new profile");
-
-        console.log("Created new profile:", newProfile);
-        await onConfirm(newProfile.id);
+        const newUserId = await createNewUser(newUsername);
+        console.log("Created new user with ID:", newUserId);
+        await onConfirm(newUserId);
       } else {
         console.log("Updating recipe owner", { selectedUserId, currentOwnerId });
         await onConfirm(selectedUserId);
