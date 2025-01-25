@@ -144,6 +144,12 @@ export const UserManagement = ({ users }: UserManagementProps) => {
     }
   };
 
+  const handleEditProfile = (userId: string) => {
+    // Instead of using navigate directly, we'll construct the URL and use window.location
+    const editUrl = `/admin/users/${userId}/edit`;
+    window.location.href = editUrl;
+  };
+
   const handleSendEmail = async (email: string) => {
     // This is a placeholder for email functionality
     toast({
@@ -218,7 +224,7 @@ export const UserManagement = ({ users }: UserManagementProps) => {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => navigate(`/admin/users/${user.id}/edit`)}
+                        onClick={() => handleEditProfile(user.id)}
                       >
                         <Edit2 className="h-4 w-4 mr-2" />
                         Edit Profile
