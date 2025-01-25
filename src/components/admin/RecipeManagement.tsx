@@ -38,7 +38,7 @@ export const RecipeManagement = ({
 }: RecipeManagementProps) => {
   const navigate = useNavigate();
   const [shareableLink, setShareableLink] = useState<string>("");
-  const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
+  const [selectedRecipeId, setSelectedRecipeId] = useState<string | null>(null);
   const [showOwnerDialog, setShowOwnerDialog] = useState(false);
   
   const handleDeleteRecipe = async (recipeId: string) => {
@@ -83,52 +83,8 @@ export const RecipeManagement = ({
 
   const handleChangeOwner = (recipeId: string) => {
     console.log("Changing owner for recipe:", recipeId);
-    const recipe = recipes.find(r => r.id === recipeId);
-    
-    if (!recipe) {
-      console.error("Recipe not found:", recipeId);
-      toast({
-        title: "Error",
-        description: "Recipe not found",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setSelectedRecipe(recipe);
+    setSelectedRecipeId(recipeId);
     setShowOwnerDialog(true);
-  };
-
-  const handleUpdateOwner = async (newOwnerId: string) => {
-    if (!selectedRecipe || !isAdmin) {
-      console.error("Cannot update owner: missing recipe or not admin");
-      throw new Error("Unauthorized or invalid recipe");
-    }
-
-    console.log("Updating owner", {
-      recipeId: selectedRecipe.id,
-      newOwnerId,
-      currentOwnerId: selectedRecipe.author?.id || null
-    });
-
-    const { error } = await supabase
-      .from("recipes")
-      .update({ 
-        author_id: newOwnerId,
-        updated_at: new Date().toISOString()
-      })
-      .eq("id", selectedRecipe.id);
-
-    if (error) {
-      console.error("Error updating recipe owner:", error);
-      throw error;
-    }
-
-    setShowOwnerDialog(false);
-    setSelectedRecipe(null);
-
-    // Reload the page to refresh the recipes list
-    window.location.reload();
   };
 
   return (
@@ -155,13 +111,14 @@ export const RecipeManagement = ({
           onChangeOwner={handleChangeOwner}
           onDelete={handleDeleteRecipe}
         />
-        {showOwnerDialog && (
+        {showOwnerDialog && selectedRecipeId && (
           <ChangeOwnerDialog
             open={showOwnerDialog}
             onClose={() => {
               setShowOwnerDialog(false);
-              setSelectedRecipe(null);
+              setSelectedRecipeId(null);
             }}
+            recipeId={selectedRecipeId}
           />
         )}
       </CardContent>

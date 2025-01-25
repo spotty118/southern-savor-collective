@@ -7,15 +7,16 @@ import { toast } from "@/hooks/use-toast";
 interface ChangeOwnerDialogProps {
   open: boolean;
   onClose: () => void;
+  recipeId: string;  // Add recipeId prop
 }
 
-export const ChangeOwnerDialog = ({ open, onClose }: ChangeOwnerDialogProps) => {
+export const ChangeOwnerDialog = ({ open, onClose, recipeId }: ChangeOwnerDialogProps) => {
   const [username, setUsername] = useState("");
   const [loading, setLoading] = useState(false);
 
   const createNewUser = async (username: string): Promise<string> => {
     try {
-      console.log("Creating new user with username:", username);
+      console.log("Creating/finding user with username:", username);
       
       // First check if a profile with this username already exists
       const { data: existingProfile, error: profileError } = await supabase
@@ -87,20 +88,34 @@ export const ChangeOwnerDialog = ({ open, onClose }: ChangeOwnerDialogProps) => 
     try {
       const userId = await createNewUser(username);
       console.log("User created/found with ID:", userId);
+      
+      // Update the recipe's author_id
+      const { error: updateError } = await supabase
+        .from("recipes")
+        .update({ author_id: userId })
+        .eq("id", recipeId);
+
+      if (updateError) {
+        throw updateError;
+      }
+
       toast({
         title: "Success",
-        description: "User successfully selected/created",
+        description: "Recipe ownership successfully transferred",
       });
-      onClose();
+      
+      // Reload the page to reflect the changes
+      window.location.reload();
     } catch (error: any) {
-      console.error("Error creating user:", error);
+      console.error("Error transferring ownership:", error);
       toast({
         title: "Error",
-        description: error.message || "Failed to create/select user",
+        description: error.message || "Failed to transfer ownership",
         variant: "destructive",
       });
     } finally {
       setLoading(false);
+      onClose();
     }
   };
 
