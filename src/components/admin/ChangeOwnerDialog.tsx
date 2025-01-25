@@ -112,18 +112,15 @@ export const ChangeOwnerDialog = ({
     setIsLoading(true);
     try {
       if (activeTab === "new") {
-        // First get the current user's ID
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session?.user?.id) {
-          throw new Error("No authenticated user found");
-        }
-
-        // Create new profile using the current user's ID
+        // Generate a new UUID for the user
+        const newUserId = crypto.randomUUID();
+        
+        // Create new profile
         const { data: newProfile, error: profileError } = await supabase
           .from("profiles")
           .insert([
             { 
-              id: session.user.id,
+              id: newUserId,
               username: newUsername.trim(),
               created_at: new Date().toISOString(),
               updated_at: new Date().toISOString()
