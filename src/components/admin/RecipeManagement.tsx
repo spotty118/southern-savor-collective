@@ -18,6 +18,7 @@ interface Recipe {
   author: { 
     id: string;
     username: string | null;
+    full_name: string | null;
   } | null;
   created_at: string;
 }
