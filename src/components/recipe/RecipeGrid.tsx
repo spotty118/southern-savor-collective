@@ -44,6 +44,9 @@ export const RecipeGrid = ({
           (currentUserId && recipe.author_id === currentUserId)
         );
 
+        // Log the author information for debugging
+        console.log(`Recipe ${recipe.id} author:`, recipe.author);
+
         return (
           <RecipeCard
             key={recipe.id}

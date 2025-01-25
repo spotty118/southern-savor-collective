@@ -47,8 +47,8 @@ export const RecipeCard = ({
     img.src = "/placeholder.svg";
   };
 
-  // Log the image URL to help with debugging
-  console.log("Recipe image URL:", image);
+  // Log the author information to help with debugging
+  console.log("Recipe author:", author);
 
   return (
     <div 
@@ -98,7 +98,7 @@ export const RecipeCard = ({
         <p className="mb-5 text-gray-600 line-clamp-2 leading-relaxed">{description}</p>
         <div className="space-y-2">
           <div className="flex items-center justify-between text-gray-600">
-            <span className="font-script text-lg">From {author}'s Kitchen</span>
+            <span className="font-script text-lg">From {author || "Anonymous"}'s Kitchen</span>
             <div className="flex gap-6">
               <span className="font-script text-base">{cookTime}</span>
               <span className="font-script text-base text-[#FEC6A1]">{difficulty}</span>
