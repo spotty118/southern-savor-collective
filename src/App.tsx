@@ -9,8 +9,9 @@ import EditRecipe from "@/pages/EditRecipe";
 import { Toaster } from "@/components/ui/toaster";
 
 function App() {
+  // Remove basename prop since we're serving from root
   return (
-    <Router basename={import.meta.env.BASE_URL || "/"}>
+    <Router>
       <Routes>
         <Route path="/" element={<Index />} />
         <Route path="/auth" element={<Auth />} />

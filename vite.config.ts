@@ -5,15 +5,14 @@ import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
+  base: "/", // Explicitly set base URL to root
   server: {
     host: "::",
     port: 8080,
     headers: {
-      // Ensure correct MIME types for JavaScript modules
       "Content-Type": "application/javascript",
     },
     mimeTypes: {
-      // Correct MIME types for JavaScript modules
       "application/javascript": ["js", "mjs"],
       "text/javascript": ["js"],
     },
