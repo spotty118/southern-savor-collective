@@ -12,6 +12,11 @@ export default defineConfig(({ mode }) => ({
       // Ensure correct MIME types for JavaScript modules
       "Content-Type": "application/javascript",
     },
+    mimeTypes: {
+      // Correct MIME types for JavaScript modules
+      "application/javascript": ["js", "mjs"],
+      "text/javascript": ["js"],
+    },
   },
   plugins: [
     react(),
