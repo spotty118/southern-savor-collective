@@ -42,6 +42,9 @@ export const ChangeOwnerDialog = ({
 
   useEffect(() => {
     const fetchUsers = async () => {
+      if (!isOpen) return;
+      
+      console.log("Fetching users for owner change dialog");
       try {
         const { data, error } = await supabase
           .from("profiles")
@@ -49,7 +52,17 @@ export const ChangeOwnerDialog = ({
           .order("username");
 
         if (error) throw error;
-        setUsers(data as User[]);
+        
+        // Filter out null usernames and ensure all required fields are present
+        const validUsers = (data || []).filter(
+          (user): user is User => 
+            user && 
+            typeof user.id === 'string' && 
+            typeof user.username === 'string'
+        );
+        
+        console.log("Fetched users:", validUsers.length);
+        setUsers(validUsers);
       } catch (error) {
         console.error("Error fetching users:", error);
         toast({
@@ -76,8 +89,19 @@ export const ChangeOwnerDialog = ({
       return;
     }
 
+    if (!currentOwnerId) {
+      console.error("Current owner ID is missing");
+      toast({
+        title: "Error",
+        description: "Current owner information is missing",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsLoading(true);
     try {
+      console.log("Updating recipe owner", { selectedUserId, currentOwnerId });
       await onConfirm(selectedUserId);
       onClose();
       toast({
@@ -95,6 +119,12 @@ export const ChangeOwnerDialog = ({
       setIsLoading(false);
     }
   };
+
+  // Only render dialog content if we have a valid currentOwnerId
+  if (!currentOwnerId) {
+    console.error("ChangeOwnerDialog rendered without currentOwnerId");
+    return null;
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -118,7 +148,7 @@ export const ChangeOwnerDialog = ({
                 .filter(user => user.id !== currentOwnerId)
                 .map((user) => (
                   <SelectItem key={user.id} value={user.id}>
-                    {user.username}
+                    {user.username || 'Unnamed User'}
                   </SelectItem>
                 ))}
             </SelectContent>
