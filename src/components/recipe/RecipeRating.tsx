@@ -26,42 +26,55 @@ export const RecipeRating = ({ recipeId, userId, className = "" }: RecipeRatingP
 
   const fetchRatings = async () => {
     try {
+      console.log("Fetching ratings for recipe:", recipeId);
       const { data, error } = await supabase
         .from("ratings")
         .select("rating")
         .eq("recipe_id", recipeId);
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching ratings:", error);
+        return;
+      }
 
       if (data && data.length > 0) {
         const avg = data.reduce((acc, curr) => acc + curr.rating, 0) / data.length;
+        console.log("Average rating:", avg, "Total ratings:", data.length);
         setAverageRating(Math.round(avg * 10) / 10);
         setTotalRatings(data.length);
       }
     } catch (error) {
-      console.error("Error fetching ratings:", error);
+      console.error("Error in fetchRatings:", error);
     }
   };
 
   const fetchUserRating = async () => {
-    if (!userId) return;
+    if (!userId || !recipeId) {
+      console.log("Missing userId or recipeId for user rating fetch");
+      return;
+    }
 
     try {
+      console.log("Fetching user rating for recipe:", recipeId, "user:", userId);
       const { data, error } = await supabase
         .from("ratings")
         .select("rating")
         .eq("recipe_id", recipeId)
         .eq("user_id", userId)
-        .single();
+        .maybeSingle();
 
-      if (error && error.code !== "PGRST116") throw error;
+      if (error) {
+        console.error("Error fetching user rating:", error);
+        return;
+      }
 
       if (data) {
+        console.log("User rating found:", data.rating);
         setUserRating(data.rating);
         setRating(data.rating);
       }
     } catch (error) {
-      console.error("Error fetching user rating:", error);
+      console.error("Error in fetchUserRating:", error);
     }
   };
 
@@ -75,10 +88,11 @@ export const RecipeRating = ({ recipeId, userId, className = "" }: RecipeRatingP
     }
 
     try {
+      console.log("Handling rating:", value, "for recipe:", recipeId, "user:", userId);
       if (userRating) {
         const { error } = await supabase
           .from("ratings")
-          .update({ rating: value })
+          .update({ rating: value, updated_at: new Date().toISOString() })
           .eq("recipe_id", recipeId)
           .eq("user_id", userId);
 
