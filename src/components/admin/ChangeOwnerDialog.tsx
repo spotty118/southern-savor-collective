@@ -112,11 +112,19 @@ export const ChangeOwnerDialog = ({
     setIsLoading(true);
     try {
       if (activeTab === "new") {
-        // Create new profile
+        // Generate a UUID for the new profile
+        const newProfileId = crypto.randomUUID();
+        
+        // Create new profile with the generated ID
         const { data: newProfile, error: profileError } = await supabase
           .from("profiles")
           .insert([
-            { username: newUsername.trim() }
+            { 
+              id: newProfileId,
+              username: newUsername.trim(),
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString()
+            }
           ])
           .select()
           .single();
