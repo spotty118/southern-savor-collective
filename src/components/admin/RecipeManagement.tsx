@@ -18,7 +18,7 @@ interface Recipe {
   author: { 
     id: string;
     username: string | null;
-  };
+  } | null;
   created_at: string;
 }
 
@@ -83,18 +83,21 @@ export const RecipeManagement = ({
   const handleChangeOwner = (recipeId: string) => {
     console.log("Changing owner for recipe:", recipeId);
     const recipe = recipes.find(r => r.id === recipeId);
-    if (recipe && recipe.author && recipe.author.id) {
-      console.log("Selected recipe for owner change:", recipe);
-      setSelectedRecipe(recipe);
-      setShowOwnerDialog(true);
-    } else {
-      console.error("Invalid recipe or author data:", recipe);
+    
+    // Check if recipe exists and has a valid author
+    if (!recipe) {
+      console.error("Recipe not found:", recipeId);
       toast({
         title: "Error",
-        description: "Could not change recipe owner - invalid recipe data",
+        description: "Recipe not found",
         variant: "destructive",
       });
+      return;
     }
+
+    // If recipe has no author, we can still change ownership
+    setSelectedRecipe(recipe);
+    setShowOwnerDialog(true);
   };
 
   const handleUpdateOwner = async (newOwnerId: string) => {
@@ -106,7 +109,7 @@ export const RecipeManagement = ({
     console.log("Updating owner", {
       recipeId: selectedRecipe.id,
       newOwnerId,
-      currentOwnerId: selectedRecipe.author.id
+      currentOwnerId: selectedRecipe.author?.id || null
     });
 
     const { error } = await supabase
@@ -153,7 +156,7 @@ export const RecipeManagement = ({
           onChangeOwner={handleChangeOwner}
           onDelete={handleDeleteRecipe}
         />
-        {showOwnerDialog && selectedRecipe && selectedRecipe.author && (
+        {showOwnerDialog && selectedRecipe && (
           <ChangeOwnerDialog
             isOpen={showOwnerDialog}
             onClose={() => {
@@ -161,7 +164,7 @@ export const RecipeManagement = ({
               setSelectedRecipe(null);
             }}
             onConfirm={handleUpdateOwner}
-            currentOwnerId={selectedRecipe.author.id}
+            currentOwnerId={selectedRecipe.author?.id || null}
           />
         )}
       </CardContent>

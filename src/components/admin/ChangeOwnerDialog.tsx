@@ -27,7 +27,7 @@ interface ChangeOwnerDialogProps {
   isOpen: boolean;
   onClose: () => void;
   onConfirm: (newOwnerId: string) => Promise<void>;
-  currentOwnerId: string;
+  currentOwnerId: string | null;
 }
 
 export const ChangeOwnerDialog = ({
@@ -89,16 +89,6 @@ export const ChangeOwnerDialog = ({
       return;
     }
 
-    if (!currentOwnerId) {
-      console.error("Current owner ID is missing");
-      toast({
-        title: "Error",
-        description: "Current owner information is missing",
-        variant: "destructive",
-      });
-      return;
-    }
-
     setIsLoading(true);
     try {
       console.log("Updating recipe owner", { selectedUserId, currentOwnerId });
@@ -120,12 +110,6 @@ export const ChangeOwnerDialog = ({
     }
   };
 
-  // Only render dialog content if we have a valid currentOwnerId
-  if (!currentOwnerId) {
-    console.error("ChangeOwnerDialog rendered without currentOwnerId");
-    return null;
-  }
-
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent>
@@ -145,7 +129,7 @@ export const ChangeOwnerDialog = ({
             </SelectTrigger>
             <SelectContent>
               {users
-                .filter(user => user.id !== currentOwnerId)
+                .filter(user => !currentOwnerId || user.id !== currentOwnerId)
                 .map((user) => (
                   <SelectItem key={user.id} value={user.id}>
                     {user.username || 'Unnamed User'}
