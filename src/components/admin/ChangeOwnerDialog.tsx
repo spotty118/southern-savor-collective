@@ -90,40 +90,35 @@ export const ChangeOwnerDialog = ({
   }, [isOpen]);
 
   const createNewUser = async (username: string): Promise<string> => {
-    // Generate a UUID for the new user
-    const newUserId = crypto.randomUUID();
-    
     try {
-      // First create auth user
+      console.log("Creating new user with username:", username);
+      
+      // First create auth user with a temporary email and password
       const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: `${username.toLowerCase().replace(/\s+/g, '_')}@temp.com`,
-        password: crypto.randomUUID(), // Generate a random password
+        email: `${username.toLowerCase().replace(/\s+/g, '_')}_${Date.now()}@temp.com`,
+        password: crypto.randomUUID(),
       });
 
       if (authError) throw authError;
-      
-      if (!authData.user) {
-        throw new Error("Failed to create auth user");
-      }
+      if (!authData.user) throw new Error("Failed to create auth user");
 
-      // Create profile using the auth user's ID
+      console.log("Created auth user:", authData.user.id);
+
+      // The profile should be created automatically by the handle_new_user trigger
+      // Wait a moment for the trigger to complete
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      // Verify the profile was created
       const { data: profile, error: profileError } = await supabase
         .from("profiles")
-        .insert([
-          {
-            id: authData.user.id,
-            username: username.trim(),
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          }
-        ])
         .select()
+        .eq('id', authData.user.id)
         .single();
 
       if (profileError) throw profileError;
-      if (!profile) throw new Error("Failed to create profile");
+      if (!profile) throw new Error("Profile was not created");
 
-      console.log("Created new user:", profile);
+      console.log("Verified profile creation:", profile);
       return profile.id;
     } catch (error) {
       console.error("Error creating new user:", error);
