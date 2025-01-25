@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Dialog,
   DialogContent,
@@ -17,6 +18,12 @@ import {
 } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
 
 interface User {
   id: string;
@@ -38,7 +45,9 @@ export const ChangeOwnerDialog = ({
 }: ChangeOwnerDialogProps) => {
   const [users, setUsers] = useState<User[]>([]);
   const [selectedUserId, setSelectedUserId] = useState<string>("");
+  const [newUsername, setNewUsername] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState<"existing" | "new">("existing");
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -76,14 +85,25 @@ export const ChangeOwnerDialog = ({
     if (isOpen) {
       fetchUsers();
       setSelectedUserId("");
+      setNewUsername("");
+      setActiveTab("existing");
     }
   }, [isOpen]);
 
   const handleConfirm = async () => {
-    if (!selectedUserId) {
+    if (activeTab === "existing" && !selectedUserId) {
       toast({
         title: "Error",
-        description: "Please select a new owner",
+        description: "Please select a user",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (activeTab === "new" && !newUsername.trim()) {
+      toast({
+        title: "Error",
+        description: "Please enter a username",
         variant: "destructive",
       });
       return;
@@ -91,8 +111,26 @@ export const ChangeOwnerDialog = ({
 
     setIsLoading(true);
     try {
-      console.log("Updating recipe owner", { selectedUserId, currentOwnerId });
-      await onConfirm(selectedUserId);
+      if (activeTab === "new") {
+        // Create new profile
+        const { data: newProfile, error: profileError } = await supabase
+          .from("profiles")
+          .insert([
+            { username: newUsername.trim() }
+          ])
+          .select()
+          .single();
+
+        if (profileError) throw profileError;
+        if (!newProfile?.id) throw new Error("Failed to create new profile");
+
+        console.log("Created new profile:", newProfile);
+        await onConfirm(newProfile.id);
+      } else {
+        console.log("Updating recipe owner", { selectedUserId, currentOwnerId });
+        await onConfirm(selectedUserId);
+      }
+      
       onClose();
       toast({
         title: "Success",
@@ -116,35 +154,52 @@ export const ChangeOwnerDialog = ({
         <DialogHeader>
           <DialogTitle>Change Recipe Owner</DialogTitle>
           <DialogDescription>
-            Select a new owner for this recipe. This action can only be performed by administrators.
+            Select an existing user or create a new one to be the recipe owner.
           </DialogDescription>
         </DialogHeader>
-        <div className="py-4">
-          <Select
-            value={selectedUserId}
-            onValueChange={setSelectedUserId}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select new owner" />
-            </SelectTrigger>
-            <SelectContent>
-              {users
-                .filter(user => !currentOwnerId || user.id !== currentOwnerId)
-                .map((user) => (
-                  <SelectItem key={user.id} value={user.id}>
-                    {user.username || 'Unnamed User'}
-                  </SelectItem>
-                ))}
-            </SelectContent>
-          </Select>
-        </div>
+        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "existing" | "new")}>
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="existing">Existing User</TabsTrigger>
+            <TabsTrigger value="new">New User</TabsTrigger>
+          </TabsList>
+          <TabsContent value="existing" className="py-4">
+            <Select
+              value={selectedUserId}
+              onValueChange={setSelectedUserId}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select new owner" />
+              </SelectTrigger>
+              <SelectContent>
+                {users
+                  .filter(user => !currentOwnerId || user.id !== currentOwnerId)
+                  .map((user) => (
+                    <SelectItem key={user.id} value={user.id}>
+                      {user.username || 'Unnamed User'}
+                    </SelectItem>
+                  ))}
+              </SelectContent>
+            </Select>
+          </TabsContent>
+          <TabsContent value="new" className="py-4">
+            <Input
+              placeholder="Enter new username"
+              value={newUsername}
+              onChange={(e) => setNewUsername(e.target.value)}
+            />
+          </TabsContent>
+        </Tabs>
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>
           <Button 
             onClick={handleConfirm} 
-            disabled={!selectedUserId || isLoading}
+            disabled={
+              isLoading || 
+              (activeTab === "existing" && !selectedUserId) || 
+              (activeTab === "new" && !newUsername.trim())
+            }
           >
             {isLoading ? "Updating..." : "Update Owner"}
           </Button>
