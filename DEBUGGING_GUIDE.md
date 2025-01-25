@@ -136,3 +136,32 @@ To verify proper loading:
 - [ ] Browser cache cleared
 - [ ] Import paths using correct aliases
 - [ ] No syntax errors in module code
+
+## Production Deployment Steps
+
+### 1. Building the Application
+
+```bash
+# Correct build command
+npm run build
+
+# Common errors:
+npm run buld   # ❌ Typo in 'build'
+npm build      # ❌ Missing 'run'
+```
+
+The build process will create a `dist` directory containing optimized files.
+
+### 2. Serving the Production Build
+
+After building, ensure your web server (Nginx/Apache) is configured properly:
+
+1. Point your server root to the `dist` directory
+2. Configure MIME types BEFORE deploying:
+
+```nginx
+# /etc/nginx/mime.types or in server block
+types {
+    application/javascript    js mjs;
+}
+```
