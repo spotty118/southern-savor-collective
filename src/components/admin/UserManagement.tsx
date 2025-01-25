@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { UserCog, Mail, Edit2 } from "lucide-react";
+import { UserCog, Mail, Edit2, Trash2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -10,6 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import {
   Card,
@@ -17,6 +18,16 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface UserProfile {
   id: string;
@@ -33,6 +44,7 @@ interface UserManagementProps {
 export const UserManagement = ({ users }: UserManagementProps) => {
   const navigate = useNavigate();
   const [resetPasswordDialog, setResetPasswordDialog] = useState(false);
+  const [deleteUserDialog, setDeleteUserDialog] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
 
   const handleResetPassword = async () => {
@@ -59,6 +71,38 @@ export const UserManagement = ({ users }: UserManagementProps) => {
         description: error.message,
         variant: "destructive",
       });
+    }
+  };
+
+  const handleDeleteUser = async () => {
+    if (!selectedUser) return;
+
+    try {
+      // Delete from profiles first (this will cascade to user_roles)
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .delete()
+        .eq('id', selectedUser.id);
+
+      if (profileError) throw profileError;
+
+      toast({
+        title: "Success",
+        description: "User deleted successfully",
+      });
+
+      // Reload the page to refresh the users list
+      window.location.reload();
+    } catch (error: any) {
+      console.error('Error deleting user:', error);
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setDeleteUserDialog(false);
+      setSelectedUser(null);
     }
   };
 
@@ -98,7 +142,7 @@ export const UserManagement = ({ users }: UserManagementProps) => {
                     <div className="flex items-center">
                       <div>
                         <div className="text-sm font-medium text-gray-900">
-                          {user.full_name || "No name"}
+                          {user.full_name || user.username || "No name"}
                         </div>
                         <div className="text-sm text-gray-500">
                           {user.username || "No username"}
@@ -141,6 +185,17 @@ export const UserManagement = ({ users }: UserManagementProps) => {
                         <Edit2 className="h-4 w-4 mr-2" />
                         Edit Profile
                       </Button>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => {
+                          setSelectedUser(user);
+                          setDeleteUserDialog(true);
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Delete
+                      </Button>
                     </div>
                   </td>
                 </tr>
@@ -169,6 +224,29 @@ export const UserManagement = ({ users }: UserManagementProps) => {
             </div>
           </DialogContent>
         </Dialog>
+
+        <AlertDialog open={deleteUserDialog} onOpenChange={setDeleteUserDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete User</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to delete this user? This action cannot be undone.
+                User: {selectedUser?.full_name || selectedUser?.username}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={() => setDeleteUserDialog(false)}>
+                Cancel
+              </AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleDeleteUser}
+                className="bg-red-600 hover:bg-red-700"
+              >
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </CardContent>
     </Card>
   );
