@@ -81,17 +81,33 @@ export const RecipeManagement = ({
   };
 
   const handleChangeOwner = (recipeId: string) => {
+    console.log("Changing owner for recipe:", recipeId);
     const recipe = recipes.find(r => r.id === recipeId);
-    if (recipe) {
+    if (recipe && recipe.author && recipe.author.id) {
+      console.log("Selected recipe for owner change:", recipe);
       setSelectedRecipe(recipe);
       setShowOwnerDialog(true);
+    } else {
+      console.error("Invalid recipe or author data:", recipe);
+      toast({
+        title: "Error",
+        description: "Could not change recipe owner - invalid recipe data",
+        variant: "destructive",
+      });
     }
   };
 
   const handleUpdateOwner = async (newOwnerId: string) => {
     if (!selectedRecipe || !isAdmin) {
+      console.error("Cannot update owner: missing recipe or not admin");
       throw new Error("Unauthorized or invalid recipe");
     }
+
+    console.log("Updating owner", {
+      recipeId: selectedRecipe.id,
+      newOwnerId,
+      currentOwnerId: selectedRecipe.author.id
+    });
 
     const { error } = await supabase
       .from("recipes")
@@ -102,17 +118,14 @@ export const RecipeManagement = ({
       .eq("id", selectedRecipe.id);
 
     if (error) {
+      console.error("Error updating recipe owner:", error);
       throw error;
     }
-
-    // Update local state if needed
-    // This might require a refresh of the recipes list
-    // depending on your app's data management strategy
 
     setShowOwnerDialog(false);
     setSelectedRecipe(null);
 
-    // Optionally reload the page or refresh the recipes list
+    // Reload the page to refresh the recipes list
     window.location.reload();
   };
 
@@ -140,10 +153,13 @@ export const RecipeManagement = ({
           onChangeOwner={handleChangeOwner}
           onDelete={handleDeleteRecipe}
         />
-        {showOwnerDialog && selectedRecipe && (
+        {showOwnerDialog && selectedRecipe && selectedRecipe.author && (
           <ChangeOwnerDialog
             isOpen={showOwnerDialog}
-            onClose={() => setShowOwnerDialog(false)}
+            onClose={() => {
+              setShowOwnerDialog(false);
+              setSelectedRecipe(null);
+            }}
             onConfirm={handleUpdateOwner}
             currentOwnerId={selectedRecipe.author.id}
           />
