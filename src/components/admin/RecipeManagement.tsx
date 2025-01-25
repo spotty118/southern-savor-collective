@@ -96,7 +96,7 @@ export const RecipeManagement = ({
     const { error } = await supabase
       .from("recipes")
       .update({ 
-        user_id: newOwnerId,
+        author_id: newOwnerId,
         updated_at: new Date().toISOString()
       })
       .eq("id", selectedRecipe.id);
