@@ -78,7 +78,15 @@ export const UserManagement = ({ users }: UserManagementProps) => {
     if (!selectedUser) return;
 
     try {
-      // First delete from profiles (this will cascade to user_roles and other related tables)
+      // First delete all recipe versions created by the user
+      const { error: versionsError } = await supabase
+        .from('recipe_versions')
+        .delete()
+        .eq('created_by', selectedUser.id);
+
+      if (versionsError) throw versionsError;
+
+      // Then delete from profiles (this will cascade to user_roles and other related tables)
       const { error: profileError } = await supabase
         .from('profiles')
         .delete()
