@@ -86,12 +86,12 @@ export const UserManagement = ({ users }: UserManagementProps) => {
 
       if (profileError) throw profileError;
 
-      // Then delete from auth.users using admin API
-      const { error: authError } = await supabase.auth.admin.deleteUser(
-        selectedUser.id
-      );
+      // Call the edge function to delete the auth user
+      const { error: deleteError } = await supabase.functions.invoke('delete-user', {
+        body: { userId: selectedUser.id }
+      });
 
-      if (authError) throw authError;
+      if (deleteError) throw deleteError;
 
       toast({
         title: "Success",
