@@ -19,6 +19,11 @@ export function Footer() {
             >
               Terms of Service
             </Link>
+            <Link 
+              to="/data-deletion" 
+              className="hover:text-[#FEC6A1] transition-colors"
+            >
+              Data Deletion</Link>
           </div>
         </div>
       </div>

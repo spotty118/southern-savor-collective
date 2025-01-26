@@ -8,6 +8,7 @@ import RecipeDetail from "@/pages/RecipeDetail";
 import EditRecipe from "@/pages/EditRecipe";
 import Privacy from "@/pages/Privacy";
 import Terms from "@/pages/Terms";
+import DataDeletion from "@/pages/DataDeletion";
 import { Toaster } from "@/components/ui/toaster";
 
 function App() {
@@ -23,6 +24,7 @@ function App() {
         <Route path="/recipe/:id/edit" element={<EditRecipe />} />
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/terms" element={<Terms />} />
+        <Route path="/data-deletion" element={<DataDeletion />} />
       </Routes>
       <Toaster />
     </Router>
