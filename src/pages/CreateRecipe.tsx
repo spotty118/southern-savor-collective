@@ -34,6 +34,21 @@ const CreateRecipe = () => {
   const [defaultServings, setDefaultServings] = useState<number>(4);
 
   useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast({
+          title: "Please login",
+          description: "You need to be logged in to create recipes",
+        });
+        navigate("/auth");
+      }
+    };
+
+    checkAuth();
+  }, [navigate]);
+
+  useEffect(() => {
     const fetchCategories = async () => {
       try {
         const { data, error } = await supabase
@@ -42,6 +57,7 @@ const CreateRecipe = () => {
           .order("name");
 
         if (error) throw error;
+        console.log("Fetched categories:", data);
         setCategories(data || []);
       } catch (error: any) {
         console.error("Error fetching categories:", error);
@@ -86,8 +102,44 @@ const CreateRecipe = () => {
     setInstructions(newInstructions);
   };
 
+  const validateForm = () => {
+    if (!title.trim()) {
+      toast({
+        title: "Missing Title",
+        description: "Please enter a recipe title",
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    if (ingredients.some(ing => !ing.item.trim())) {
+      toast({
+        title: "Invalid Ingredients",
+        description: "Please fill in all ingredient names",
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    if (instructions.some(inst => !inst.trim())) {
+      toast({
+        title: "Invalid Instructions",
+        description: "Please fill in all instruction steps",
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    return true;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!validateForm()) {
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -104,6 +156,7 @@ const CreateRecipe = () => {
         return;
       }
 
+      // Create the recipe
       const { data: recipe, error: recipeError } = await supabase
         .from("recipes")
         .insert({
@@ -114,7 +167,6 @@ const CreateRecipe = () => {
           image_url: imageUrl,
           ingredients: ingredients as unknown as Json,
           instructions: instructions as unknown as Json,
-          author_id: user.id,
           default_servings: defaultServings,
         })
         .select()
@@ -122,6 +174,7 @@ const CreateRecipe = () => {
 
       if (recipeError) throw recipeError;
 
+      // Add categories if selected
       if (selectedCategories.length > 0 && recipe) {
         const { error: categoryError } = await supabase
           .from("recipe_categories")
@@ -169,56 +222,62 @@ const CreateRecipe = () => {
           </Button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <RecipeBasicInfo
-            title={title}
-            setTitle={setTitle}
-            description={description}
-            setDescription={setDescription}
-            cookTime={cookTime}
-            setCookTime={setCookTime}
-            difficulty={difficulty}
-            setDifficulty={setDifficulty}
-            imageUrl={imageUrl}
-            setImageUrl={setImageUrl}
-            defaultServings={defaultServings}
-            setDefaultServings={setDefaultServings}
-            onDescriptionEnhancement={(enhanced) => {
-              if (enhanced.length > 0) {
-                setDescription(enhanced[0]);
-              }
-            }}
-          />
+        <form 
+          onSubmit={handleSubmit} 
+          className="space-y-6 bg-white rounded-lg shadow-md p-6 border border-[#FEC6A1]/20"
+        >
+          <div className="space-y-6 font-medium">
+            <RecipeBasicInfo
+              title={title}
+              setTitle={setTitle}
+              description={description}
+              setDescription={setDescription}
+              cookTime={cookTime}
+              setCookTime={setCookTime}
+              difficulty={difficulty}
+              setDifficulty={setDifficulty}
+              imageUrl={imageUrl}
+              setImageUrl={setImageUrl}
+              defaultServings={defaultServings}
+              setDefaultServings={setDefaultServings}
+              onDescriptionEnhancement={(enhanced) => {
+                if (enhanced.length > 0) {
+                  setDescription(enhanced[0]);
+                }
+              }}
+              isEditing={true}
+            />
 
-          <RecipeCategories
-            categories={categories}
-            selectedCategories={selectedCategories}
-            setSelectedCategories={setSelectedCategories}
-          />
+            <RecipeCategories
+              categories={categories}
+              selectedCategories={selectedCategories}
+              setSelectedCategories={setSelectedCategories}
+            />
 
-          <IngredientsList
-            ingredients={ingredients}
-            onAddIngredient={handleAddIngredient}
-            onRemoveIngredient={handleRemoveIngredient}
-            onIngredientChange={handleIngredientChange}
-          />
+            <IngredientsList
+              ingredients={ingredients}
+              onAddIngredient={handleAddIngredient}
+              onRemoveIngredient={handleRemoveIngredient}
+              onIngredientChange={handleIngredientChange}
+            />
 
-          <InstructionsList
-            instructions={instructions}
-            ingredients={ingredients}
-            onAddInstruction={handleAddInstruction}
-            onRemoveInstruction={handleRemoveInstruction}
-            onInstructionChange={handleInstructionChange}
-            onInstructionsEnhancement={(enhanced) => {
-              if (enhanced.length > 0) {
-                setInstructions(enhanced);
-              }
-            }}
-          />
+            <InstructionsList
+              instructions={instructions}
+              ingredients={ingredients}
+              onAddInstruction={handleAddInstruction}
+              onRemoveInstruction={handleRemoveInstruction}
+              onInstructionChange={handleInstructionChange}
+              onInstructionsEnhancement={(enhanced) => {
+                if (enhanced.length > 0) {
+                  setInstructions(enhanced);
+                }
+              }}
+            />
+          </div>
 
           <Button
             type="submit"
-            className="w-full bg-[#FEC6A1] text-accent-foreground hover:bg-[#FDE1D3]"
+            className="w-full bg-[#FEC6A1] text-accent-foreground hover:bg-[#FDE1D3] font-semibold"
             disabled={loading}
           >
             {loading ? "Creating..." : "Share Recipe"}

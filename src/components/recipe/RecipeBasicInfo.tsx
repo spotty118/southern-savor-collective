@@ -8,6 +8,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { AIEnhanceButton } from "@/components/recipe/AIEnhanceButton";
+import { RecipeImageUpload } from "@/components/recipe/RecipeImageUpload";
 
 interface RecipeBasicInfoProps {
   title: string;
@@ -71,6 +72,17 @@ export const RecipeBasicInfo = ({
           <label className="text-sm font-medium">Difficulty</label>
           <p className="text-gray-700">{difficulty}</p>
         </div>
+
+        {imageUrl && (
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Recipe Image</label>
+            <img
+              src={imageUrl}
+              alt="Recipe"
+              className="rounded-md max-h-48 object-cover"
+            />
+          </div>
+        )}
       </>
     );
   }
@@ -140,15 +152,7 @@ export const RecipeBasicInfo = ({
         </Select>
       </div>
 
-      <div className="space-y-2">
-        <label className="text-sm font-medium">Image URL</label>
-        <Input
-          type="url"
-          value={imageUrl}
-          onChange={(e) => setImageUrl(e.target.value)}
-          placeholder="Enter image URL"
-        />
-      </div>
+      <RecipeImageUpload imageUrl={imageUrl} setImageUrl={setImageUrl} />
     </>
   );
 };

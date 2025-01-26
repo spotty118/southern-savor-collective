@@ -86,6 +86,35 @@ const Profile = () => {
     }
   };
 
+  const handleDashboardClick = async () => {
+    try {
+      // Verify the session is still active
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        console.log("No active session found");
+        toast({
+          title: "Error",
+          description: "Please log in to view your dashboard",
+          variant: "destructive",
+        });
+        navigate("/auth");
+        return;
+      }
+
+      console.log("Active session found, navigating to dashboard");
+      navigate("/dashboard");
+      
+    } catch (error) {
+      console.error("Error checking session:", error);
+      toast({
+        title: "Error",
+        description: "Failed to access dashboard",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -104,6 +133,18 @@ const Profile = () => {
         <Home className="mr-2 h-4 w-4" />
         Back to Home
       </Button>
+
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold text-accent">Profile Settings</h1>
+        <Button 
+          variant="outline"
+          onClick={handleDashboardClick}
+          className="bg-white hover:bg-gray-50"
+        >
+          View Dashboard
+        </Button>
+      </div>
+
       <Card className="mx-auto max-w-2xl">
         <CardHeader>
           <CardTitle>Profile Settings</CardTitle>
