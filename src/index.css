@@ -6,15 +6,15 @@
  
 @layer base {
   :root {
-    --background: 24 33% 97%;
+    --background: 24 33% 98%;
     --foreground: 20 14.3% 4.1%;
-    --card: 39 100% 99%;
+    --card: 32 100% 99%;
     --card-foreground: 20 14.3% 4.1%;
     --popover: 0 0% 100%;
     --popover-foreground: 20 14.3% 4.1%;
-    --primary: 20 95% 85%;
+    --primary: 20 100% 92%;
     --primary-foreground: 60 9.1% 97.8%;
-    --secondary: 43 85% 85%;
+    --secondary: 20 100% 85%;
     --secondary-foreground: 60 9.1% 97.8%;
     --muted: 60 4.8% 95.9%;
     --muted-foreground: 25 5.3% 44.7%;
@@ -24,13 +24,13 @@
     --destructive-foreground: 60 9.1% 97.8%;
     --border: 20 5.9% 90%;
     --input: 20 5.9% 90%;
-    --ring: 24 98% 81%;
+    --ring: 24 98% 85%;
     --radius: 0.75rem;
     
     /* Southern charm colors */
-    --butter-yellow: 43 95% 90%;
-    --sage-green: 120 30% 80%;
-    --warm-peach: 20 95% 90%;
+    --butter-yellow: 43 95% 92%;
+    --sage-green: 120 30% 82%;
+    --warm-peach: 20 100% 92%;
     --vintage-cream: 39 100% 98%;
   }
 }

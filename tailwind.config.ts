@@ -25,11 +25,11 @@ export default {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         primary: {
-          DEFAULT: "#FDE1D3", // Soft peach
+          DEFAULT: "#FFE4D6", // Warmer peach
           foreground: "#403E43",
         },
         secondary: {
-          DEFAULT: "#FEC6A1", // Warm orange
+          DEFAULT: "#FFCDB2", // Warmer orange
           foreground: "#403E43",
         },
         accent: {
@@ -37,7 +37,7 @@ export default {
           foreground: "#FDFCFB",
         },
         card: {
-          DEFAULT: "#FFFFFF",
+          DEFAULT: "#FFFBF8", // Slightly warmer white
           foreground: "#222222",
         },
       },
