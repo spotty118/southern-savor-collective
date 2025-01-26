@@ -86,33 +86,9 @@ const Profile = () => {
     }
   };
 
-  const handleDashboardClick = async () => {
-    try {
-      // Verify the session is still active
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        console.log("No active session found");
-        toast({
-          title: "Error",
-          description: "Please log in to view your dashboard",
-          variant: "destructive",
-        });
-        navigate("/auth");
-        return;
-      }
-
-      console.log("Active session found, navigating to dashboard");
-      navigate("/dashboard");
-      
-    } catch (error) {
-      console.error("Error checking session:", error);
-      toast({
-        title: "Error",
-        description: "Failed to access dashboard",
-        variant: "destructive",
-      });
-    }
+  const handleDashboardClick = () => {
+    console.log("Navigating to dashboard");
+    navigate("/dashboard");
   };
 
   if (loading) {
