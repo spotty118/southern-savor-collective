@@ -24,8 +24,9 @@ function App() {
         <Route path="/create-recipe" element={<CreateRecipe />} />
         <Route path="/recipe/:id" element={<RecipeDetail />} />
         <Route path="/recipe/:id/edit" element={<EditRecipe />} />
-        <Route path="/privacy-policy" element={<Privacy />} />
-        <Route path="/terms-of-service" element={<Terms />} />
+        <Route path="/admin" element={<Admin />} />
+        <Route path="/privacy" element={<Privacy />} />
+        <Route path="/terms" element={<Terms />} />
         <Route path="/data-deletion" element={<DataDeletion />} />
       </Routes>
     </Router>

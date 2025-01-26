@@ -1,6 +1,6 @@
 # Terms of Service
 
-URL: https://yalleat.com/terms-of-service
+URL: https://yalleat.com/terms
 
 Last updated: January 25, 2025
 
@@ -92,7 +92,7 @@ We are not liable for:
 ## 8. Privacy and Data Protection
 
 ### 8.1 Privacy Policy
-Our Privacy Policy (https://yalleat.com/privacy-policy) explains how we collect, use, and protect your personal information.
+Our Privacy Policy (https://yalleat.com/privacy) explains how we collect, use, and protect your personal information.
 
 ### 8.2 Data Deletion
 You have the right to request deletion of your personal data:
@@ -123,8 +123,8 @@ You have the right to request deletion of your personal data:
 
 - Website: https://yalleat.com
 - Email: support@southernsavorcollective.com
-- Privacy Policy: https://yalleat.com/privacy-policy
-- Terms of Service: https://yalleat.com/terms-of-service
+- Privacy Policy: https://yalleat.com/privacy
+- Terms of Service: https://yalleat.com/terms
 - Data Deletion: https://yalleat.com/data-deletion
 
 ## 12. Severability

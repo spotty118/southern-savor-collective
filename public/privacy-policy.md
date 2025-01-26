@@ -1,6 +1,6 @@
 # Privacy Policy
 
-URL: https://yalleat.com/privacy-policy
+URL: https://yalleat.com/privacy
 
 Last updated: January 25, 2025
 
@@ -132,8 +132,8 @@ Processing time: 30 days
 ### 7.2 Contact Us
 - Email: privacy@southernsavorcollective.com
 - Website: https://yalleat.com
-- Privacy Policy URL: https://yalleat.com/privacy-policy
-- Terms of Service: https://yalleat.com/terms-of-service
+- Privacy Policy URL: https://yalleat.com/privacy
+- Terms of Service: https://yalleat.com/terms
 - Data Deletion: https://yalleat.com/data-deletion
 
 ## 8. Governing Law
