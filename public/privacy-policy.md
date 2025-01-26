@@ -1,5 +1,7 @@
 # Privacy Policy
 
+URL: https://yalleat.com/privacy
+
 Last updated: January 25, 2025
 
 ## 1. Introduction
@@ -45,16 +47,17 @@ To exercise your rights:
 2. Use the privacy dashboard
 3. Contact us at privacy@southernsavorcollective.com
 
-### 3.2 Data Deletion
+### 3.3 Data Deletion
 You can request deletion of your data in two ways:
 1. Through your account:
    - Go to Profile Settings
    - Click "Delete Account"
 2. Submit a deletion request:
-   - Visit our Data Deletion page at /data-deletion
+   - Visit our Data Deletion page at https://yalleat.com/data-deletion
    - Fill out the request form
    - We will process your request within 30 days
-### 3.3 Account Termination
+
+### 3.4 Account Termination
 1. Go to account settings
 2. Select "Delete Account"
 3. Confirm deletion
@@ -127,9 +130,11 @@ Processing time: 30 days
 - Version tracking
 
 ### 7.2 Contact Us
-Email: privacy@southernsavorcollective.com
-Address: [Your Business Address]
-Phone: [Your Contact Number]
+- Email: privacy@southernsavorcollective.com
+- Website: https://yalleat.com
+- Privacy Policy URL: https://yalleat.com/privacy
+- Terms of Service: https://yalleat.com/terms
+- Data Deletion: https://yalleat.com/data-deletion
 
 ## 8. Governing Law
 

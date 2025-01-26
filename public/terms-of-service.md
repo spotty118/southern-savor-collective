@@ -1,5 +1,7 @@
 # Terms of Service
 
+URL: https://yalleat.com/terms
+
 Last updated: January 25, 2025
 
 ## 1. Agreement to Terms
@@ -47,7 +49,9 @@ We reserve the right to:
 ## 5. Account Termination
 
 ### 5.1 User-Initiated Termination
-- You may delete your account at any time
+- You may delete your account at any time via:
+  1. Account settings page
+  2. Data deletion request form at https://yalleat.com/data-deletion
 - Content deletion process begins immediately
 - 30-day recovery window before permanent deletion
 
@@ -85,39 +89,52 @@ We are not liable for:
 - Service interruptions
 - Third-party actions
 
-## 8. Dispute Resolution
+## 8. Privacy and Data Protection
 
-### 8.1 Governing Law
+### 8.1 Privacy Policy
+Our Privacy Policy (https://yalleat.com/privacy) explains how we collect, use, and protect your personal information.
+
+### 8.2 Data Deletion
+You have the right to request deletion of your personal data:
+- Through account settings
+- Via our data deletion page: https://yalleat.com/data-deletion
+- By contacting privacy@southernsavorcollective.com
+
+## 9. Dispute Resolution
+
+### 9.1 Governing Law
 - These terms are governed by [Your Jurisdiction] law
 - Disputes subject to exclusive jurisdiction
 
-### 8.2 Dispute Process
+### 9.2 Dispute Process
 1. Informal resolution attempt
 2. Written notice of dispute
 3. 30-day resolution period
 4. Legal proceedings if necessary
 
-## 9. Changes to Terms
+## 10. Changes to Terms
 
 - We may modify terms at any time
 - Changes effective upon posting
 - Continued use implies acceptance
 - Material changes notified via email
 
-## 10. Contact Information
+## 11. Contact Information
 
-Email: support@southernsavorcollective.com
-Address: [Your Business Address]
-Phone: [Your Contact Number]
+- Website: https://yalleat.com
+- Email: support@southernsavorcollective.com
+- Privacy Policy: https://yalleat.com/privacy
+- Terms of Service: https://yalleat.com/terms
+- Data Deletion: https://yalleat.com/data-deletion
 
-## 11. Severability
+## 12. Severability
 
 If any provision is found unenforceable:
 - Provision will be modified
 - Remaining terms stay in effect
 - Intent of terms preserved
 
-## 12. Entire Agreement
+## 13. Entire Agreement
 
 - These terms constitute the entire agreement
 - Supersede prior agreements
