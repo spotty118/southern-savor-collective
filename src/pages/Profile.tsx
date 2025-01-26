@@ -104,6 +104,18 @@ const Profile = () => {
         <Home className="mr-2 h-4 w-4" />
         Back to Home
       </Button>
+
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold text-accent">Profile Settings</h1>
+        <Button 
+          variant="outline"
+          onClick={() => navigate("/dashboard")}
+          className="bg-white hover:bg-gray-50"
+        >
+          View Dashboard
+        </Button>
+      </div>
+
       <Card className="mx-auto max-w-2xl">
         <CardHeader>
           <CardTitle>Profile Settings</CardTitle>
