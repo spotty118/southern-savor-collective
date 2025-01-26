@@ -222,57 +222,62 @@ const CreateRecipe = () => {
           </Button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <RecipeBasicInfo
-            title={title}
-            setTitle={setTitle}
-            description={description}
-            setDescription={setDescription}
-            cookTime={cookTime}
-            setCookTime={setCookTime}
-            difficulty={difficulty}
-            setDifficulty={setDifficulty}
-            imageUrl={imageUrl}
-            setImageUrl={setImageUrl}
-            defaultServings={defaultServings}
-            setDefaultServings={setDefaultServings}
-            onDescriptionEnhancement={(enhanced) => {
-              if (enhanced.length > 0) {
-                setDescription(enhanced[0]);
-              }
-            }}
-            isEditing={true}
-          />
+        <form 
+          onSubmit={handleSubmit} 
+          className="space-y-6 bg-white rounded-lg shadow-md p-6 border border-[#FEC6A1]/20"
+        >
+          <div className="space-y-6 font-medium">
+            <RecipeBasicInfo
+              title={title}
+              setTitle={setTitle}
+              description={description}
+              setDescription={setDescription}
+              cookTime={cookTime}
+              setCookTime={setCookTime}
+              difficulty={difficulty}
+              setDifficulty={setDifficulty}
+              imageUrl={imageUrl}
+              setImageUrl={setImageUrl}
+              defaultServings={defaultServings}
+              setDefaultServings={setDefaultServings}
+              onDescriptionEnhancement={(enhanced) => {
+                if (enhanced.length > 0) {
+                  setDescription(enhanced[0]);
+                }
+              }}
+              isEditing={true}
+            />
 
-          <RecipeCategories
-            categories={categories}
-            selectedCategories={selectedCategories}
-            setSelectedCategories={setSelectedCategories}
-          />
+            <RecipeCategories
+              categories={categories}
+              selectedCategories={selectedCategories}
+              setSelectedCategories={setSelectedCategories}
+            />
 
-          <IngredientsList
-            ingredients={ingredients}
-            onAddIngredient={handleAddIngredient}
-            onRemoveIngredient={handleRemoveIngredient}
-            onIngredientChange={handleIngredientChange}
-          />
+            <IngredientsList
+              ingredients={ingredients}
+              onAddIngredient={handleAddIngredient}
+              onRemoveIngredient={handleRemoveIngredient}
+              onIngredientChange={handleIngredientChange}
+            />
 
-          <InstructionsList
-            instructions={instructions}
-            ingredients={ingredients}
-            onAddInstruction={handleAddInstruction}
-            onRemoveInstruction={handleRemoveInstruction}
-            onInstructionChange={handleInstructionChange}
-            onInstructionsEnhancement={(enhanced) => {
-              if (enhanced.length > 0) {
-                setInstructions(enhanced);
-              }
-            }}
-          />
+            <InstructionsList
+              instructions={instructions}
+              ingredients={ingredients}
+              onAddInstruction={handleAddInstruction}
+              onRemoveInstruction={handleRemoveInstruction}
+              onInstructionChange={handleInstructionChange}
+              onInstructionsEnhancement={(enhanced) => {
+                if (enhanced.length > 0) {
+                  setInstructions(enhanced);
+                }
+              }}
+            />
+          </div>
 
           <Button
             type="submit"
-            className="w-full bg-[#FEC6A1] text-accent-foreground hover:bg-[#FDE1D3]"
+            className="w-full bg-[#FEC6A1] text-accent-foreground hover:bg-[#FDE1D3] font-semibold"
             disabled={loading}
           >
             {loading ? "Creating..." : "Share Recipe"}
