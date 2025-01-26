@@ -6,6 +6,8 @@ import Admin from "@/pages/Admin";
 import CreateRecipe from "@/pages/CreateRecipe";
 import RecipeDetail from "@/pages/RecipeDetail";
 import EditRecipe from "@/pages/EditRecipe";
+import Privacy from "@/pages/Privacy";
+import Terms from "@/pages/Terms";
 import { Toaster } from "@/components/ui/toaster";
 
 function App() {
@@ -19,6 +21,8 @@ function App() {
         <Route path="/create-recipe" element={<CreateRecipe />} />
         <Route path="/recipe/:id" element={<RecipeDetail />} />
         <Route path="/recipe/:id/edit" element={<EditRecipe />} />
+        <Route path="/privacy" element={<Privacy />} />
+        <Route path="/terms" element={<Terms />} />
       </Routes>
       <Toaster />
     </Router>

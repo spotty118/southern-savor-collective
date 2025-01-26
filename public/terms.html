@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terms of Service - Southern Savor Collective</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+            color: #333;
+        }
+        h1 {
+            color: #1a1a1a;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 0.5rem;
+        }
+        h2 {
+            color: #2a2a2a;
+            margin-top: 2rem;
+        }
+        h3 {
+            color: #3a3a3a;
+        }
+        ul, ol {
+            padding-left: 2rem;
+        }
+        .last-updated {
+            color: #666;
+            font-style: italic;
+        }
+        .section {
+            margin-bottom: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <div id="content"></div>
+    <script>
+        // Fetch and render the markdown content
+        fetch('terms-of-service.md')
+            .then(response => response.text())
+            .then(text => {
+                // Simple markdown to HTML conversion
+                const html = text
+                    .replace(/^# (.*$)/gm, '<h1>$1</h1>')
+                    .replace(/^## (.*$)/gm, '<h2>$1</h2>')
+                    .replace(/^### (.*$)/gm, '<h3>$1</h3>')
+                    .replace(/^\- (.*$)/gm, '<li>$1</li>')
+                    .replace(/<\/li>\n<li>/g, '</li><li>')
+                    .replace(/(<li>.*<\/li>)/gm, '<ul>$1</ul>')
+                    .replace(/<\/ul>\n<ul>/g, '');
+                document.getElementById('content').innerHTML = html;
+            });
+    </script>
+</body>
+</html>
