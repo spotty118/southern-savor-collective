@@ -8,13 +8,13 @@ export function Footer() {
           <p>© {new Date().getFullYear()} Southern Savor Collective. All rights reserved.</p>
           <div className="flex gap-4">
             <Link 
-              to="/privacy" 
+              to="/privacy-policy" 
               className="hover:text-[#FEC6A1] transition-colors"
             >
               Privacy Policy
             </Link>
             <Link 
-              to="/terms" 
+              to="/terms-of-service" 
               className="hover:text-[#FEC6A1] transition-colors"
             >
               Terms of Service
@@ -23,7 +23,8 @@ export function Footer() {
               to="/data-deletion" 
               className="hover:text-[#FEC6A1] transition-colors"
             >
-              Data Deletion</Link>
+              Data Deletion
+            </Link>
           </div>
         </div>
       </div>
