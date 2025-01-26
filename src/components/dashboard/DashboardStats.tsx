@@ -20,6 +20,13 @@ export const DashboardStats = ({ userId }: DashboardStatsProps) => {
       try {
         console.log("Fetching dashboard stats for user:", userId);
         
+        // Get session to verify authentication
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          console.error("No active session found");
+          return;
+        }
+
         const [favoritesData, ratingsData, recipesData] = await Promise.all([
           supabase
             .from("favorites")
@@ -41,12 +48,16 @@ export const DashboardStats = ({ userId }: DashboardStatsProps) => {
           recipes: recipesData.count,
         });
 
+        if (favoritesData.error) throw favoritesData.error;
+        if (ratingsData.error) throw ratingsData.error;
+        if (recipesData.error) throw recipesData.error;
+
         setStats({
           totalLikes: favoritesData.count || 0,
           totalRatings: ratingsData.count || 0,
           totalRecipes: recipesData.count || 0,
         });
-      } catch (error) {
+      } catch (error: any) {
         console.error("Error fetching dashboard stats:", error);
       } finally {
         setLoading(false);

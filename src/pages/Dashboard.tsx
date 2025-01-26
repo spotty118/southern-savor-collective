@@ -6,17 +6,29 @@ import { Home } from "lucide-react";
 import { DashboardStats } from "@/components/dashboard/DashboardStats";
 import { UserRecipesList } from "@/components/dashboard/UserRecipesList";
 import { useRecipeUser } from "@/hooks/recipe/useRecipeUser";
+import { toast } from "@/hooks/use-toast";
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { user } = useRecipeUser();
+  const { user, isAdmin } = useRecipeUser();
   const [activeTab, setActiveTab] = useState("created");
 
   useEffect(() => {
-    if (!user) {
-      navigate("/auth");
-    }
-  }, [user, navigate]);
+    const checkAuth = async () => {
+      if (!user) {
+        console.log("No user found, redirecting to auth");
+        navigate("/auth");
+        return;
+      }
+      
+      console.log("User authenticated:", {
+        id: user.id,
+        isAdmin,
+      });
+    };
+
+    checkAuth();
+  }, [user, navigate, isAdmin]);
 
   if (!user) {
     return null;
