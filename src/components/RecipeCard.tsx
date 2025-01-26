@@ -47,9 +47,6 @@ export const RecipeCard = ({
     img.src = "/placeholder.svg";
   };
 
-  // Log the author information to help with debugging
-  console.log("Recipe author:", author);
-
   return (
     <div 
       className="recipe-card group vintage-paper cursor-pointer transform transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)]"
@@ -92,16 +89,18 @@ export const RecipeCard = ({
         <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
       </div>
       <div className="recipe-card-content p-6">
-        <h3 className="mb-3 text-xl font-semibold font-display text-accent group-hover:text-[#FEC6A1] transition-colors duration-300 heading-underline">
+        <h3 className="mb-3 text-xl font-display font-semibold text-accent group-hover:text-[#FEC6A1] transition-colors duration-300 heading-underline">
           {title}
         </h3>
-        <p className="mb-5 text-gray-600 line-clamp-2 leading-relaxed">{description}</p>
+        <p className="mb-5 text-gray-600 line-clamp-2 leading-relaxed font-['Crimson_Pro'] text-base">
+          {description}
+        </p>
         <div className="space-y-2">
           <div className="flex items-center justify-between text-gray-600">
-            <span className="font-script text-lg">From {author || "Anonymous"}'s Kitchen</span>
+            <span className="font-script text-xl tracking-wide">From {author || "Anonymous"}'s Kitchen</span>
             <div className="flex gap-6">
-              <span className="font-script text-base">{cookTime}</span>
-              <span className="font-script text-base text-[#FEC6A1]">{difficulty}</span>
+              <span className="font-['Crimson_Pro'] text-base">{cookTime}</span>
+              <span className="font-['Crimson_Pro'] text-base text-[#FEC6A1]">{difficulty}</span>
             </div>
           </div>
           <RecipeRating 
