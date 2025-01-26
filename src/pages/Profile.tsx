@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { Loader2, Home } from "lucide-react";
+import { DeleteAccountDialog } from "@/components/DeleteAccountDialog";
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -143,10 +144,13 @@ const Profile = () => {
                 placeholder="Enter your full name"
               />
             </div>
-            <Button type="submit" disabled={updating}>
-              {updating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Save Changes
-            </Button>
+            <div className="flex justify-between items-center pt-4">
+              <Button type="submit" disabled={updating}>
+                {updating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Save Changes
+              </Button>
+              <DeleteAccountDialog />
+            </div>
           </form>
         </CardContent>
       </Card>
