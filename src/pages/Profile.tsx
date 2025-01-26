@@ -86,6 +86,22 @@ const Profile = () => {
     }
   };
 
+  const handleDashboardClick = () => {
+    // Store the current session state before navigation
+    const currentUser = user;
+    if (currentUser && currentUser.id) {
+      console.log("Navigating to dashboard with user:", currentUser.id);
+      navigate("/dashboard", { state: { userId: currentUser.id } });
+    } else {
+      console.log("No user found, cannot navigate to dashboard");
+      toast({
+        title: "Error",
+        description: "Please log in to view your dashboard",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -109,7 +125,7 @@ const Profile = () => {
         <h1 className="text-2xl font-bold text-accent">Profile Settings</h1>
         <Button 
           variant="outline"
-          onClick={() => navigate("/dashboard")}
+          onClick={handleDashboardClick}
           className="bg-white hover:bg-gray-50"
         >
           View Dashboard
