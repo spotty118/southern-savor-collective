@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Footer } from '@/components/Footer';
 
 export default function Privacy() {
   const [content, setContent] = useState('');
@@ -22,11 +23,15 @@ export default function Privacy() {
   }, []);
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
-      <div 
-        className="prose prose-slate max-w-none"
-        dangerouslySetInnerHTML={{ __html: content }} 
-      />
+    <div className="min-h-screen flex flex-col bg-[#FDFCFB]">
+      <div className="flex-grow">
+        <div className="max-w-4xl mx-auto px-4 py-8">
+          <div className="prose prose-slate max-w-none bg-white p-8 rounded-lg shadow-sm"
+            dangerouslySetInnerHTML={{ __html: content }} 
+          />
+        </div>
+      </div>
+      <Footer />
     </div>
   );
 }

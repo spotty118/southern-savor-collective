@@ -6,6 +6,7 @@ import { CookingPot } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { RecipeGrid } from "@/components/recipe/RecipeGrid";
 import { RecipeHeader } from "@/components/recipe/RecipeHeader";
+import { Footer } from "@/components/Footer";
 import { Tables } from "@/integrations/supabase/types";
 
 interface RecipeWithExtras extends Tables<"recipes"> {
@@ -293,6 +294,7 @@ const Index = () => {
           />
         )}
       </div>
+      <Footer />
     </div>
   );
 };
