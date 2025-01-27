@@ -22,12 +22,14 @@ export const CollectionDialog = ({ recipeId, userId }: CollectionDialogProps) =>
 
   const fetchCollections = async () => {
     try {
+      console.log("Fetching collections for user:", userId);
       const { data, error } = await supabase
         .from("collections")
         .select("*")
         .eq("user_id", userId);
 
       if (error) throw error;
+      console.log("Fetched collections:", data);
       setCollections(data || []);
     } catch (error: any) {
       console.error("Error fetching collections:", error);
@@ -51,7 +53,13 @@ export const CollectionDialog = ({ recipeId, userId }: CollectionDialogProps) =>
 
     setLoading(true);
     try {
-      const { data, error } = await supabase
+      console.log("Creating new collection:", {
+        name: newCollectionName,
+        description: newCollectionDescription,
+        user_id: userId
+      });
+
+      const { data: collection, error: collectionError } = await supabase
         .from("collections")
         .insert({
           name: newCollectionName,
@@ -61,13 +69,19 @@ export const CollectionDialog = ({ recipeId, userId }: CollectionDialogProps) =>
         .select()
         .single();
 
-      if (error) throw error;
+      if (collectionError) throw collectionError;
 
-      if (data) {
-        await addToCollection(data.id);
+      if (collection) {
+        console.log("Collection created:", collection);
+        await addToCollection(collection.id);
         setNewCollectionName("");
         setNewCollectionDescription("");
         await fetchCollections();
+        
+        toast({
+          title: "Success",
+          description: "Collection created and recipe added",
+        });
       }
     } catch (error: any) {
       console.error("Error creating collection:", error);
@@ -83,6 +97,11 @@ export const CollectionDialog = ({ recipeId, userId }: CollectionDialogProps) =>
 
   const addToCollection = async (collectionId: string) => {
     try {
+      console.log("Adding recipe to collection:", {
+        collection_id: collectionId,
+        recipe_id: recipeId
+      });
+
       const { error } = await supabase
         .from("recipe_collections")
         .insert({
@@ -90,7 +109,17 @@ export const CollectionDialog = ({ recipeId, userId }: CollectionDialogProps) =>
           recipe_id: recipeId,
         });
 
-      if (error) throw error;
+      if (error) {
+        // Check if it's a duplicate entry error
+        if (error.code === '23505') {
+          toast({
+            title: "Info",
+            description: "Recipe is already in this collection",
+          });
+          return;
+        }
+        throw error;
+      }
 
       toast({
         title: "Success",
@@ -111,14 +140,14 @@ export const CollectionDialog = ({ recipeId, userId }: CollectionDialogProps) =>
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button
-          variant="outline"
-          className="gap-2"
+          variant="ghost"
+          size="icon"
+          className="bg-white/90 hover:bg-white"
           onClick={() => {
             fetchCollections();
           }}
         >
-          <Plus className="h-4 w-4" />
-          Save to Collection
+          <Plus className="h-4 w-4 text-gray-500" />
         </Button>
       </DialogTrigger>
       <DialogContent>
