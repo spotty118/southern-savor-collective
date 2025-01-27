@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useParams } from "react-router-dom";
-import { Button } from "@/components/ui/button";
 import { RecipeDetailHeader } from "@/components/recipe/RecipeDetailHeader";
 import { RecipeDetailContent } from "@/components/recipe/RecipeDetailContent";
 import { AIEnhancementDialog } from "@/components/recipe/AIEnhancementDialog";
@@ -72,6 +71,7 @@ const RecipeDetail = () => {
           onEnhanceInstructions={() => enhanceRecipe("instructions")}
           enhancing={enhancing}
           isEditMode={isEditMode}
+          location_name={recipe.location_name}
         />
 
         <AIEnhancementDialog
