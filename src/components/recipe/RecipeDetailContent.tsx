@@ -29,6 +29,7 @@ interface RecipeDetailContentProps {
       username: string | null;
     };
     categories: Tables<"categories">[];
+    location_name?: string | null;
   };
   currentUserId: string | null;
   isAdmin?: boolean;

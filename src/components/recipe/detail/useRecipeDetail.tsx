@@ -16,6 +16,7 @@ export const useRecipeDetail = (id: string | undefined) => {
     handleApplyChanges,
     handleDelete,
     handleEdit,
+    shareRecipeLocation,
   } = useRecipeActions(id, user, recipe, setRecipe);
 
   const isRecipeOwner = user && recipe && user.id === recipe.author_id;
@@ -37,5 +38,6 @@ export const useRecipeDetail = (id: string | undefined) => {
     handleDelete,
     handleEdit,
     setShowAiDialog,
+    shareRecipeLocation,
   };
 };
