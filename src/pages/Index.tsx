@@ -8,8 +8,7 @@ import { RecipeGrid } from "@/components/recipe/RecipeGrid";
 import { RecipeHeader } from "@/components/recipe/RecipeHeader";
 import { Footer } from "@/components/Footer";
 import { Tables } from "@/integrations/supabase/types";
-import { BuilderComponent } from '@builder.io/react';
-import { builder } from '@/integrations/builder/client';
+import { BuilderComponent, builder } from '@builder.io/react';
 
 interface RecipeWithExtras extends Tables<"recipes"> {
   author: { username: string | null };
@@ -32,9 +31,11 @@ const Index = () => {
   useEffect(() => {
     async function fetchBuilderContent() {
       try {
+        console.log('Fetching Builder.io content with API key:', builder.apiKey);
         const content = await builder
           .get('page', {
-            url: window.location.pathname
+            url: window.location.pathname,
+            apiKey: '422dc336' // Explicitly pass API key here as well
           })
           .promise();
         
