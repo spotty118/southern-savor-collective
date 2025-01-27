@@ -1,7 +1,7 @@
 import { Builder } from '@builder.io/react';
 
 // Initialize the Builder instance with your public API key
-const builder = Builder({
+const builder = new Builder({
   apiKey: '422dc336'
 });
 
