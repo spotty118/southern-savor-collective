@@ -1,7 +1,9 @@
-import { Heart, Edit, MapPin } from "lucide-react";
+import { Heart, Edit, MapPin, Timer, FolderPlus } from "lucide-react";
 import { Button } from "./ui/button";
 import { cn } from "@/lib/utils";
 import { RecipeRating } from "./recipe/RecipeRating";
+import { CollectionDialog } from "./recipe/CollectionDialog";
+import { CookingTimerDialog } from "./recipe/CookingTimerDialog";
 
 interface RecipeCardProps {
   id: string;
@@ -87,6 +89,12 @@ export const RecipeCard = ({
           >
             <Heart className={cn("h-5 w-5", isLoved ? "fill-red-500 text-red-500" : "text-gray-500")} />
           </Button>
+          {currentUserId && (
+            <>
+              <CollectionDialog recipeId={id} userId={currentUserId} />
+              <CookingTimerDialog recipeId={id} />
+            </>
+          )}
         </div>
         <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
       </div>

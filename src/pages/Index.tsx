@@ -136,7 +136,7 @@ const Index = () => {
     };
 
     fetchFavorites();
-  }, [user?.id]); // Changed dependency to user?.id
+  }, [user?.id]);
 
   useEffect(() => {
     console.log("Setting up auth state listener");
@@ -185,7 +185,7 @@ const Index = () => {
     };
 
     checkUserRoles();
-  }, [user?.id]); // Changed dependency to user?.id
+  }, [user?.id]);
 
   const handleLoveClick = async (recipeId: string) => {
     if (!user?.id) {
