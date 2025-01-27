@@ -6,4 +6,4 @@ builder.init('422dc336');
 // Optional: Register custom components
 // builder.registerComponent(YourComponent, { name: 'Custom Component' });
 
-export { builder as Builder };
+export { builder };

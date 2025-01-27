@@ -8,8 +8,8 @@ import { RecipeGrid } from "@/components/recipe/RecipeGrid";
 import { RecipeHeader } from "@/components/recipe/RecipeHeader";
 import { Footer } from "@/components/Footer";
 import { Tables } from "@/integrations/supabase/types";
-import { BuilderComponent, builder } from '@builder.io/react';
-import { Builder } from '@/integrations/builder/client';
+import { BuilderComponent } from '@builder.io/react';
+import { builder } from '@/integrations/builder/client';
 
 interface RecipeWithExtras extends Tables<"recipes"> {
   author: { username: string | null };
