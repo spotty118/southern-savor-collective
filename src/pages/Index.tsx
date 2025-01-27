@@ -8,45 +8,25 @@ import { RecipeGrid } from "@/components/recipe/RecipeGrid";
 import { RecipeHeader } from "@/components/recipe/RecipeHeader";
 import { Footer } from "@/components/Footer";
 import { Tables } from "@/integrations/supabase/types";
-import { BuilderComponent, builder } from '@builder.io/react';
 
 interface RecipeWithExtras extends Tables<"recipes"> {
   author: { username: string | null };
   categories: Tables<"categories">[];
 }
 
+interface Category extends Tables<"categories"> {}
+
 const Index = () => {
   const navigate = useNavigate();
   const [recipes, setRecipes] = useState<RecipeWithExtras[]>([]);
   const [filteredRecipes, setFilteredRecipes] = useState<RecipeWithExtras[]>([]);
-  const [categories, setCategories] = useState<Tables<"categories">[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [user, setUser] = useState<any>(null);
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isEditor, setIsEditor] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState("All Y'all");
-  const [builderContent, setBuilderContent] = useState(null);
-
-  useEffect(() => {
-    async function fetchBuilderContent() {
-      try {
-        console.log('Fetching Builder.io content with API key:', builder.apiKey);
-        const content = await builder
-          .get('page', {
-            url: window.location.pathname,
-            apiKey: '422dc336' // Explicitly pass API key here as well
-          })
-          .promise();
-        
-        console.log('Builder.io content:', content);
-        setBuilderContent(content);
-      } catch (error) {
-        console.error('Error fetching Builder.io content:', error);
-      }
-    }
-    fetchBuilderContent();
-  }, []);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -276,13 +256,6 @@ const Index = () => {
         onFilterChange={handleFilterChange}
         categories={categories}
       />
-
-      {builderContent && (
-        <BuilderComponent 
-          model="page" 
-          content={builderContent} 
-        />
-      )}
 
       <div className="container mx-auto px-4 py-8">
         {loading ? (
