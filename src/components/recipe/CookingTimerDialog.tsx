@@ -32,7 +32,16 @@ export const CookingTimerDialog = ({ recipeId }: CookingTimerDialogProps) => {
           .eq("recipe_id", recipeId);
 
         if (error) throw error;
-        setTimers(data || []);
+        
+        // Transform the data to match the Timer interface
+        const formattedTimers: Timer[] = data?.map(timer => ({
+          id: timer.id,
+          step_index: timer.step_index,
+          duration: timer.duration.toString(), // Convert duration to string
+          label: timer.label
+        })) || [];
+
+        setTimers(formattedTimers);
       } catch (error: any) {
         console.error("Error fetching timers:", error);
         toast({
