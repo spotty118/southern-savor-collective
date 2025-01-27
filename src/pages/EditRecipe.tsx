@@ -265,7 +265,6 @@ const EditRecipe = () => {
                 setDescription(enhanced[0]);
               }
             }}
-            isEditing={true}
           />
 
           <RecipeCategories

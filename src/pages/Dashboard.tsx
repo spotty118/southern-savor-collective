@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Home } from "lucide-react";
 import { DashboardStats } from "@/components/dashboard/DashboardStats";
 import { UserRecipesList } from "@/components/dashboard/UserRecipesList";
-import { BlogManagement } from "@/components/dashboard/BlogManagement";
 import { useRecipeUser } from "@/hooks/recipe/useRecipeUser";
 import { toast } from "@/hooks/use-toast";
 
@@ -52,7 +51,6 @@ const Dashboard = () => {
           <TabsList className="bg-white">
             <TabsTrigger value="created">My Recipes</TabsTrigger>
             <TabsTrigger value="liked">Saved Recipes</TabsTrigger>
-            <TabsTrigger value="blog">Blog Posts</TabsTrigger>
           </TabsList>
           <TabsContent value="created" className="mt-6">
             <UserRecipesList
@@ -67,9 +65,6 @@ const Dashboard = () => {
               type="liked"
               currentUserId={user.id}
             />
-          </TabsContent>
-          <TabsContent value="blog" className="mt-6">
-            <BlogManagement userId={user.id} />
           </TabsContent>
         </Tabs>
       </div>

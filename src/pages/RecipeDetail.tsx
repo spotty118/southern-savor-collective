@@ -27,7 +27,6 @@ const RecipeDetail = () => {
     handleDelete,
     handleEdit,
     setShowAiDialog,
-    shareRecipeLocation,
   } = useRecipeDetail(id);
 
   if (loading) {
@@ -71,7 +70,6 @@ const RecipeDetail = () => {
           onEnhanceInstructions={() => enhanceRecipe("instructions")}
           enhancing={enhancing}
           isEditMode={isEditMode}
-          location_name={recipe.location_name}
         />
 
         <AIEnhancementDialog
@@ -80,14 +78,6 @@ const RecipeDetail = () => {
           enhancedContent={aiSuggestion?.enhanced_content}
           onApplyChanges={handleApplyChanges}
         />
-
-        {recipe.location_name && (
-          <div className="bg-white rounded-lg shadow-lg p-6 space-y-6">
-            <h2 className="text-xl font-semibold text-gray-900">Location</h2>
-            <p className="text-gray-700">{recipe.location_name}</p>
-            <Button onClick={shareRecipeLocation}>Share Location</Button>
-          </div>
-        )}
       </div>
     </div>
   );

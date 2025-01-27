@@ -11,10 +11,6 @@ import Admin from "./pages/Admin";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import DataDeletion from "./pages/DataDeletion";
-import BlogPost from "./pages/BlogPost";
-import CreateBlogPost from "./pages/CreateBlogPost";
-import EditBlogPost from "./pages/EditBlogPost";
-import Blog from "./pages/Blog";
 
 function App() {
   return (
@@ -32,10 +28,6 @@ function App() {
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/terms" element={<Terms />} />
         <Route path="/data-deletion" element={<DataDeletion />} />
-        <Route path="/blog" element={<Blog />} />
-        <Route path="/blog/create" element={<CreateBlogPost />} />
-        <Route path="/blog/:id" element={<BlogPost />} />
-        <Route path="/blog/:id/edit" element={<EditBlogPost />} />
       </Routes>
     </Router>
   );

@@ -27,7 +27,6 @@ interface RecipeData {
   author_id: string | null;
   created_at: string;
   updated_at: string;
-  location_name: string | null;
 }
 
 export const useRecipeData = (id: string | undefined) => {
@@ -82,8 +81,7 @@ export const useRecipeData = (id: string | undefined) => {
           categories: data.categories?.map(cat => cat.categories) || [],
           created_at: data.created_at,
           updated_at: data.updated_at,
-          author_id: data.author_id,
-          location_name: data.location_name
+          author_id: data.author_id
         };
 
         setRecipe(formattedData);
