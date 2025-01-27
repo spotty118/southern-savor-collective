@@ -110,7 +110,6 @@ export const CollectionDialog = ({ recipeId, userId }: CollectionDialogProps) =>
         });
 
       if (error) {
-        // Check if it's a duplicate entry error
         if (error.code === '23505') {
           toast({
             title: "Info",
