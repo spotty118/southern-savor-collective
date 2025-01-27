@@ -8,25 +8,37 @@ import { RecipeGrid } from "@/components/recipe/RecipeGrid";
 import { RecipeHeader } from "@/components/recipe/RecipeHeader";
 import { Footer } from "@/components/Footer";
 import { Tables } from "@/integrations/supabase/types";
+import { BuilderComponent } from '@builder.io/react';
+import { Builder } from '@/integrations/builder/client';
 
 interface RecipeWithExtras extends Tables<"recipes"> {
   author: { username: string | null };
   categories: Tables<"categories">[];
 }
 
-interface Category extends Tables<"categories"> {}
-
 const Index = () => {
   const navigate = useNavigate();
   const [recipes, setRecipes] = useState<RecipeWithExtras[]>([]);
   const [filteredRecipes, setFilteredRecipes] = useState<RecipeWithExtras[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
+  const [categories, setCategories] = useState<Tables<"categories">[]>([]);
   const [user, setUser] = useState<any>(null);
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isEditor, setIsEditor] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState("All Y'all");
+  const [builderContent, setBuilderContent] = useState(null);
+
+  useEffect(() => {
+    async function fetchBuilderContent() {
+      const content = await Builder.get('page', {
+        url: window.location.pathname
+      }).promise();
+      
+      setBuilderContent(content);
+    }
+    fetchBuilderContent();
+  }, []);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -256,6 +268,13 @@ const Index = () => {
         onFilterChange={handleFilterChange}
         categories={categories}
       />
+
+      {builderContent && (
+        <BuilderComponent 
+          model="page" 
+          content={builderContent} 
+        />
+      )}
 
       <div className="container mx-auto px-4 py-8">
         {loading ? (
