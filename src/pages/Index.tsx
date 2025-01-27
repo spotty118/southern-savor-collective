@@ -8,7 +8,7 @@ import { RecipeGrid } from "@/components/recipe/RecipeGrid";
 import { RecipeHeader } from "@/components/recipe/RecipeHeader";
 import { Footer } from "@/components/Footer";
 import { Tables } from "@/integrations/supabase/types";
-import { BuilderComponent } from '@builder.io/react';
+import { BuilderComponent, builder } from '@builder.io/react';
 import { Builder } from '@/integrations/builder/client';
 
 interface RecipeWithExtras extends Tables<"recipes"> {
@@ -31,7 +31,7 @@ const Index = () => {
 
   useEffect(() => {
     async function fetchBuilderContent() {
-      const content = await Builder.get('page', {
+      const content = await builder.get('page', {
         url: window.location.pathname
       }).promise();
       
