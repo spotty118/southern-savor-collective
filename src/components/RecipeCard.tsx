@@ -1,7 +1,8 @@
-import { Heart, Edit } from "lucide-react";
+import { Heart, Edit, MapPin } from "lucide-react";
 import { Button } from "./ui/button";
 import { cn } from "@/lib/utils";
 import { RecipeRating } from "./recipe/RecipeRating";
+import { CollectionDialog } from "./recipe/CollectionDialog";
 
 interface RecipeCardProps {
   id: string;
@@ -11,6 +12,7 @@ interface RecipeCardProps {
   author: string;
   cookTime: string;
   difficulty: string;
+  locationName?: string;
   isLoved?: boolean;
   canEdit?: boolean;
   currentUserId?: string | null;
@@ -27,6 +29,7 @@ export const RecipeCard = ({
   author,
   cookTime,
   difficulty,
+  locationName,
   isLoved = false,
   canEdit = false,
   currentUserId,
@@ -46,9 +49,6 @@ export const RecipeCard = ({
     const img = e.target as HTMLImageElement;
     img.src = "/placeholder.svg";
   };
-
-  // Log the author information to help with debugging
-  console.log("Recipe author:", author);
 
   return (
     <div 
@@ -88,22 +88,33 @@ export const RecipeCard = ({
           >
             <Heart className={cn("h-5 w-5", isLoved ? "fill-red-500 text-red-500" : "text-gray-500")} />
           </Button>
+          {currentUserId && (
+            <CollectionDialog recipeId={id} userId={currentUserId} />
+          )}
         </div>
         <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
       </div>
       <div className="recipe-card-content p-6">
-        <h3 className="mb-3 text-xl font-semibold font-display text-accent group-hover:text-[#FEC6A1] transition-colors duration-300 heading-underline">
+        <h3 className="mb-3 text-xl font-display font-semibold text-accent group-hover:text-[#FEC6A1] transition-colors duration-300 heading-underline">
           {title}
         </h3>
-        <p className="mb-5 text-gray-600 line-clamp-2 leading-relaxed">{description}</p>
+        <p className="mb-5 text-gray-600 line-clamp-2 leading-relaxed font-['Crimson_Pro'] text-base">
+          {description}
+        </p>
         <div className="space-y-2">
           <div className="flex items-center justify-between text-gray-600">
-            <span className="font-script text-lg">From {author || "Anonymous"}'s Kitchen</span>
+            <span className="font-script text-xl tracking-wide">From {author || "Anonymous"}'s Kitchen</span>
             <div className="flex gap-6">
-              <span className="font-script text-base">{cookTime}</span>
-              <span className="font-script text-base text-[#FEC6A1]">{difficulty}</span>
+              <span className="font-['Crimson_Pro'] text-base">{cookTime}</span>
+              <span className="font-['Crimson_Pro'] text-base text-[#FEC6A1]">{difficulty}</span>
             </div>
           </div>
+          {locationName && (
+            <div className="flex items-center gap-2 text-gray-500 mt-2">
+              <MapPin className="h-4 w-4" />
+              <span className="text-sm">{locationName}</span>
+            </div>
+          )}
           <RecipeRating 
             recipeId={id} 
             userId={currentUserId} 

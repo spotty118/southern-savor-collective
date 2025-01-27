@@ -75,7 +75,7 @@ export const useRecipeActions = (
         : recipe.description;
 
       const { data, error } = await supabase.functions.invoke('enhance-recipe', {
-        body: { content, type },
+        body: { content, type, location: recipe.location_name },
       });
 
       if (error) throw error;
@@ -183,6 +183,48 @@ export const useRecipeActions = (
     navigate(`/recipe/${id}/edit`);
   };
 
+  const shareRecipeLocation = async () => {
+    if (!recipe || !recipe.location_name) {
+      toast({
+        title: "Error",
+        description: "No location data available to share",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const shareData = {
+        title: "Recipe Location",
+        text: `Check out this recipe from ${recipe.location_name}`,
+        url: window.location.href,
+      };
+
+      if (navigator.share) {
+        await navigator.share(shareData);
+        toast({
+          title: "Success",
+          description: "Location shared successfully",
+        });
+      } else {
+        navigator.clipboard.writeText(`${shareData.text} - ${shareData.url}`);
+        toast({
+          title: "Link Copied",
+          description: "Location link copied to clipboard",
+        });
+      }
+    } catch (error) {
+      console.error("Error sharing location:", error);
+      if (error instanceof Error) {
+        toast({
+          title: "Error",
+          description: error.message,
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
   return {
     isLoved,
     showAiDialog,
@@ -194,5 +236,6 @@ export const useRecipeActions = (
     handleApplyChanges,
     handleDelete,
     handleEdit,
+    shareRecipeLocation,
   };
 };
