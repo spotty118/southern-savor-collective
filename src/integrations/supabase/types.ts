@@ -86,6 +86,129 @@ export type Database = {
         }
         Relationships: []
       }
+      challenge_entries: {
+        Row: {
+          challenge_id: string | null
+          created_at: string
+          id: string
+          recipe_id: string | null
+          submission_text: string | null
+          user_id: string | null
+        }
+        Insert: {
+          challenge_id?: string | null
+          created_at?: string
+          id?: string
+          recipe_id?: string | null
+          submission_text?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          challenge_id?: string | null
+          created_at?: string
+          id?: string
+          recipe_id?: string | null
+          submission_text?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "challenge_entries_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "recipe_challenges"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "challenge_entries_recipe_id_fkey"
+            columns: ["recipe_id"]
+            isOneToOne: false
+            referencedRelation: "recipes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "challenge_entries_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      collaborative_recipes: {
+        Row: {
+          collaborator_id: string | null
+          created_at: string
+          id: string
+          recipe_id: string | null
+          role: string
+        }
+        Insert: {
+          collaborator_id?: string | null
+          created_at?: string
+          id?: string
+          recipe_id?: string | null
+          role: string
+        }
+        Update: {
+          collaborator_id?: string | null
+          created_at?: string
+          id?: string
+          recipe_id?: string | null
+          role?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "collaborative_recipes_collaborator_id_fkey"
+            columns: ["collaborator_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "collaborative_recipes_recipe_id_fkey"
+            columns: ["recipe_id"]
+            isOneToOne: false
+            referencedRelation: "recipes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      collections: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "collections_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       comments: {
         Row: {
           content: string
@@ -128,6 +251,83 @@ export type Database = {
           },
         ]
       }
+      cooking_progress: {
+        Row: {
+          completed_at: string | null
+          completed_steps: number[] | null
+          id: string
+          recipe_id: string | null
+          started_at: string
+          user_id: string | null
+        }
+        Insert: {
+          completed_at?: string | null
+          completed_steps?: number[] | null
+          id?: string
+          recipe_id?: string | null
+          started_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          completed_at?: string | null
+          completed_steps?: number[] | null
+          id?: string
+          recipe_id?: string | null
+          started_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cooking_progress_recipe_id_fkey"
+            columns: ["recipe_id"]
+            isOneToOne: false
+            referencedRelation: "recipes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cooking_progress_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cooking_timers: {
+        Row: {
+          created_at: string
+          duration: unknown
+          id: string
+          label: string
+          recipe_id: string | null
+          step_index: number
+        }
+        Insert: {
+          created_at?: string
+          duration: unknown
+          id?: string
+          label: string
+          recipe_id?: string | null
+          step_index: number
+        }
+        Update: {
+          created_at?: string
+          duration?: unknown
+          id?: string
+          label?: string
+          recipe_id?: string | null
+          step_index?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cooking_timers_recipe_id_fkey"
+            columns: ["recipe_id"]
+            isOneToOne: false
+            referencedRelation: "recipes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       favorites: {
         Row: {
           created_at: string
@@ -158,6 +358,48 @@ export type Database = {
           {
             foreignKeyName: "favorites_user_id_fkey"
             columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      private_messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          read_at: string | null
+          recipient_id: string | null
+          sender_id: string | null
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          read_at?: string | null
+          recipient_id?: string | null
+          sender_id?: string | null
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          read_at?: string | null
+          recipient_id?: string | null
+          sender_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "private_messages_recipient_id_fkey"
+            columns: ["recipient_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "private_messages_sender_id_fkey"
+            columns: ["sender_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -311,6 +553,128 @@ export type Database = {
           },
         ]
       }
+      recipe_challenges: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string
+          end_date: string
+          id: string
+          start_date: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description: string
+          end_date: string
+          id?: string
+          start_date: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          end_date?: string
+          id?: string
+          start_date?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recipe_challenges_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      recipe_collections: {
+        Row: {
+          added_at: string
+          collection_id: string
+          recipe_id: string
+        }
+        Insert: {
+          added_at?: string
+          collection_id: string
+          recipe_id: string
+        }
+        Update: {
+          added_at?: string
+          collection_id?: string
+          recipe_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recipe_collections_collection_id_fkey"
+            columns: ["collection_id"]
+            isOneToOne: false
+            referencedRelation: "collections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "recipe_collections_recipe_id_fkey"
+            columns: ["recipe_id"]
+            isOneToOne: false
+            referencedRelation: "recipes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      recipe_comments: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          location_coords: unknown | null
+          location_name: string | null
+          recipe_id: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          location_coords?: unknown | null
+          location_name?: string | null
+          recipe_id?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          location_coords?: unknown | null
+          location_name?: string | null
+          recipe_id?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recipe_comments_recipe_id_fkey"
+            columns: ["recipe_id"]
+            isOneToOne: false
+            referencedRelation: "recipes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "recipe_comments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       recipe_scaling_preferences: {
         Row: {
           created_at: string
@@ -425,6 +789,8 @@ export type Database = {
           image_url: string | null
           ingredients: Json
           instructions: Json
+          location_coords: unknown | null
+          location_name: string | null
           title: string
           updated_at: string
         }
@@ -439,6 +805,8 @@ export type Database = {
           image_url?: string | null
           ingredients: Json
           instructions: Json
+          location_coords?: unknown | null
+          location_name?: string | null
           title: string
           updated_at?: string
         }
@@ -453,6 +821,8 @@ export type Database = {
           image_url?: string | null
           ingredients?: Json
           instructions?: Json
+          location_coords?: unknown | null
+          location_name?: string | null
           title?: string
           updated_at?: string
         }
@@ -461,6 +831,77 @@ export type Database = {
             foreignKeyName: "recipes_author_id_fkey"
             columns: ["author_id"]
             isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_follows: {
+        Row: {
+          created_at: string
+          follower_id: string
+          following_id: string
+        }
+        Insert: {
+          created_at?: string
+          follower_id: string
+          following_id: string
+        }
+        Update: {
+          created_at?: string
+          follower_id?: string
+          following_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_follows_follower_id_fkey"
+            columns: ["follower_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_follows_following_id_fkey"
+            columns: ["following_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_preferences: {
+        Row: {
+          cooking_skill_level: string | null
+          created_at: string
+          dietary_preferences: Json | null
+          favorite_cuisines: Json | null
+          social_links: Json | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          cooking_skill_level?: string | null
+          created_at?: string
+          dietary_preferences?: Json | null
+          favorite_cuisines?: Json | null
+          social_links?: Json | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          cooking_skill_level?: string | null
+          created_at?: string
+          dietary_preferences?: Json | null
+          favorite_cuisines?: Json | null
+          social_links?: Json | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_preferences_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },

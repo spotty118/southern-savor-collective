@@ -75,7 +75,7 @@ export const RecipeDetailContent = ({
     setCookTime: () => {}, // Read-only in detail view
     difficulty: recipe.difficulty || "",
     setDifficulty: () => {}, // Read-only in detail view
-    imageUrl: recipe.image_url || "",
+    imageUrl: "", // Remove image from BasicInfo since we're showing it at the top
     setImageUrl: () => {}, // Read-only in detail view
     defaultServings: recipe.default_servings || 4,
     setDefaultServings: () => {}, // Read-only in detail view
