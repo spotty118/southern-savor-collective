@@ -1,4 +1,4 @@
-import { Heart, Edit } from "lucide-react";
+import { Heart, Edit, MapPin } from "lucide-react";
 import { Button } from "./ui/button";
 import { cn } from "@/lib/utils";
 import { RecipeRating } from "./recipe/RecipeRating";
@@ -11,6 +11,7 @@ interface RecipeCardProps {
   author: string;
   cookTime: string;
   difficulty: string;
+  locationName?: string;
   isLoved?: boolean;
   canEdit?: boolean;
   currentUserId?: string | null;
@@ -27,6 +28,7 @@ export const RecipeCard = ({
   author,
   cookTime,
   difficulty,
+  locationName,
   isLoved = false,
   canEdit = false,
   currentUserId,
@@ -103,6 +105,12 @@ export const RecipeCard = ({
               <span className="font-['Crimson_Pro'] text-base text-[#FEC6A1]">{difficulty}</span>
             </div>
           </div>
+          {locationName && (
+            <div className="flex items-center gap-2 text-gray-500 mt-2">
+              <MapPin className="h-4 w-4" />
+              <span className="text-sm">{locationName}</span>
+            </div>
+          )}
           <RecipeRating 
             recipeId={id} 
             userId={currentUserId} 

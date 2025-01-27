@@ -32,7 +32,6 @@ export const RecipeGrid = ({
   return (
     <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
       {recipes.map((recipe) => {
-        // Ensure we have valid IDs before rendering
         if (!recipe?.id) {
           console.warn("Recipe without ID encountered:", recipe);
           return null;
@@ -44,9 +43,6 @@ export const RecipeGrid = ({
           (currentUserId && recipe.author_id === currentUserId)
         );
 
-        // Log the author information for debugging
-        console.log(`Recipe ${recipe.id} author:`, recipe.author);
-
         return (
           <RecipeCard
             key={recipe.id}
@@ -57,6 +53,7 @@ export const RecipeGrid = ({
             author={recipe.author?.username || "Anonymous"}
             cookTime={recipe.cook_time?.toString() || "N/A"}
             difficulty={recipe.difficulty || "Easy as Pie"}
+            locationName={recipe.location_name || undefined}
             isLoved={favorites.has(recipe.id)}
             canEdit={canEdit}
             currentUserId={currentUserId}

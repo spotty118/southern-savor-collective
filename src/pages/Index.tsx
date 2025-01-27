@@ -2,8 +2,9 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
-import { CookingPot } from "lucide-react";
+import { CookingPot, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { RecipeGrid } from "@/components/recipe/RecipeGrid";
 import { RecipeHeader } from "@/components/recipe/RecipeHeader";
 import { Footer } from "@/components/Footer";
@@ -27,6 +28,7 @@ const Index = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isEditor, setIsEditor] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState("All Y'all");
+  const [locationSearch, setLocationSearch] = useState("");
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -67,7 +69,6 @@ const Index = () => {
         if (recipesError) throw recipesError;
         console.log("Initial recipes data:", recipesData);
 
-        // Fetch categories for each recipe
         const recipesWithCategories = await Promise.all(
           recipesData.map(async (recipe) => {
             const { data: categoryData, error: categoryError } = await supabase
@@ -233,14 +234,33 @@ const Index = () => {
 
   const handleFilterChange = (filter: string) => {
     setSelectedFilter(filter);
-    if (filter === "All Y'all") {
-      setFilteredRecipes(recipes);
-    } else {
-      const filtered = recipes.filter((recipe) =>
-        recipe.categories.some((category) => category.name === filter)
+    filterRecipes(filter, locationSearch);
+  };
+
+  const handleLocationSearch = (location: string) => {
+    setLocationSearch(location);
+    filterRecipes(selectedFilter, location);
+  };
+
+  const filterRecipes = (category: string, location: string) => {
+    let filtered = recipes;
+
+    // Apply category filter
+    if (category !== "All Y'all") {
+      filtered = filtered.filter((recipe) =>
+        recipe.categories.some((cat) => cat.name === category)
       );
-      setFilteredRecipes(filtered);
     }
+
+    // Apply location filter
+    if (location) {
+      const searchTerm = location.toLowerCase();
+      filtered = filtered.filter((recipe) =>
+        recipe.location_name?.toLowerCase().includes(searchTerm)
+      );
+    }
+
+    setFilteredRecipes(filtered);
   };
 
   const handleRecipeClick = (recipeId: string) => {
@@ -258,6 +278,20 @@ const Index = () => {
       />
 
       <div className="container mx-auto px-4 py-8">
+        <div className="mb-8">
+          <div className="flex items-center gap-2 mb-4">
+            <MapPin className="h-5 w-5 text-[#FEC6A1]" />
+            <h2 className="text-lg font-medium">Search by Location</h2>
+          </div>
+          <Input
+            type="text"
+            placeholder="Search recipes by location..."
+            value={locationSearch}
+            onChange={(e) => handleLocationSearch(e.target.value)}
+            className="max-w-md"
+          />
+        </div>
+
         {loading ? (
           <div className="text-center py-12">
             <div className="animate-pulse flex flex-col items-center gap-4">
@@ -269,10 +303,12 @@ const Index = () => {
           <div className="text-center py-12 bg-white/50 rounded-lg shadow-sm backdrop-blur-sm">
             <p className="text-lg text-gray-700 mb-4">
               {selectedFilter === "All Y'all" 
-                ? "No recipes found in the cookbook yet"
+                ? locationSearch
+                  ? "No recipes found in this location"
+                  : "No recipes found in the cookbook yet"
                 : `No ${selectedFilter.toLowerCase()} recipes found`}
             </p>
-            {user?.id && selectedFilter === "All Y'all" && (
+            {user?.id && selectedFilter === "All Y'all" && !locationSearch && (
               <Button 
                 onClick={() => navigate("/create-recipe")} 
                 className="bg-[#FEC6A1] text-accent hover:bg-[#FDE1D3] transform transition-transform duration-200 hover:scale-105"

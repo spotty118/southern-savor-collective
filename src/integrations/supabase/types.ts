@@ -789,6 +789,8 @@ export type Database = {
           image_url: string | null
           ingredients: Json
           instructions: Json
+          location_coords: unknown | null
+          location_name: string | null
           title: string
           updated_at: string
         }
@@ -803,6 +805,8 @@ export type Database = {
           image_url?: string | null
           ingredients: Json
           instructions: Json
+          location_coords?: unknown | null
+          location_name?: string | null
           title: string
           updated_at?: string
         }
@@ -817,6 +821,8 @@ export type Database = {
           image_url?: string | null
           ingredients?: Json
           instructions?: Json
+          location_coords?: unknown | null
+          location_name?: string | null
           title?: string
           updated_at?: string
         }
