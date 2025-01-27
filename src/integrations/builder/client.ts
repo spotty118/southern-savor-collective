@@ -1,6 +1,10 @@
-import { builder } from '@builder.io/react';
+import { Builder } from '@builder.io/react';
 
 // Initialize the Builder instance with your public API key
+const builder = new Builder({
+  apiKey: '422dc336'
+});
+
 builder.init('422dc336');
 
 // Optional: Register custom components

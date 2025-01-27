@@ -31,11 +31,18 @@ const Index = () => {
 
   useEffect(() => {
     async function fetchBuilderContent() {
-      const content = await builder.get('page', {
-        url: window.location.pathname
-      }).promise();
-      
-      setBuilderContent(content);
+      try {
+        const content = await builder
+          .get('page', {
+            url: window.location.pathname
+          })
+          .promise();
+        
+        console.log('Builder.io content:', content);
+        setBuilderContent(content);
+      } catch (error) {
+        console.error('Error fetching Builder.io content:', error);
+      }
     }
     fetchBuilderContent();
   }, []);
