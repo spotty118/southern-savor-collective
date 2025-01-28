@@ -9,9 +9,7 @@ builder.init('422dc336');
 // Register the page model using the static method
 Builder.registerComponent('page', { 
   name: 'Page',
-  // This tells Builder this is a page component
-  isPage: true,
-  // Default content if none is provided
+  inputs: [], // Define any inputs the component accepts
   defaults: {
     component: {
       name: 'Page',
