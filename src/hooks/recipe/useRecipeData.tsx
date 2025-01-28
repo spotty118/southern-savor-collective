@@ -1,13 +1,17 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { Tables } from "@/integrations/supabase/types";
+
+interface RecipeTime {
+  hours?: number;
+  minutes: number;
+}
 
 interface Ingredient {
   amount: string;
   unit: string;
   item: string;
-  [key: string]: string;
 }
 
 interface RecipeData {
@@ -16,7 +20,7 @@ interface RecipeData {
   description: string | null;
   ingredients: Ingredient[];
   instructions: string[];
-  cook_time: unknown;
+  cook_time: RecipeTime | null;
   difficulty: string | null;
   image_url: string | null;
   default_servings: number | null;
@@ -32,8 +36,42 @@ interface RecipeData {
 export const useRecipeData = (id: string | undefined) => {
   const [recipe, setRecipe] = useState<RecipeData | null>(null);
   const [loading, setLoading] = useState(true);
+  
+  const formatIngredients = useCallback((raw: unknown): Ingredient[] => {
+    if (!Array.isArray(raw)) return [];
+    
+    return raw.filter((ing): ing is Ingredient => 
+      ing && 
+      typeof ing === 'object' &&
+      typeof ing.amount === 'string' &&
+      typeof ing.unit === 'string' &&
+      typeof ing.item === 'string'
+    );
+  }, []);
+
+  const formatInstructions = useCallback((raw: unknown): string[] => {
+    if (!Array.isArray(raw)) return [];
+    return raw.filter((i): i is string => typeof i === 'string');
+  }, []);
+
+  const parseCookTime = useCallback((rawTime: unknown): RecipeTime | null => {
+    try {
+      if (typeof rawTime !== 'string') return null;
+      const parsed = JSON.parse(rawTime);
+      if (typeof parsed === 'object' && parsed !== null &&
+          (parsed.hours === undefined || typeof parsed.hours === 'number') &&
+          typeof parsed.minutes === 'number') {
+        return parsed as RecipeTime;
+      }
+    } catch { }
+    return null;
+  }, []);
 
   useEffect(() => {
+    if (!id) return;
+
+    let isMounted = true;
+
     const fetchRecipe = async () => {
       try {
         const { data, error } = await supabase
@@ -47,38 +85,22 @@ export const useRecipeData = (id: string | undefined) => {
           .single();
 
         if (error) throw error;
-
-        // Type guard for ingredients
-        const isIngredient = (value: unknown): value is Ingredient => {
-          if (!value || typeof value !== 'object') return false;
-          const ing = value as Record<string, unknown>;
-          return typeof ing.amount === 'string' && 
-                 typeof ing.unit === 'string' && 
-                 typeof ing.item === 'string';
-        };
-
-        // Parse ingredients from JSON and validate
-        const ingredients = Array.isArray(data.ingredients) 
-          ? data.ingredients.filter(isIngredient)
-          : [];
-
-        // Parse instructions from JSON
-        const instructions = Array.isArray(data.instructions)
-          ? data.instructions.filter((i): i is string => typeof i === 'string')
-          : [];
+        if (!isMounted) return;
 
         const formattedData: RecipeData = {
           id: data.id,
           title: data.title,
           description: data.description,
-          ingredients,
-          instructions,
-          cook_time: data.cook_time?.toString() || '',
+          ingredients: formatIngredients(data.ingredients),
+          instructions: formatInstructions(data.instructions),
+          cook_time: parseCookTime(data.cook_time),
           difficulty: data.difficulty,
           image_url: data.image_url,
-          default_servings: data.default_servings || 4,
-          author: data.author as { username: string | null },
-          categories: data.categories?.map(cat => cat.categories) || [],
+          default_servings: data.default_servings ?? 4,
+          author: {
+            username: data.author?.username ?? null
+          },
+          categories: data.categories?.map((cat: any) => cat.categories) ?? [],
           created_at: data.created_at,
           updated_at: data.updated_at,
           author_id: data.author_id
@@ -86,23 +108,27 @@ export const useRecipeData = (id: string | undefined) => {
 
         setRecipe(formattedData);
       } catch (error) {
-        console.error("Error in fetchRecipe:", error);
+        if (!isMounted) return;
         if (error instanceof Error) {
           toast({
-            title: "Error",
+            title: "Error loading recipe",
             description: error.message,
             variant: "destructive",
           });
         }
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     };
 
-    if (id) {
-      fetchRecipe();
-    }
-  }, [id]);
+    fetchRecipe();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [id, formatIngredients, formatInstructions, parseCookTime]);
 
   return { recipe, loading, setRecipe };
 };

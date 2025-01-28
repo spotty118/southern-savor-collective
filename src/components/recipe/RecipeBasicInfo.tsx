@@ -10,13 +10,18 @@ import {
 import { AIEnhanceButton } from "@/components/recipe/AIEnhanceButton";
 import { RecipeImageUpload } from "@/components/recipe/RecipeImageUpload";
 
+interface RecipeTime {
+  hours?: number;
+  minutes: number;
+}
+
 interface RecipeBasicInfoProps {
   title: string;
   setTitle: (value: string) => void;
   description: string;
   setDescription: (value: string) => void;
-  cookTime: string;
-  setCookTime: (value: string) => void;
+  cookTime: RecipeTime | null;
+  setCookTime: (value: RecipeTime) => void;
   difficulty: string;
   setDifficulty: (value: string) => void;
   imageUrl: string;
@@ -26,6 +31,13 @@ interface RecipeBasicInfoProps {
   onDescriptionEnhancement: (enhanced: string[]) => void;
   isEditing?: boolean;
 }
+
+const formatCookTime = (time: RecipeTime | null): string => {
+  if (!time) return "";
+  const hours = time.hours ? `${time.hours} hour${time.hours > 1 ? 's' : ''} ` : '';
+  const minutes = time.minutes ? `${time.minutes} minute${time.minutes > 1 ? 's' : ''}` : '';
+  return `${hours}${minutes}`.trim();
+};
 
 export const RecipeBasicInfo = ({
   title,
@@ -59,7 +71,7 @@ export const RecipeBasicInfo = ({
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
             <label className="text-sm font-medium">Cooking Time</label>
-            <p className="text-gray-700">{cookTime}</p>
+            <p className="text-gray-700">{formatCookTime(cookTime)}</p>
           </div>
 
           <div className="space-y-2">
@@ -119,11 +131,35 @@ export const RecipeBasicInfo = ({
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <label className="text-sm font-medium">Cooking Time</label>
-          <Input
-            value={cookTime}
-            onChange={(e) => setCookTime(e.target.value)}
-            placeholder="e.g., 1 hour 30 minutes"
-          />
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <Input
+                type="number"
+                min="0"
+                max="24"
+                value={cookTime?.hours || ""}
+                onChange={(e) => setCookTime({
+                  hours: parseInt(e.target.value) || 0,
+                  minutes: cookTime?.minutes || 0
+                })}
+                placeholder="Hours"
+              />
+            </div>
+            <div>
+              <Input
+                type="number"
+                min="0"
+                max="59"
+                value={cookTime?.minutes || ""}
+                onChange={(e) => setCookTime({
+                  hours: cookTime?.hours || 0,
+                  minutes: parseInt(e.target.value) || 0
+                })}
+                placeholder="Minutes"
+              />
+            </div>
+          </div>
+          <span className="text-xs text-gray-500">Enter hours and minutes</span>
         </div>
 
         <div className="space-y-2">

@@ -2,15 +2,30 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { Printer } from "lucide-react";
 
+/**
+ * Props for the PrintRecipe component
+ * @param title - Recipe title
+ * @param description - Recipe description
+ * @param cookTime - Pre-formatted cooking time string (e.g. "1 hour 30 minutes")
+ * @param difficulty - Recipe difficulty level
+ * @param ingredients - Array of recipe ingredients
+ * @param instructions - Array of recipe instructions
+ */
 interface PrintRecipeProps {
   title: string;
   description: string;
+  /** Pre-formatted cooking time string */
   cookTime: string;
   difficulty: string;
-  ingredients: Array<{ amount: string; unit: string; item: string }>;
-  instructions: string[];
+  ingredients: Array<{
+    amount: string;
+    unit: string;
+    item: string;
+  }>;
+  instructions: Array<string>;
 }
 
+/** Renders a print button that opens a printer-friendly version of the recipe in a new window */
 export const PrintRecipe = ({
   title,
   description,
