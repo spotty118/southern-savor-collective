@@ -8,14 +8,14 @@ import { RecipeGrid } from "@/components/recipe/RecipeGrid";
 import { RecipeHeader } from "@/components/recipe/RecipeHeader";
 import { Footer } from "@/components/Footer";
 import { BuilderComponent, builder } from '@builder.io/react';
-import type { RecipeWithExtras, Ingredient } from "@/types/recipe";
+import type { RecipeWithExtras, Category } from "@/types/recipe";
 import type { Json } from "@/integrations/supabase/types";
 
 const Index = () => {
   const navigate = useNavigate();
   const [recipes, setRecipes] = useState<RecipeWithExtras[]>([]);
   const [filteredRecipes, setFilteredRecipes] = useState<RecipeWithExtras[]>([]);
-  const [categories, setCategories] = useState<Tables<"categories">[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [user, setUser] = useState<any>(null);
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
