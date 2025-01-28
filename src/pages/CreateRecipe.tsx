@@ -17,12 +17,17 @@ interface Ingredient {
   [key: string]: string;
 }
 
+interface RecipeTime {
+  hours?: number;
+  minutes: number;
+}
+
 const CreateRecipe = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [cookTime, setCookTime] = useState("");
+  const [cookTime, setCookTime] = useState<RecipeTime>({ minutes: 0 });
   const [difficulty, setDifficulty] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [ingredients, setIngredients] = useState<Ingredient[]>([

@@ -17,13 +17,18 @@ interface Ingredient {
   [key: string]: string;
 }
 
+interface RecipeTime {
+  hours?: number;
+  minutes: number;
+}
+
 const EditRecipe = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const [loading, setLoading] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [cookTime, setCookTime] = useState("");
+  const [cookTime, setCookTime] = useState<RecipeTime>({ minutes: 0 });
   const [difficulty, setDifficulty] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [ingredients, setIngredients] = useState<Ingredient[]>([
@@ -71,7 +76,7 @@ const EditRecipe = () => {
         if (recipe) {
           setTitle(recipe.title || "");
           setDescription(recipe.description || "");
-          setCookTime(recipe.cook_time?.toString() || "");
+          setCookTime(recipe.cook_time || { minutes: 0 });
           setDifficulty(recipe.difficulty || "");
           setImageUrl(recipe.image_url || "");
           setDefaultServings(recipe.default_servings || 4);
@@ -193,40 +198,6 @@ const EditRecipe = () => {
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleAddIngredient = () => {
-    setIngredients([...ingredients, { item: "", amount: "", unit: "" }]);
-  };
-
-  const handleRemoveIngredient = (index: number) => {
-    const newIngredients = ingredients.filter((_, i) => i !== index);
-    setIngredients(newIngredients);
-  };
-
-  const handleIngredientChange = (
-    index: number,
-    field: keyof Ingredient,
-    value: string
-  ) => {
-    const newIngredients = [...ingredients];
-    newIngredients[index][field] = value;
-    setIngredients(newIngredients);
-  };
-
-  const handleAddInstruction = () => {
-    setInstructions([...instructions, ""]);
-  };
-
-  const handleRemoveInstruction = (index: number) => {
-    const newInstructions = instructions.filter((_, i) => i !== index);
-    setInstructions(newInstructions);
-  };
-
-  const handleInstructionChange = (index: number, value: string) => {
-    const newInstructions = [...instructions];
-    newInstructions[index] = value;
-    setInstructions(newInstructions);
   };
 
   return (
