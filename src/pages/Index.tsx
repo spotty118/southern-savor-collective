@@ -8,7 +8,8 @@ import { RecipeGrid } from "@/components/recipe/RecipeGrid";
 import { RecipeHeader } from "@/components/recipe/RecipeHeader";
 import { Footer } from "@/components/Footer";
 import { BuilderComponent, builder } from '@builder.io/react';
-import type { RecipeWithExtras, Category } from "@/types/recipe";
+import type { RecipeWithExtras, Category, Ingredient } from "@/types/recipe";
+import type { Json } from "@/integrations/supabase/types";
 
 const Index = () => {
   const navigate = useNavigate();
