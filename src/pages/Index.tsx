@@ -31,18 +31,19 @@ const Index = () => {
   useEffect(() => {
     async function fetchBuilderContent() {
       try {
-        console.log('Fetching Builder.io content with API key:', builder.apiKey);
-        const content = await builder
-          .get('page', {
-            url: window.location.pathname,
-            apiKey: '422dc336' // Explicitly pass API key here as well
-          })
-          .promise();
+        console.log('Fetching Builder.io content...');
+        const content = await builder.get('page', {
+          url: '/',
+          userAttributes: {
+            urlPath: '/',
+          }
+        }).promise();
         
         console.log('Builder.io content:', content);
         setBuilderContent(content);
       } catch (error) {
         console.error('Error fetching Builder.io content:', error);
+        // Don't show error to users since this is optional content
       }
     }
     fetchBuilderContent();
@@ -278,10 +279,12 @@ const Index = () => {
       />
 
       {builderContent && (
-        <BuilderComponent 
-          model="page" 
-          content={builderContent} 
-        />
+        <div className="container mx-auto px-4">
+          <BuilderComponent 
+            model="page" 
+            content={builderContent} 
+          />
+        </div>
       )}
 
       <div className="container mx-auto px-4 py-8">
