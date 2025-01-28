@@ -26,7 +26,7 @@ const Index = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isEditor, setIsEditor] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState("All Y'all");
-  const [builderContent, setBuilderContent] = useState(null);
+  const [builderContent, setBuilderContent] = useState<any>(null);
   const [builderError, setBuilderError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -62,7 +62,7 @@ const Index = () => {
   useEffect(() => {
     async function fetchBuilderContent() {
       try {
-        console.log('Fetching Builder.io content with API key:', builder.apiKey);
+        console.log('Fetching Builder.io content');
         const content = await builder
           .get('page', {
             url: window.location.pathname
@@ -276,7 +276,7 @@ const Index = () => {
       {user && (
         <div className="container mx-auto px-4 py-4">
           <Button 
-            onClick={handleDashboardClick}
+            onClick={() => navigate('/dashboard')}
             className="bg-[#FEC6A1] text-accent hover:bg-[#FDE1D3] mb-4"
           >
             View Dashboard
