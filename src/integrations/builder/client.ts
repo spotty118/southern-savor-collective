@@ -13,7 +13,9 @@ Builder.registerComponent('page', {
   isPage: true,
   // Default content if none is provided
   defaults: {
-    title: 'Page'
+    data: {
+      title: 'Page'
+    }
   }
 });
 
