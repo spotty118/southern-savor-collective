@@ -17,13 +17,14 @@ export interface Recipe {
   created_at: string;
   updated_at: string;
   default_servings: number | null;
+  location_name: string | null;
+  location_coords: unknown | null;
 }
 
 export interface RecipeWithExtras extends Omit<Recipe, 'author'> {
   author: {
     username: string | null;
   };
-  categories: Category[];
 }
 
 export interface Ingredient {
@@ -52,8 +53,18 @@ export interface BlogPost {
   published_at: string | null;
   tags: string[];
   meta_description: string | null;
-  is_ai_generated: boolean;
+  is_ai_generated: boolean | null;
   author: {
     username: string | null;
   } | null;
+}
+
+export interface AdminStatsProps {
+  recipes: Recipe[];
+  users: any[];
+}
+
+export interface UserManagementProps {
+  users: any[];
+  onDeleteUser: (userId: string) => Promise<void>;
 }
