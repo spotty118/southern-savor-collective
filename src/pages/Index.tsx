@@ -11,7 +11,7 @@ import { Tables } from "@/integrations/supabase/types";
 import { BuilderComponent, builder } from '@builder.io/react';
 
 interface RecipeWithExtras extends Tables<"recipes"> {
-  author: { username: string | null };
+  author: { username: string | null } | null;
   categories: Tables<"categories">[];
 }
 
