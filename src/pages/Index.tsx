@@ -62,18 +62,27 @@ const Index = () => {
   useEffect(() => {
     async function fetchBuilderContent() {
       try {
-        console.log('Fetching Builder.io content');
+        console.log('Fetching Builder.io content with API key:', builder.apiKey);
+        if (!builder.apiKey) {
+          throw new Error('Builder.io API key not initialized');
+        }
+        
         const content = await builder
           .get('page', {
             url: window.location.pathname
           })
           .promise();
         
-        console.log('Builder.io content:', content);
+        console.log('Builder.io content fetched successfully:', content);
         setBuilderContent(content);
       } catch (error) {
         console.error('Error fetching Builder.io content:', error);
         setBuilderError(error instanceof Error ? error.message : 'Failed to load Builder.io content');
+        toast({
+          title: "Warning",
+          description: "Some content failed to load, but the app will continue to function.",
+          variant: "destructive",
+        });
       }
     }
     fetchBuilderContent();
