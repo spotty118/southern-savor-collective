@@ -1,152 +1,136 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "@/hooks/use-toast";
-import { Home, Loader2 } from "lucide-react";
 import { AdminStats } from "@/components/admin/AdminStats";
 import { UserManagement } from "@/components/admin/UserManagement";
 import { RecipeManagement } from "@/components/admin/RecipeManagement";
+import { toast } from "@/hooks/use-toast";
+import type { Recipe } from "@/types/recipe";
 
-const Admin = () => {
-  const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState({
-    totalUsers: 0,
-    totalRecipes: 0,
-  });
-  const [users, setUsers] = useState([]);
-  const [recipes, setRecipes] = useState([]);
+export default function Admin() {
+  const [user, setUser] = useState<any>(null);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [currentUserId, setCurrentUserId] = useState<string>("");
+  const [users, setUsers] = useState<any[]>([]);
+  const [recipes, setRecipes] = useState<Recipe[]>([]);
 
   useEffect(() => {
-    const checkAdminAndLoadData = async () => {
+    const fetchUsers = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
-        
-        if (!session) {
-          navigate("/auth");
-          return;
-        }
-
-        setCurrentUserId(session.user.id);
-
-        // Check if user is admin
-        const { data: roleData, error: roleError } = await supabase
-          .from("user_roles")
-          .select("role")
-          .eq("user_id", session.user.id)
-          .eq("role", "admin")
-          .single();
-
-        if (roleError || !roleData) {
-          navigate("/");
-          toast({
-            title: "Access Denied",
-            description: "You don't have permission to view this page",
-            variant: "destructive",
-          });
-          return;
-        }
-
-        setIsAdmin(true);
-
-        // Fetch users
-        const { data: userData, error: userError } = await supabase
+        const { data: profilesData, error: profilesError } = await supabase
           .from("profiles")
           .select("*")
           .order("created_at", { ascending: false });
 
-        if (userError) throw userError;
-        setUsers(userData);
-        setStats(prev => ({ ...prev, totalUsers: userData.length }));
-
-        // Fetch recipes with author information
-        const { data: recipeData, error: recipeError } = await supabase
-          .from("recipes")
-          .select(`
-            id,
-            title,
-            created_at,
-            author:profiles (id, username)
-          `)
-          .order("created_at", { ascending: false });
-
-        if (recipeError) throw recipeError;
-        setRecipes(recipeData);
-        setStats(prev => ({ ...prev, totalRecipes: recipeData.length }));
-
-      } catch (error: any) {
-        console.error("Error loading admin data:", error);
+        if (profilesError) throw profilesError;
+        setUsers(profilesData || []);
+      } catch (error) {
+        console.error("Error fetching users:", error);
         toast({
           title: "Error",
-          description: "Failed to load admin dashboard",
+          description: "Failed to load users",
           variant: "destructive",
         });
-      } finally {
-        setLoading(false);
       }
     };
 
-    checkAdminAndLoadData();
-  }, [navigate]);
+    const fetchRecipes = async () => {
+      try {
+        const { data: recipesData, error: recipesError } = await supabase
+          .from("recipes")
+          .select(`
+            *,
+            author:profiles(id, username)
+          `)
+          .order("created_at", { ascending: false });
 
-  const handleDeleteRecipe = (recipeId: string) => {
-    setRecipes(recipes.filter(recipe => recipe.id !== recipeId));
-    setStats(prev => ({ ...prev, totalRecipes: prev.totalRecipes - 1 }));
+        if (recipesError) throw recipesError;
+        setRecipes(recipesData as Recipe[] || []);
+      } catch (error) {
+        console.error("Error fetching recipes:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load recipes",
+          variant: "destructive",
+        });
+      }
+    };
+
+    const checkAdminStatus = async () => {
+      try {
+        const { data: { user: currentUser } } = await supabase.auth.getUser();
+        setUser(currentUser);
+
+        if (currentUser) {
+          const { data: roles } = await supabase
+            .from("user_roles")
+            .select("role")
+            .eq("user_id", currentUser.id)
+            .single();
+
+          setIsAdmin(roles?.role === "admin");
+        }
+      } catch (error) {
+        console.error("Error checking admin status:", error);
+      }
+    };
+
+    checkAdminStatus();
+    fetchUsers();
+    fetchRecipes();
+  }, []);
+
+  const handleDeleteUser = async (userId: string) => {
+    try {
+      const { error } = await supabase.functions.invoke("delete-user", {
+        body: { userId },
+      });
+
+      if (error) throw error;
+
+      setUsers(users.filter((user) => user.id !== userId));
+      toast({
+        title: "Success",
+        description: "User deleted successfully",
+      });
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      toast({
+        title: "Error",
+        description: "Failed to delete user",
+        variant: "destructive",
+      });
+    }
   };
 
-  if (loading) {
+  const handleDeleteRecipe = (recipeId: string) => {
+    setRecipes(recipes.filter((recipe) => recipe.id !== recipeId));
+  };
+
+  if (!user || !isAdmin) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin" />
+      <div className="container mx-auto p-4">
+        <h1 className="text-2xl font-bold mb-4">Unauthorized</h1>
+        <p>You must be an admin to view this page.</p>
       </div>
     );
   }
 
-  if (!isAdmin) {
-    return null;
-  }
-
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Y'all Eat Admin Dashboard</h1>
-        <Button 
-          variant="ghost" 
-          onClick={() => navigate("/")}
-          className="flex items-center gap-2"
-        >
-          <Home className="h-4 w-4" />
-          Back to Home
-        </Button>
-      </div>
-
-      <AdminStats totalUsers={stats.totalUsers} totalRecipes={stats.totalRecipes} />
-
-      <Tabs defaultValue="users" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="users">Users</TabsTrigger>
-          <TabsTrigger value="recipes">Recipes</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="users">
-          <UserManagement users={users} />
-        </TabsContent>
-
-        <TabsContent value="recipes">
-          <RecipeManagement 
-            recipes={recipes}
-            onDeleteRecipe={handleDeleteRecipe}
-            currentUserId={currentUserId}
-            isAdmin={isAdmin}
-          />
-        </TabsContent>
-      </Tabs>
+    <div className="container mx-auto p-4 space-y-8">
+      <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+      
+      <AdminStats users={users} recipes={recipes} />
+      
+      <UserManagement 
+        users={users}
+        onDeleteUser={handleDeleteUser}
+      />
+      
+      <RecipeManagement
+        recipes={recipes}
+        onDeleteRecipe={handleDeleteRecipe}
+        currentUserId={user.id}
+        isAdmin={isAdmin}
+      />
     </div>
   );
-};
-
-export default Admin;
+}

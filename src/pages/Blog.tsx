@@ -2,16 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "react-router-dom";
-
-interface BlogPost {
-  id: string;
-  title: string;
-  excerpt: string;
-  published_at: string;
-  author: {
-    username: string;
-  };
-}
+import type { BlogPost } from "@/types/recipe";
 
 export default function Blog() {
   const [posts, setPosts] = useState<BlogPost[]>([]);
@@ -36,7 +27,20 @@ export default function Blog() {
         .order("published_at", { ascending: false });
 
       if (error) throw error;
-      setPosts(data || []);
+      
+      // Transform the data to match BlogPost type
+      const transformedPosts = (data || []).map(post => ({
+        ...post,
+        excerpt: post.excerpt || "",
+        published_at: post.published_at || new Date().toISOString(),
+        is_ai_generated: false, // Default value
+        content: "", // Not needed in list view
+        status: "published",
+        tags: [],
+        author: post.author || { username: null }
+      }));
+      
+      setPosts(transformedPosts);
     } catch (error) {
       console.error("Error fetching blog posts:", error);
     } finally {
