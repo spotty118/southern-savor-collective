@@ -259,10 +259,6 @@ const Index = () => {
     navigate(`/recipe/${recipeId}`);
   };
 
-  const handleDashboardClick = () => {
-    navigate('/dashboard');
-  };
-
   return (
     <div className="min-h-screen bg-[#FDFCFB]">
       <RecipeHeader 
