@@ -1,9 +1,11 @@
+import { Json } from "@/integrations/supabase/types";
+
 export interface Recipe {
   id: string;
   title: string;
   description: string | null;
-  ingredients: Ingredient[];
-  instructions: string[];
+  ingredients: Json;
+  instructions: Json;
   cook_time: unknown;
   difficulty: string | null;
   image_url: string | null;
@@ -31,6 +33,7 @@ export interface Ingredient {
   amount: string;
   unit: string;
   item: string;
+  [key: string]: string;
 }
 
 export interface Category {
@@ -67,4 +70,9 @@ export interface AdminStatsProps {
 export interface UserManagementProps {
   users: any[];
   onDeleteUser: (userId: string) => Promise<void>;
+}
+
+export interface RecipeCategoryInput {
+  recipe_id: string;
+  category_id: string;
 }

@@ -7,9 +7,9 @@ import { Button } from "@/components/ui/button";
 import { RecipeGrid } from "@/components/recipe/RecipeGrid";
 import { RecipeHeader } from "@/components/recipe/RecipeHeader";
 import { Footer } from "@/components/Footer";
-import { Tables } from "@/integrations/supabase/types";
 import { BuilderComponent, builder } from '@builder.io/react';
-import type { RecipeWithExtras } from "@/types/recipe";
+import type { RecipeWithExtras, Ingredient } from "@/types/recipe";
+import type { Json } from "@/integrations/supabase/types";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -99,11 +99,15 @@ const Index = () => {
             if (categoryError) throw categoryError;
             console.log(`Categories for recipe ${recipe.id}:`, categoryData);
 
-            return {
+            const transformedRecipe: RecipeWithExtras = {
               ...recipe,
+              ingredients: recipe.ingredients as Json,
+              instructions: recipe.instructions as Json,
               categories: categoryData?.map((c) => c.categories) || [],
               author: recipe.author || { username: null }
-            } as RecipeWithExtras;
+            };
+
+            return transformedRecipe;
           })
         );
 
