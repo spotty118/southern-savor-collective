@@ -33,14 +33,16 @@ const Index = () => {
       try {
         console.log('Fetching Builder.io content...');
         const content = await builder.get('page', {
-          url: '/',
           userAttributes: {
             urlPath: '/',
+            device: 'desktop'
           }
         }).promise();
         
         console.log('Builder.io content:', content);
-        setBuilderContent(content);
+        if (content) {
+          setBuilderContent(content);
+        }
       } catch (error) {
         console.error('Error fetching Builder.io content:', error);
         // Don't show error to users since this is optional content
@@ -282,7 +284,11 @@ const Index = () => {
         <div className="container mx-auto px-4">
           <BuilderComponent 
             model="page" 
-            content={builderContent} 
+            content={builderContent}
+            options={{
+              // Ensure we're getting fresh content
+              cachebust: true
+            }}
           />
         </div>
       )}
