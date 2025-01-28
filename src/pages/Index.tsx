@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
@@ -260,6 +260,14 @@ const Index = () => {
   };
 
   const handleDashboardClick = () => {
+    if (!user) {
+      toast({
+        title: "Please login",
+        description: "You need to be logged in to view your dashboard",
+      });
+      navigate("/auth");
+      return;
+    }
     navigate('/dashboard');
   };
 
