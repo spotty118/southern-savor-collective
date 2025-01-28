@@ -11,7 +11,17 @@ import {
 } from "@/components/ui/card";
 import { ChangeOwnerDialog } from "./ChangeOwnerDialog";
 import { RecipeTable } from "./RecipeTable";
-import type { Recipe } from "@/types/recipe";
+
+interface Recipe {
+  id: string;
+  title: string;
+  author: { 
+    id: string;
+    username: string | null;
+    full_name: string | null;
+  } | null;
+  created_at: string;
+}
 
 interface RecipeManagementProps {
   recipes: Recipe[];
@@ -27,6 +37,7 @@ export const RecipeManagement = ({
   isAdmin 
 }: RecipeManagementProps) => {
   const navigate = useNavigate();
+  const [shareableLink, setShareableLink] = useState<string>("");
   const [selectedRecipeId, setSelectedRecipeId] = useState<string | null>(null);
   const [showOwnerDialog, setShowOwnerDialog] = useState(false);
   
@@ -55,7 +66,9 @@ export const RecipeManagement = ({
   };
 
   const generateShareableLink = (recipeId: string) => {
+    setShareableLink("");
     const link = `${window.location.origin}/recipe/${recipeId}`;
+    setShareableLink(link);
     navigator.clipboard.writeText(link);
     toast({
       title: "Link Copied!",
@@ -64,6 +77,7 @@ export const RecipeManagement = ({
   };
 
   const handleAddNewRecipe = () => {
+    setShareableLink("");
     navigate("/create-recipe");
   };
 

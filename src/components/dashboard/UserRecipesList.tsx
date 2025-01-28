@@ -119,14 +119,7 @@ export const UserRecipesList = ({ userId, type, currentUserId }: UserRecipesList
             recipe_id: recipeId,
           });
           
-        if (error) {
-          // Handle unique constraint violation
-          if (error.code === '23505') {
-            console.log("Recipe already favorited");
-            return;
-          }
-          throw error;
-        }
+        if (error) throw error;
         newFavorites.add(recipeId);
       }
       setFavorites(newFavorites);

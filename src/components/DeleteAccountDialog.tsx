@@ -25,16 +25,11 @@ export const DeleteAccountDialog = () => {
       setIsDeleting(true);
       console.log("Starting account deletion process");
 
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user?.id) {
-        throw new Error("No user found");
-      }
-
       // Delete profile (this will cascade to all related data)
       const { error: deleteError } = await supabase
         .from("profiles")
         .delete()
-        .eq("id", user.id);
+        .eq("id", (await supabase.auth.getUser()).data.user?.id);
 
       if (deleteError) throw deleteError;
 
