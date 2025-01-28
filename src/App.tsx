@@ -1,5 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { Toaster } from "@/components/ui/toaster";
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
+import { ErrorBoundary } from "@/components/error/ErrorBoundary";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Profile from "./pages/Profile";
@@ -18,26 +20,96 @@ import Blog from "./pages/Blog";
 
 function App() {
   return (
-    <Router>
-      <Toaster />
-      <Routes>
-        <Route path="/" element={<Index />} />
-        <Route path="/auth" element={<Auth />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/create-recipe" element={<CreateRecipe />} />
-        <Route path="/recipe/:id" element={<RecipeDetail />} />
-        <Route path="/recipe/:id/edit" element={<EditRecipe />} />
-        <Route path="/admin" element={<Admin />} />
-        <Route path="/privacy" element={<Privacy />} />
-        <Route path="/terms" element={<Terms />} />
-        <Route path="/data-deletion" element={<DataDeletion />} />
-        <Route path="/blog" element={<Blog />} />
-        <Route path="/blog/create" element={<CreateBlogPost />} />
-        <Route path="/blog/:id" element={<BlogPost />} />
-        <Route path="/blog/:id/edit" element={<EditBlogPost />} />
-      </Routes>
-    </Router>
+    <ErrorBoundary>
+      <Router>
+        <Toaster />
+        <Routes>
+          {/* Public routes */}
+          <Route path="/" element={<ErrorBoundary><Index /></ErrorBoundary>} />
+          <Route path="/auth" element={<ErrorBoundary><Auth /></ErrorBoundary>} />
+          <Route path="/privacy" element={<ErrorBoundary><Privacy /></ErrorBoundary>} />
+          <Route path="/terms" element={<ErrorBoundary><Terms /></ErrorBoundary>} />
+          <Route path="/data-deletion" element={<ErrorBoundary><DataDeletion /></ErrorBoundary>} />
+          <Route path="/blog" element={<ErrorBoundary><Blog /></ErrorBoundary>} />
+          <Route path="/blog/:id" element={<ErrorBoundary><BlogPost /></ErrorBoundary>} />
+          <Route path="/recipe/:id" element={<ErrorBoundary><RecipeDetail /></ErrorBoundary>} />
+
+          {/* Protected routes */}
+          <Route
+            path="/profile"
+            element={
+              <ErrorBoundary>
+                <ProtectedRoute>
+                  <Profile />
+                </ProtectedRoute>
+              </ErrorBoundary>
+            }
+          />
+          <Route
+            path="/dashboard"
+            element={
+              <ErrorBoundary>
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              </ErrorBoundary>
+            }
+          />
+          <Route
+            path="/create-recipe"
+            element={
+              <ErrorBoundary>
+                <ProtectedRoute>
+                  <CreateRecipe />
+                </ProtectedRoute>
+              </ErrorBoundary>
+            }
+          />
+          <Route
+            path="/recipe/:id/edit"
+            element={
+              <ErrorBoundary>
+                <ProtectedRoute>
+                  <EditRecipe />
+                </ProtectedRoute>
+              </ErrorBoundary>
+            }
+          />
+          <Route
+            path="/blog/create"
+            element={
+              <ErrorBoundary>
+                <ProtectedRoute>
+                  <CreateBlogPost />
+                </ProtectedRoute>
+              </ErrorBoundary>
+            }
+          />
+          <Route
+            path="/blog/:id/edit"
+            element={
+              <ErrorBoundary>
+                <ProtectedRoute>
+                  <EditBlogPost />
+                </ProtectedRoute>
+              </ErrorBoundary>
+            }
+          />
+
+          {/* Admin routes */}
+          <Route
+            path="/admin"
+            element={
+              <ErrorBoundary>
+                <ProtectedRoute requireAdmin>
+                  <Admin />
+                </ProtectedRoute>
+              </ErrorBoundary>
+            }
+          />
+        </Routes>
+      </Router>
+    </ErrorBoundary>
   );
 }
 
