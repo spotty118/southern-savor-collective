@@ -145,8 +145,9 @@ export const UserManagement = ({ users }: UserManagementProps) => {
   };
 
   const handleEditProfile = (userId: string) => {
-    // Navigate to the profile page with a special admin edit mode
-    navigate(`/profile?userId=${userId}&mode=admin`);
+    // Instead of using navigate directly, we'll construct the URL and use window.location
+    const editUrl = `/admin/users/${userId}/edit`;
+    window.location.href = editUrl;
   };
 
   const handleSendEmail = async (email: string) => {

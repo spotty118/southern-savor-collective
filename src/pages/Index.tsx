@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
@@ -27,37 +27,6 @@ const Index = () => {
   const [isEditor, setIsEditor] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState("All Y'all");
   const [builderContent, setBuilderContent] = useState(null);
-  const [builderError, setBuilderError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const checkUserRoles = async () => {
-      if (!user?.id) {
-        console.log("No user ID available for checking roles");
-        setIsAdmin(false);
-        setIsEditor(false);
-        return;
-      }
-      
-      try {
-        console.log("Checking roles for user:", user.id);
-        const { data, error } = await supabase
-          .from("user_roles")
-          .select("role")
-          .eq("user_id", user.id);
-
-        if (!error && data) {
-          const roles = data.map(r => r.role);
-          console.log("User roles:", roles);
-          setIsAdmin(roles.includes('admin'));
-          setIsEditor(roles.includes('editor'));
-        }
-      } catch (error) {
-        console.error("Error checking user roles:", error);
-      }
-    };
-
-    checkUserRoles();
-  }, [user?.id]);
 
   useEffect(() => {
     async function fetchBuilderContent() {
@@ -65,7 +34,8 @@ const Index = () => {
         console.log('Fetching Builder.io content with API key:', builder.apiKey);
         const content = await builder
           .get('page', {
-            url: window.location.pathname
+            url: window.location.pathname,
+            apiKey: '422dc336' // Explicitly pass API key here as well
           })
           .promise();
         
@@ -73,7 +43,6 @@ const Index = () => {
         setBuilderContent(content);
       } catch (error) {
         console.error('Error fetching Builder.io content:', error);
-        setBuilderError(error instanceof Error ? error.message : 'Failed to load Builder.io content');
       }
     }
     fetchBuilderContent();
@@ -116,6 +85,7 @@ const Index = () => {
           .order("created_at", { ascending: false });
 
         if (recipesError) throw recipesError;
+        console.log("Initial recipes data:", recipesData);
 
         // Fetch categories for each recipe
         const recipesWithCategories = await Promise.all(
@@ -130,6 +100,7 @@ const Index = () => {
               .eq("recipe_id", recipe.id);
 
             if (categoryError) throw categoryError;
+            console.log(`Categories for recipe ${recipe.id}:`, categoryData);
 
             return {
               ...recipe,
@@ -138,6 +109,7 @@ const Index = () => {
           })
         );
 
+        console.log("Final recipes with categories:", recipesWithCategories);
         setRecipes(recipesWithCategories);
         setFilteredRecipes(recipesWithCategories);
       } catch (error: any) {
@@ -157,7 +129,10 @@ const Index = () => {
 
   useEffect(() => {
     const fetchFavorites = async () => {
-      if (!user?.id) return;
+      if (!user?.id) {
+        console.log("No user ID available for fetching favorites");
+        return;
+      }
 
       try {
         console.log("Fetching favorites for user:", user.id);
@@ -166,18 +141,21 @@ const Index = () => {
           .select("recipe_id")
           .eq("user_id", user.id);
 
-        if (error) throw error;
+        if (error) {
+          console.error("Error fetching favorites:", error);
+          return;
+        }
         
-        const favoriteIds = new Set(data?.map((fav) => fav.recipe_id));
+        const favoriteIds = new Set(data?.map((fav) => fav.recipe_id) || []);
         console.log("Fetched favorites:", favoriteIds);
         setFavorites(favoriteIds);
       } catch (error: any) {
-        console.error("Error fetching favorites:", error);
+        console.error("Error in fetchFavorites:", error);
       }
     };
 
     fetchFavorites();
-  }, [user?.id]);
+  }, [user?.id]); // Changed dependency to user?.id
 
   useEffect(() => {
     console.log("Setting up auth state listener");
@@ -197,6 +175,36 @@ const Index = () => {
 
     return () => subscription.unsubscribe();
   }, []);
+
+  useEffect(() => {
+    const checkUserRoles = async () => {
+      if (!user?.id) {
+        console.log("No user ID available for checking roles");
+        setIsAdmin(false);
+        setIsEditor(false);
+        return;
+      }
+      
+      try {
+        console.log("Checking roles for user:", user.id);
+        const { data, error } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", user.id);
+
+        if (!error && data) {
+          const roles = data.map(r => r.role);
+          console.log("User roles:", roles);
+          setIsAdmin(roles.includes('admin'));
+          setIsEditor(roles.includes('editor'));
+        }
+      } catch (error) {
+        console.error("Error checking user roles:", error);
+      }
+    };
+
+    checkUserRoles();
+  }, [user?.id]); // Changed dependency to user?.id
 
   const handleLoveClick = async (recipeId: string) => {
     if (!user?.id) {
@@ -259,18 +267,6 @@ const Index = () => {
     navigate(`/recipe/${recipeId}`);
   };
 
-  const handleDashboardClick = () => {
-    if (!user) {
-      toast({
-        title: "Please login",
-        description: "You need to be logged in to view your dashboard",
-      });
-      navigate("/auth");
-      return;
-    }
-    navigate('/dashboard');
-  };
-
   return (
     <div className="min-h-screen bg-[#FDFCFB]">
       <RecipeHeader 
@@ -281,18 +277,7 @@ const Index = () => {
         categories={categories}
       />
 
-      {user && (
-        <div className="container mx-auto px-4 py-4">
-          <Button 
-            onClick={handleDashboardClick}
-            className="bg-[#FEC6A1] text-accent hover:bg-[#FDE1D3] mb-4"
-          >
-            View Dashboard
-          </Button>
-        </div>
-      )}
-
-      {!builderError && builderContent && (
+      {builderContent && (
         <BuilderComponent 
           model="page" 
           content={builderContent} 
