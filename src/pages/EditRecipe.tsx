@@ -76,7 +76,9 @@ const EditRecipe = () => {
         if (recipe) {
           setTitle(recipe.title || "");
           setDescription(recipe.description || "");
-          setCookTime(recipe.cook_time || { minutes: 0 });
+          // Parse cook_time from recipe data and ensure it matches RecipeTime type
+          const parsedCookTime = recipe.cook_time as RecipeTime;
+          setCookTime(parsedCookTime || { minutes: 0 });
           setDifficulty(recipe.difficulty || "");
           setImageUrl(recipe.image_url || "");
           setDefaultServings(recipe.default_servings || 4);
@@ -198,6 +200,40 @@ const EditRecipe = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleAddIngredient = () => {
+    setIngredients([...ingredients, { item: "", amount: "", unit: "" }]);
+  };
+
+  const handleRemoveIngredient = (index: number) => {
+    const newIngredients = ingredients.filter((_, i) => i !== index);
+    setIngredients(newIngredients);
+  };
+
+  const handleIngredientChange = (
+    index: number,
+    field: keyof Ingredient,
+    value: string
+  ) => {
+    const newIngredients = [...ingredients];
+    newIngredients[index][field] = value;
+    setIngredients(newIngredients);
+  };
+
+  const handleAddInstruction = () => {
+    setInstructions([...instructions, ""]);
+  };
+
+  const handleRemoveInstruction = (index: number) => {
+    const newInstructions = instructions.filter((_, i) => i !== index);
+    setInstructions(newInstructions);
+  };
+
+  const handleInstructionChange = (index: number, value: string) => {
+    const newInstructions = [...instructions];
+    newInstructions[index] = value;
+    setInstructions(newInstructions);
   };
 
   return (
