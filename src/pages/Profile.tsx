@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -10,12 +10,17 @@ import { DeleteAccountDialog } from "@/components/DeleteAccountDialog";
 
 const Profile = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
   const [profile, setProfile] = useState<any>(null);
   const [username, setUsername] = useState("");
   const [fullName, setFullName] = useState("");
   const [updating, setUpdating] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  const userId = searchParams.get('userId');
+  const isAdminMode = searchParams.get('mode') === 'admin';
 
   useEffect(() => {
     const getProfile = async () => {
@@ -27,10 +32,33 @@ const Profile = () => {
           return;
         }
 
+        // Check if user is admin when in admin mode
+        if (isAdminMode) {
+          const { data: roleData } = await supabase
+            .from("user_roles")
+            .select("role")
+            .eq("user_id", session.user.id)
+            .eq("role", "admin")
+            .single();
+
+          if (!roleData) {
+            navigate("/");
+            toast({
+              title: "Access Denied",
+              description: "You don't have permission to edit other users' profiles",
+              variant: "destructive",
+            });
+            return;
+          }
+          setIsAdmin(true);
+        }
+
+        // Get profile data for the target user (either current user or specified userId)
+        const targetUserId = isAdminMode ? userId : session.user.id;
         const { data: profileData, error: profileError } = await supabase
           .from("profiles")
           .select("*")
-          .eq("id", session.user.id)
+          .eq("id", targetUserId)
           .single();
 
         if (profileError) throw profileError;
@@ -52,13 +80,14 @@ const Profile = () => {
     };
 
     getProfile();
-  }, [navigate]);
+  }, [navigate, userId, isAdminMode]);
 
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     setUpdating(true);
 
     try {
+      const targetUserId = isAdminMode ? userId : user.id;
       const { error } = await supabase
         .from("profiles")
         .update({
@@ -66,7 +95,7 @@ const Profile = () => {
           full_name: fullName,
           updated_at: new Date().toISOString(),
         })
-        .eq("id", user.id);
+        .eq("id", targetUserId);
 
       if (error) throw error;
 
@@ -86,35 +115,6 @@ const Profile = () => {
     }
   };
 
-  const handleDashboardClick = async () => {
-    try {
-      // Verify the session is still active
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        console.log("No active session found");
-        toast({
-          title: "Error",
-          description: "Please log in to view your dashboard",
-          variant: "destructive",
-        });
-        navigate("/auth");
-        return;
-      }
-
-      console.log("Active session found, navigating to dashboard");
-      navigate("/dashboard");
-      
-    } catch (error) {
-      console.error("Error checking session:", error);
-      toast({
-        title: "Error",
-        description: "Failed to access dashboard",
-        variant: "destructive",
-      });
-    }
-  };
-
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -127,22 +127,17 @@ const Profile = () => {
     <div className="container mx-auto px-4 py-8">
       <Button 
         variant="ghost" 
-        onClick={() => navigate("/")}
+        onClick={() => navigate(isAdmin ? "/admin" : "/")}
         className="mb-6"
       >
         <Home className="mr-2 h-4 w-4" />
-        Back to Home
+        Back to {isAdmin ? "Admin" : "Home"}
       </Button>
 
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-accent">Profile Settings</h1>
-        <Button 
-          variant="outline"
-          onClick={handleDashboardClick}
-          className="bg-white hover:bg-gray-50"
-        >
-          View Dashboard
-        </Button>
+        <h1 className="text-2xl font-bold text-accent">
+          {isAdminMode ? "Edit User Profile" : "Profile Settings"}
+        </h1>
       </div>
 
       <Card className="mx-auto max-w-2xl">
@@ -158,7 +153,7 @@ const Profile = () => {
               <Input
                 id="email"
                 type="email"
-                value={user?.email || ""}
+                value={profile?.email || ""}
                 disabled
                 className="bg-gray-50"
               />
@@ -171,7 +166,7 @@ const Profile = () => {
                 id="username"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                placeholder="Enter your username"
+                placeholder="Enter username"
               />
             </div>
             <div className="space-y-2">
@@ -182,7 +177,7 @@ const Profile = () => {
                 id="fullName"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                placeholder="Enter your full name"
+                placeholder="Enter full name"
               />
             </div>
             <div className="flex justify-between items-center pt-4">
@@ -190,7 +185,7 @@ const Profile = () => {
                 {updating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Save Changes
               </Button>
-              <DeleteAccountDialog />
+              {!isAdminMode && <DeleteAccountDialog />}
             </div>
           </form>
         </CardContent>
