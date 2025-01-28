@@ -9,11 +9,7 @@ import { RecipeHeader } from "@/components/recipe/RecipeHeader";
 import { Footer } from "@/components/Footer";
 import { Tables } from "@/integrations/supabase/types";
 import { BuilderComponent, builder } from '@builder.io/react';
-
-interface RecipeWithExtras extends Tables<"recipes"> {
-  author: { username: string | null };
-  categories: Tables<"categories">[];
-}
+import type { RecipeWithExtras } from "@/types/recipe";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -45,7 +41,6 @@ const Index = () => {
         }
       } catch (error) {
         console.error('Error fetching Builder.io content:', error);
-        // Don't show error to users since this is optional content
       }
     }
     fetchBuilderContent();
@@ -90,9 +85,8 @@ const Index = () => {
         if (recipesError) throw recipesError;
         console.log("Initial recipes data:", recipesData);
 
-        // Fetch categories for each recipe
         const recipesWithCategories = await Promise.all(
-          recipesData.map(async (recipe) => {
+          (recipesData || []).map(async (recipe) => {
             const { data: categoryData, error: categoryError } = await supabase
               .from("recipe_categories")
               .select(`
@@ -108,7 +102,8 @@ const Index = () => {
             return {
               ...recipe,
               categories: categoryData?.map((c) => c.categories) || [],
-            };
+              author: recipe.author || { username: null }
+            } as RecipeWithExtras;
           })
         );
 
@@ -158,7 +153,7 @@ const Index = () => {
     };
 
     fetchFavorites();
-  }, [user?.id]); // Changed dependency to user?.id
+  }, [user?.id]);
 
   useEffect(() => {
     console.log("Setting up auth state listener");
@@ -207,7 +202,7 @@ const Index = () => {
     };
 
     checkUserRoles();
-  }, [user?.id]); // Changed dependency to user?.id
+  }, [user?.id]);
 
   const handleLoveClick = async (recipeId: string) => {
     if (!user?.id) {
@@ -241,7 +236,6 @@ const Index = () => {
           });
           
         if (error) {
-          // Handle unique constraint violation
           if (error.code === '23505') {
             console.log("Recipe already favorited");
             return;
@@ -293,7 +287,6 @@ const Index = () => {
             model="page" 
             content={builderContent}
             options={{
-              // Ensure we're getting fresh content
               cachebust: true
             }}
           />

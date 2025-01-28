@@ -11,12 +11,19 @@ export interface Recipe {
     id: string;
     username: string | null;
     full_name: string | null;
-  };
+  } | null;
   categories: Category[];
-  author_id: string;
+  author_id: string | null;
   created_at: string;
   updated_at: string;
-  default_servings: number;
+  default_servings: number | null;
+}
+
+export interface RecipeWithExtras extends Omit<Recipe, 'author'> {
+  author: {
+    username: string | null;
+  };
+  categories: Category[];
 }
 
 export interface Ingredient {
@@ -36,17 +43,17 @@ export interface BlogPost {
   id: string;
   title: string;
   content: string;
-  excerpt: string;
+  excerpt: string | null;
   status: string;
   author_id: string | null;
   image_url: string | null;
   created_at: string;
   updated_at: string;
-  published_at: string;
+  published_at: string | null;
   tags: string[];
   meta_description: string | null;
   is_ai_generated: boolean;
   author: {
     username: string | null;
-  };
+  } | null;
 }
