@@ -27,6 +27,7 @@ const Index = () => {
   const [isEditor, setIsEditor] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState("All Y'all");
   const [builderContent, setBuilderContent] = useState(null);
+  const [builderError, setBuilderError] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchBuilderContent() {
@@ -34,8 +35,7 @@ const Index = () => {
         console.log('Fetching Builder.io content with API key:', builder.apiKey);
         const content = await builder
           .get('page', {
-            url: window.location.pathname,
-            apiKey: '422dc336' // Explicitly pass API key here as well
+            url: window.location.pathname
           })
           .promise();
         
@@ -43,6 +43,7 @@ const Index = () => {
         setBuilderContent(content);
       } catch (error) {
         console.error('Error fetching Builder.io content:', error);
+        setBuilderError(error instanceof Error ? error.message : 'Failed to load Builder.io content');
       }
     }
     fetchBuilderContent();
@@ -277,7 +278,7 @@ const Index = () => {
         categories={categories}
       />
 
-      {builderContent && (
+      {!builderError && builderContent && (
         <BuilderComponent 
           model="page" 
           content={builderContent} 
