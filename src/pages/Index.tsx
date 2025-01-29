@@ -8,7 +8,6 @@ import { RecipeGrid } from "@/components/recipe/RecipeGrid";
 import { RecipeHeader } from "@/components/recipe/RecipeHeader";
 import { Footer } from "@/components/Footer";
 import { Tables } from "@/integrations/supabase/types";
-import { BuilderComponent, builder } from '@builder.io/react';
 
 interface RecipeWithExtras extends Tables<"recipes"> {
   author: { username: string | null };
@@ -26,8 +25,6 @@ const Index = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isEditor, setIsEditor] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState("All Y'all");
-  const [builderContent, setBuilderContent] = useState(null);
-  const [builderError, setBuilderError] = useState<string | null>(null);
 
   useEffect(() => {
     const checkUserRoles = async () => {
@@ -58,26 +55,6 @@ const Index = () => {
 
     checkUserRoles();
   }, [user?.id]);
-
-  useEffect(() => {
-    async function fetchBuilderContent() {
-      try {
-        console.log('Fetching Builder.io content with API key:', builder.apiKey);
-        const content = await builder
-          .get('page', {
-            url: window.location.pathname
-          })
-          .promise();
-        
-        console.log('Builder.io content:', content);
-        setBuilderContent(content);
-      } catch (error) {
-        console.error('Error fetching Builder.io content:', error);
-        setBuilderError(error instanceof Error ? error.message : 'Failed to load Builder.io content');
-      }
-    }
-    fetchBuilderContent();
-  }, []);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -282,13 +259,6 @@ const Index = () => {
             View Dashboard
           </Button>
         </div>
-      )}
-
-      {!builderError && builderContent && (
-        <BuilderComponent 
-          model="page" 
-          content={builderContent} 
-        />
       )}
 
       <div className="container mx-auto px-4 py-8">
