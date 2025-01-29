@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
@@ -8,9 +8,10 @@ import { RecipeGrid } from "@/components/recipe/RecipeGrid";
 import { RecipeHeader } from "@/components/recipe/RecipeHeader";
 import { Footer } from "@/components/Footer";
 import { Tables } from "@/integrations/supabase/types";
+import { BuilderComponent, builder } from '@builder.io/react';
 
 interface RecipeWithExtras extends Tables<"recipes"> {
-  author: { username: string | null } | null;
+  author: { username: string | null };
   categories: Tables<"categories">[];
 }
 
@@ -25,6 +26,8 @@ const Index = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isEditor, setIsEditor] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState("All Y'all");
+  const [builderContent, setBuilderContent] = useState(null);
+  const [builderError, setBuilderError] = useState<string | null>(null);
 
   useEffect(() => {
     const checkUserRoles = async () => {
@@ -55,6 +58,26 @@ const Index = () => {
 
     checkUserRoles();
   }, [user?.id]);
+
+  useEffect(() => {
+    async function fetchBuilderContent() {
+      try {
+        console.log('Fetching Builder.io content with API key:', builder.apiKey);
+        const content = await builder
+          .get('page', {
+            url: window.location.pathname
+          })
+          .promise();
+        
+        console.log('Builder.io content:', content);
+        setBuilderContent(content);
+      } catch (error) {
+        console.error('Error fetching Builder.io content:', error);
+        setBuilderError(error instanceof Error ? error.message : 'Failed to load Builder.io content');
+      }
+    }
+    fetchBuilderContent();
+  }, []);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -236,6 +259,18 @@ const Index = () => {
     navigate(`/recipe/${recipeId}`);
   };
 
+  const handleDashboardClick = () => {
+    if (!user) {
+      toast({
+        title: "Please login",
+        description: "You need to be logged in to view your dashboard",
+      });
+      navigate("/auth");
+      return;
+    }
+    navigate('/dashboard');
+  };
+
   return (
     <div className="min-h-screen bg-[#FDFCFB]">
       <RecipeHeader 
@@ -245,6 +280,24 @@ const Index = () => {
         onFilterChange={handleFilterChange}
         categories={categories}
       />
+
+      {user && (
+        <div className="container mx-auto px-4 py-4">
+          <Button 
+            onClick={handleDashboardClick}
+            className="bg-[#FEC6A1] text-accent hover:bg-[#FDE1D3] mb-4"
+          >
+            View Dashboard
+          </Button>
+        </div>
+      )}
+
+      {!builderError && builderContent && (
+        <BuilderComponent 
+          model="page" 
+          content={builderContent} 
+        />
+      )}
 
       <div className="container mx-auto px-4 py-8">
         {loading ? (

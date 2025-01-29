@@ -5,37 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Home } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { Tables, Json } from "@/integrations/supabase/types";
-import { RecipeBasicInfo, RecipeTime } from "@/components/recipe/RecipeBasicInfo";
+import { RecipeBasicInfo } from "@/components/recipe/RecipeBasicInfo";
 import { RecipeCategories } from "@/components/recipe/RecipeCategories";
 import { IngredientsList } from "@/components/recipe/IngredientsList";
 import { InstructionsList } from "@/components/recipe/InstructionsList";
-import { z } from "zod";
-
-// Validation schemas
-const RecipeTimeSchema = z.object({
-  hours: z.number().min(0).max(24).optional(),
-  minutes: z.number().min(0).max(59)
-});
-
-const IngredientSchema = z.object({
-  item: z.string().min(1, "Ingredient name is required"),
-  amount: z.string().min(1, "Amount is required"),
-  unit: z.string().min(1, "Unit is required")
-});
-
-const RecipeSchema = z.object({
-  title: z.string().min(1, "Title is required").max(100, "Title is too long"),
-  description: z.string().min(10, "Description must be at least 10 characters").max(1000, "Description is too long"),
-  cookTime: RecipeTimeSchema,
-  difficulty: z.string().min(1, "Difficulty is required"),
-  imageUrl: z.string().url("Invalid image URL").optional(),
-  ingredients: z.array(IngredientSchema).min(1, "At least one ingredient is required"),
-  instructions: z.array(z.string().min(1, "Instruction step cannot be empty")).min(1, "At least one instruction is required"),
-  defaultServings: z.number().min(1, "Servings must be at least 1").max(50, "Servings cannot exceed 50"),
-  categories: z.array(z.string()).optional()
-});
-
-type RecipeFormData = z.infer<typeof RecipeSchema>;
 
 interface Ingredient {
   item: string;
@@ -49,7 +22,7 @@ const CreateRecipe = () => {
   const [loading, setLoading] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [cookTime, setCookTime] = useState<RecipeTime>({ minutes: 0 });
+  const [cookTime, setCookTime] = useState("");
   const [difficulty, setDifficulty] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [ingredients, setIngredients] = useState<Ingredient[]>([
@@ -129,43 +102,41 @@ const CreateRecipe = () => {
     setInstructions(newInstructions);
   };
 
-  const validateForm = (): { isValid: boolean; errors: string[] } => {
-    try {
-      const formData: RecipeFormData = {
-        title,
-        description,
-        cookTime,
-        difficulty,
-        imageUrl: imageUrl || undefined,
-        ingredients,
-        instructions: instructions.filter(Boolean),
-        defaultServings,
-        categories: selectedCategories
-      };
-
-      RecipeSchema.parse(formData);
-      return { isValid: true, errors: [] };
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        const errors = error.errors.map(err => err.message);
-        return { isValid: false, errors };
-      }
-      return { isValid: false, errors: ["An unexpected error occurred"] };
+  const validateForm = () => {
+    if (!title.trim()) {
+      toast({
+        title: "Missing Title",
+        description: "Please enter a recipe title",
+        variant: "destructive",
+      });
+      return false;
     }
+
+    if (ingredients.some(ing => !ing.item.trim())) {
+      toast({
+        title: "Invalid Ingredients",
+        description: "Please fill in all ingredient names",
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    if (instructions.some(inst => !inst.trim())) {
+      toast({
+        title: "Invalid Instructions",
+        description: "Please fill in all instruction steps",
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    return true;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    const validation = validateForm();
-    if (!validation.isValid) {
-      validation.errors.forEach(error => {
-        toast({
-          title: "Validation Error",
-          description: error,
-          variant: "destructive",
-        });
-      });
+    if (!validateForm()) {
       return;
     }
 
@@ -195,7 +166,7 @@ const CreateRecipe = () => {
           difficulty,
           image_url: imageUrl,
           ingredients: ingredients as unknown as Json,
-          instructions: instructions.filter(Boolean) as Json,
+          instructions: instructions as unknown as Json,
           default_servings: defaultServings,
         })
         .select()
@@ -226,7 +197,7 @@ const CreateRecipe = () => {
       console.error("Error creating recipe:", error);
       toast({
         title: "Error",
-        description: error.message || "Failed to create recipe",
+        description: error.message,
         variant: "destructive",
       });
     } finally {

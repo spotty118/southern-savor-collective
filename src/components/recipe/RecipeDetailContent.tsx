@@ -7,16 +7,11 @@ import { RecipeRating } from "@/components/recipe/RecipeRating";
 import { PrintRecipe } from "@/components/recipe/PrintRecipe";
 import { Trash2, Edit } from "lucide-react";
 
-interface RecipeTime {
-  hours?: number;
-  minutes: number;
-}
-
 interface Ingredient {
   amount: string;
   unit: string;
   item: string;
-  // Removed index signature for better type safety
+  [key: string]: string;
 }
 
 interface RecipeDetailContentProps {
@@ -26,7 +21,7 @@ interface RecipeDetailContentProps {
     description: string | null;
     ingredients: Ingredient[];
     instructions: string[];
-    cook_time: RecipeTime | null;
+    cook_time: unknown;
     difficulty: string | null;
     image_url: string | null;
     default_servings: number | null;
@@ -60,18 +55,11 @@ export const RecipeDetailContent = ({
 }: RecipeDetailContentProps) => {
   const canModify = isAdmin || isEditor || isRecipeOwner;
 
-  const formatCookTime = (time: RecipeTime | null): string => {
-    if (!time) return "";
-    const hours = time.hours ? `${time.hours} hour${time.hours > 1 ? 's' : ''} ` : '';
-    const minutes = time.minutes ? `${time.minutes} minute${time.minutes > 1 ? 's' : ''}` : '';
-    return `${hours}${minutes}`.trim();
-  };
-
   // Extract basic recipe info for PrintRecipe component
   const printRecipeProps = {
     title: recipe.title,
     description: recipe.description || "",
-    cookTime: formatCookTime(recipe.cook_time),
+    cookTime: recipe.cook_time?.toString() || "",
     difficulty: recipe.difficulty || "",
     ingredients: recipe.ingredients,
     instructions: recipe.instructions
@@ -83,7 +71,7 @@ export const RecipeDetailContent = ({
     setTitle: () => {}, // Read-only in detail view
     description: recipe.description || "",
     setDescription: () => {}, // Read-only in detail view
-    cookTime: recipe.cook_time,
+    cookTime: recipe.cook_time?.toString() || "",
     setCookTime: () => {}, // Read-only in detail view
     difficulty: recipe.difficulty || "",
     setDifficulty: () => {}, // Read-only in detail view

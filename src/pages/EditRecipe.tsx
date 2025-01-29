@@ -17,18 +17,13 @@ interface Ingredient {
   [key: string]: string;
 }
 
-interface RecipeTime {
-  hours?: number;
-  minutes: number;
-}
-
 const EditRecipe = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const [loading, setLoading] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [cookTime, setCookTime] = useState<RecipeTime>({ minutes: 0 });
+  const [cookTime, setCookTime] = useState("");
   const [difficulty, setDifficulty] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [ingredients, setIngredients] = useState<Ingredient[]>([
@@ -76,9 +71,7 @@ const EditRecipe = () => {
         if (recipe) {
           setTitle(recipe.title || "");
           setDescription(recipe.description || "");
-          // Parse cook_time from recipe data and ensure it matches RecipeTime type
-          const parsedCookTime = recipe.cook_time as RecipeTime;
-          setCookTime(parsedCookTime || { minutes: 0 });
+          setCookTime(recipe.cook_time?.toString() || "");
           setDifficulty(recipe.difficulty || "");
           setImageUrl(recipe.image_url || "");
           setDefaultServings(recipe.default_servings || 4);
