@@ -16,14 +16,21 @@ interface UserPreferencesProps {
   userId: string;
 }
 
+interface UserPreferencesData {
+  cooking_skill_level: string;
+  dietary_preferences: string[];
+  favorite_cuisines: string[];
+  social_links: Record<string, string>;
+}
+
 export const UserPreferences = ({ userId }: UserPreferencesProps) => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [preferences, setPreferences] = useState({
+  const [preferences, setPreferences] = useState<UserPreferencesData>({
     cooking_skill_level: "",
-    dietary_preferences: [] as string[],
-    favorite_cuisines: [] as string[],
-    social_links: {} as Record<string, string>,
+    dietary_preferences: [],
+    favorite_cuisines: [],
+    social_links: {},
   });
 
   useEffect(() => {
@@ -40,9 +47,9 @@ export const UserPreferences = ({ userId }: UserPreferencesProps) => {
         if (data) {
           setPreferences({
             cooking_skill_level: data.cooking_skill_level || "",
-            dietary_preferences: data.dietary_preferences || [],
-            favorite_cuisines: data.favorite_cuisines || [],
-            social_links: data.social_links || {},
+            dietary_preferences: (data.dietary_preferences as string[]) || [],
+            favorite_cuisines: (data.favorite_cuisines as string[]) || [],
+            social_links: (data.social_links as Record<string, string>) || {},
           });
         }
       } catch (error: any) {
