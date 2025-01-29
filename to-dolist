@@ -1,10 +1,6 @@
 Recipe Management:
-- Share recipe should be blank when a user is submitting a recipe
 - Add recipe version history to track modifications
-- Implement recipe scaling functionality (adjust servings/portions)
-- Add print-friendly recipe format
 - Enable recipe saving to collections/folders
-- Add cooking timer feature for recipe steps
 - Implement ingredient unit conversion (metric/imperial)
 
 User Experience:
@@ -22,7 +18,6 @@ User Experience:
 
 Social Features:
 - Add comments from users on recipes and optionally allow them to tag a location
-- Enable recipe rating system (1-5 stars)
 - Add ability to follow other users
 - Implement recipe sharing on social media platforms
 - Create recipe challenges/contests
@@ -30,11 +25,9 @@ Social Features:
 - Enable collaborative recipe creation
 
 Technical Improvements:
-- Implement offline mode for saved recipes
 - Add recipe import from URLs
 - Optimize image loading and storage
 - Add recipe nutrition calculation
-- Implement ingredient inventory tracking
 - Add automatic unit conversion
 
 Mobile Experience:
@@ -44,5 +37,3 @@ Mobile Experience:
   * Recipe comments
   * Recipe likes
   * Contest announcements
-- Implement mobile-friendly recipe cards
-- Add voice commands for hands-free cooking
