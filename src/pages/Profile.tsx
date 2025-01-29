@@ -7,8 +7,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { Loader2, Home } from "lucide-react";
 import { DeleteAccountDialog } from "@/components/DeleteAccountDialog";
-import { UserPreferences } from "@/components/profile/UserPreferences";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -88,6 +86,35 @@ const Profile = () => {
     }
   };
 
+  const handleDashboardClick = async () => {
+    try {
+      // Verify the session is still active
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        console.log("No active session found");
+        toast({
+          title: "Error",
+          description: "Please log in to view your dashboard",
+          variant: "destructive",
+        });
+        navigate("/auth");
+        return;
+      }
+
+      console.log("Active session found, navigating to dashboard");
+      navigate("/dashboard");
+      
+    } catch (error) {
+      console.error("Error checking session:", error);
+      toast({
+        title: "Error",
+        description: "Failed to access dashboard",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -109,78 +136,65 @@ const Profile = () => {
 
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-accent">Profile Settings</h1>
+        <Button 
+          variant="outline"
+          onClick={handleDashboardClick}
+          className="bg-white hover:bg-gray-50"
+        >
+          View Dashboard
+        </Button>
       </div>
 
-      <Tabs defaultValue="profile" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="profile">Basic Info</TabsTrigger>
-          <TabsTrigger value="preferences">Preferences</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="profile">
-          <Card>
-            <CardHeader>
-              <CardTitle>Profile Settings</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleUpdateProfile} className="space-y-6">
-                <div className="space-y-2">
-                  <label htmlFor="email" className="text-sm font-medium">
-                    Email
-                  </label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={user?.email || ""}
-                    disabled
-                    className="bg-gray-50"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label htmlFor="username" className="text-sm font-medium">
-                    Username
-                  </label>
-                  <Input
-                    id="username"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    placeholder="Enter your username"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label htmlFor="fullName" className="text-sm font-medium">
-                    Full Name
-                  </label>
-                  <Input
-                    id="fullName"
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    placeholder="Enter your full name"
-                  />
-                </div>
-                <div className="flex justify-between items-center pt-4">
-                  <Button type="submit" disabled={updating}>
-                    {updating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    Save Changes
-                  </Button>
-                  <DeleteAccountDialog />
-                </div>
-              </form>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="preferences">
-          <Card>
-            <CardHeader>
-              <CardTitle>Cooking Preferences</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {user && <UserPreferences userId={user.id} />}
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+      <Card className="mx-auto max-w-2xl">
+        <CardHeader>
+          <CardTitle>Profile Settings</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleUpdateProfile} className="space-y-6">
+            <div className="space-y-2">
+              <label htmlFor="email" className="text-sm font-medium">
+                Email
+              </label>
+              <Input
+                id="email"
+                type="email"
+                value={user?.email || ""}
+                disabled
+                className="bg-gray-50"
+              />
+            </div>
+            <div className="space-y-2">
+              <label htmlFor="username" className="text-sm font-medium">
+                Username
+              </label>
+              <Input
+                id="username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="Enter your username"
+              />
+            </div>
+            <div className="space-y-2">
+              <label htmlFor="fullName" className="text-sm font-medium">
+                Full Name
+              </label>
+              <Input
+                id="fullName"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                placeholder="Enter your full name"
+              />
+            </div>
+            <div className="flex justify-between items-center pt-4">
+              <Button type="submit" disabled={updating}>
+                {updating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Save Changes
+              </Button>
+              <DeleteAccountDialog />
+            </div>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   );
 };
