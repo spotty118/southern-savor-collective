@@ -9,11 +9,19 @@ import {
 } from "@/components/ui/select";
 import { AIEnhanceButton } from "@/components/recipe/AIEnhanceButton";
 import { RecipeImageUpload } from "@/components/recipe/RecipeImageUpload";
+import { z } from "zod";
+import { toast } from "@/hooks/use-toast";
 
-interface RecipeTime {
-  hours?: number;
-  minutes: number;
-}
+// Validation schemas
+const RecipeTimeSchema = z.object({
+  hours: z.number().min(0).max(24).optional(),
+  minutes: z.number().min(0).max(59)
+});
+
+export type RecipeTime = z.infer<typeof RecipeTimeSchema>;
+
+const DifficultyEnum = z.enum(["Easy", "Medium", "Hard"]);
+export type Difficulty = z.infer<typeof DifficultyEnum>;
 
 interface RecipeBasicInfoProps {
   title: string;
@@ -39,6 +47,36 @@ const formatCookTime = (time: RecipeTime | null): string => {
   return `${hours}${minutes}`.trim();
 };
 
+const validateCookTime = (hours: number | undefined, minutes: number): boolean => {
+  try {
+    RecipeTimeSchema.parse({ hours, minutes });
+    return true;
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      error.errors.forEach(err => {
+        toast({
+          title: "Invalid cooking time",
+          description: err.message,
+          variant: "destructive",
+        });
+      });
+    }
+    return false;
+  }
+};
+
+const validateServings = (servings: number): boolean => {
+  if (servings < 1 || servings > 50) {
+    toast({
+      title: "Invalid servings",
+      description: "Servings must be between 1 and 50",
+      variant: "destructive",
+    });
+    return false;
+  }
+  return true;
+};
+
 export const RecipeBasicInfo = ({
   title,
   setTitle,
@@ -55,6 +93,25 @@ export const RecipeBasicInfo = ({
   onDescriptionEnhancement,
   isEditing = false,
 }: RecipeBasicInfoProps) => {
+  const handleCookTimeChange = (field: keyof RecipeTime, value: string) => {
+    const numValue = parseInt(value) || 0;
+    const newTime = {
+      hours: field === 'hours' ? numValue : cookTime?.hours || 0,
+      minutes: field === 'minutes' ? numValue : cookTime?.minutes || 0
+    };
+
+    if (validateCookTime(newTime.hours, newTime.minutes)) {
+      setCookTime(newTime);
+    }
+  };
+
+  const handleServingsChange = (value: string) => {
+    const numValue = parseInt(value) || 4;
+    if (validateServings(numValue)) {
+      setDefaultServings(numValue);
+    }
+  };
+
   if (!isEditing) {
     return (
       <>
@@ -92,6 +149,13 @@ export const RecipeBasicInfo = ({
               src={imageUrl}
               alt="Recipe"
               className="rounded-md max-h-48 object-cover"
+              onError={() => {
+                toast({
+                  title: "Error",
+                  description: "Failed to load recipe image",
+                  variant: "destructive",
+                });
+              }}
             />
           </div>
         )}
@@ -102,22 +166,28 @@ export const RecipeBasicInfo = ({
   return (
     <>
       <div className="space-y-2">
-        <label className="text-sm font-medium">Recipe Title</label>
+        <label className="text-sm font-medium" htmlFor="recipe-title">Recipe Title</label>
         <Input
+          id="recipe-title"
           required
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="Enter your recipe title"
+          maxLength={100}
+          aria-label="Recipe title"
         />
       </div>
 
       <div className="space-y-2">
-        <label className="text-sm font-medium">Description</label>
+        <label className="text-sm font-medium" htmlFor="recipe-description">Description</label>
         <div className="space-y-2">
           <Textarea
+            id="recipe-description"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Share the story behind your recipe"
+            maxLength={1000}
+            aria-label="Recipe description"
           />
           <AIEnhanceButton
             content={[description]}
@@ -138,11 +208,9 @@ export const RecipeBasicInfo = ({
                 min="0"
                 max="24"
                 value={cookTime?.hours || ""}
-                onChange={(e) => setCookTime({
-                  hours: parseInt(e.target.value) || 0,
-                  minutes: cookTime?.minutes || 0
-                })}
+                onChange={(e) => handleCookTimeChange('hours', e.target.value)}
                 placeholder="Hours"
+                aria-label="Cooking time hours"
               />
             </div>
             <div>
@@ -151,33 +219,35 @@ export const RecipeBasicInfo = ({
                 min="0"
                 max="59"
                 value={cookTime?.minutes || ""}
-                onChange={(e) => setCookTime({
-                  hours: cookTime?.hours || 0,
-                  minutes: parseInt(e.target.value) || 0
-                })}
+                onChange={(e) => handleCookTimeChange('minutes', e.target.value)}
                 placeholder="Minutes"
+                aria-label="Cooking time minutes"
               />
             </div>
           </div>
-          <span className="text-xs text-gray-500">Enter hours and minutes</span>
+          <span className="text-xs text-gray-500">Enter hours (0-24) and minutes (0-59)</span>
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-medium">Default Servings</label>
+          <label className="text-sm font-medium" htmlFor="recipe-servings">Default Servings</label>
           <Input
+            id="recipe-servings"
             type="number"
             min="1"
+            max="50"
             value={defaultServings}
-            onChange={(e) => setDefaultServings(parseInt(e.target.value) || 4)}
+            onChange={(e) => handleServingsChange(e.target.value)}
             placeholder="Number of servings"
+            aria-label="Default servings"
           />
+          <span className="text-xs text-gray-500">Enter servings (1-50)</span>
         </div>
       </div>
 
       <div className="space-y-2">
         <label className="text-sm font-medium">Difficulty</label>
         <Select value={difficulty} onValueChange={setDifficulty}>
-          <SelectTrigger>
+          <SelectTrigger aria-label="Recipe difficulty">
             <SelectValue placeholder="Select difficulty" />
           </SelectTrigger>
           <SelectContent>
