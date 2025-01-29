@@ -236,10 +236,6 @@ const Index = () => {
     navigate(`/recipe/${recipeId}`);
   };
 
-  const handleDashboardClick = () => {
-    navigate('/dashboard');
-  };
-
   return (
     <div className="min-h-screen bg-[#FDFCFB]">
       <RecipeHeader 
@@ -249,17 +245,6 @@ const Index = () => {
         onFilterChange={handleFilterChange}
         categories={categories}
       />
-
-      {user && (
-        <div className="container mx-auto px-4 py-4">
-          <Button 
-            onClick={handleDashboardClick}
-            className="bg-[#FEC6A1] text-accent hover:bg-[#FDE1D3] mb-4"
-          >
-            View Dashboard
-          </Button>
-        </div>
-      )}
 
       <div className="container mx-auto px-4 py-8">
         {loading ? (
